@@ -298,7 +298,7 @@ var ORG={'도로과':['건설행정팀','도로팀','보도관리팀','자전거
 var GCD=[];var GCAL_API_KEY=localStorage.getItem('gcal_key')||'AIzaSyDU0y_Jg9YW-ybmlRSXMFNi6PJnaUe1ROc';var GCAL_CAL_ID=localStorage.getItem('gcal_calid')||'fb33c71c30a02987ef34e18cb2f4d9f1bd2c108c618c4b23594025b09c34cf0f@group.calendar.google.com';
 var currentUser=null,db=null,issues=[],reports=[],events=[],instruction=null,archives={},archiveWk='';
 var calY,calM,editIssId=null,editRepId=null,pendingPhoto=null,confCb=null,statusFilter='';var _curReps=[],_curWkLbl='';
-(function(){try{firebase.initializeApp(FB);db=firebase.database();var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);db=null;loadLS();if(currentUser){renderIssues();renderDeptGrid();renderCal();renderInstr();}}db.ref('issues').on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderIssues();},_fbErr);db.ref('reports').on('value',function(s){reports=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderDeptGrid();},_fbErr);db.ref('events').on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();},_fbErr);db.ref('instruction').on('value',function(s){instruction=s.val();renderInstr();},_fbErr);db.ref('reports_archive').on('value',function(s){archives=s.val()||{};renderArchiveSel();},_fbErr);}catch(e){console.warn('FB fail');setSyncOK(false);loadLS();}})();
+(function(){try{firebase.initializeApp(FB);db=firebase.database();var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);db=null;loadLS();if(currentUser){renderIssues();renderDeptGrid();renderCal();renderInstr();}}db.ref('issues').on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderIssues();},_fbErr);db.ref('reports').on('value',function(s){reports=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];checkNewWeekArchive();renderDeptGrid();},_fbErr);db.ref('events').on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();},_fbErr);db.ref('instruction').on('value',function(s){instruction=s.val();renderInstr();},_fbErr);db.ref('reports_archive').on('value',function(s){archives=s.val()||{};renderArchiveSel();},_fbErr);}catch(e){console.warn('FB fail');setSyncOK(false);loadLS();}})();
 function loadLS(){issues=JSON.parse(localStorage.getItem('bu_iss')||'[]');reports=JSON.parse(localStorage.getItem('bu_rep')||'[]');events=JSON.parse(localStorage.getItem('bu_ev')||'[]');instruction=JSON.parse(localStorage.getItem('bu_instr')||'null');}
 function saveLS(){localStorage.setItem('bu_iss',JSON.stringify(issues));localStorage.setItem('bu_rep',JSON.stringify(reports));localStorage.setItem('bu_ev',JSON.stringify(events));localStorage.setItem('bu_instr',JSON.stringify(instruction));}
 function dbSet(p,d){if(db)db.ref(p).set(d);else saveLS();}
@@ -308,7 +308,7 @@ function switchLoginTab(t){document.getElementById('tabA').classList.toggle('act
 function doAdminLogin(){if(document.getElementById('adminPw').value===ADMIN_PW){currentUser={type:'admin',name:'국장',dept:'전체'};enterApp();}else showLErr('비밀번호가 올바르지 않습니다.');}
 function doStaffLogin(){var n=document.getElementById('staffName').value.trim(),d=document.getElementById('staffDept').value,p=document.getElementById('staffPw').value;if(!n||!d){showLErr('이름과 소속 과를 선택해주세요.');return;}if(p===STAFF_PW){currentUser={type:'staff',name:n,dept:d};enterApp();}else showLErr('비밀번호가 올바르지 않습니다.');}
 function showLErr(m){var e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
-function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 국장 (관리자)':currentUser.name+' ('+currentUser.dept+')';if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminCalPnl').style.display='block';}var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();renderDeptGrid();renderCal();updateWk();renderGcalSide();checkWednesdayArchive();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;}fetchGCal();if(!db)loadLS();}
+function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 국장 (관리자)':currentUser.name+' ('+currentUser.dept+')';if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminCalPnl').style.display='block';}var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();renderDeptGrid();renderCal();updateWk();renderGcalSide();checkNewWeekArchive();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;}fetchGCal();if(!db)loadLS();}
 function doLogout(){currentUser=null;document.getElementById('app').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('adminPw').value='';document.getElementById('staffPw').value='';document.getElementById('adminInstrPnl').style.display='none';document.getElementById('adminCalPnl').style.display='none';document.getElementById('adminGcalPnl').style.display='none';document.getElementById('lerr').style.display='none';}
 function setSyncOK(ok){var d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;if(ok){d.classList.remove('off');t.textContent='실시간 연결';}else{d.classList.add('off');t.textContent='오프라인(로컬)';}}
 function switchTab(t,btn){document.querySelectorAll('.tBtn').forEach(function(b){b.classList.remove('active');});document.querySelectorAll('.tPanel').forEach(function(p){p.classList.remove('active');});btn.classList.add('active');document.getElementById('panel-'+t).classList.add('active');if(t==='calendar')renderCal();}
@@ -407,26 +407,40 @@ function deleteReport(id){showConf('이 보고를 삭제하시겠습니까?',fun
 function getWkLbl(d){var y=d.getFullYear()%100,m=d.getMonth()+1,day=d.getDate(),w=Math.ceil((day+new Date(d.getFullYear(),d.getMonth(),1).getDay())/7);return y+'년 '+m+'월 '+w+'째주';}
 function updateWk(){var e=document.getElementById('wkDisp');if(e)e.textContent=getWkLbl(new Date());}
 function getWkKey(d){var y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate(),w=Math.ceil((day+new Date(d.getFullYear(),d.getMonth(),1).getDay())/7);return y+'_'+String(m).padStart(2,'0')+'_w'+w;}
-function checkWednesdayArchive(){
+function checkNewWeekArchive(){
+  if(!db||!reports.length)return;
   var now=new Date();
-  if(now.getDay()!==3||!db||!reports.length)return;
-  var todayKey=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
-  if(localStorage.getItem('bu_lastArchive')===todayKey)return;
-  var lastWed=new Date(now);lastWed.setDate(now.getDate()-7);
-  var wkKey=getWkKey(lastWed);
-  db.ref('reports_archive/'+wkKey).once('value',function(s){
-    if(!s.val()){
-      var wkLbl=getWkLbl(lastWed);
-      var archData={weekLabel:wkLbl,archivedAt:now.toISOString(),items:{}};
-      reports.forEach(function(r){archData.items[r.id]=r;});
-      db.ref('reports_archive/'+wkKey).set(archData).then(function(){
-        db.ref('reports').remove();
-        localStorage.setItem('bu_lastArchive',todayKey);
-        alert('지난 주간보고('+wkLbl+')가 아카이브로 이동되었습니다.');
-      });
-    } else {
-      localStorage.setItem('bu_lastArchive',todayKey);
+  var curWkKey=getWkKey(now);
+  // 현재 주와 다른 주의 보고를 그룹화
+  var byWeek={};
+  reports.forEach(function(r){
+    var d=r.date?new Date(r.date):now;
+    var wk=getWkKey(d);
+    if(wk!==curWkKey){
+      if(!byWeek[wk])byWeek[wk]={key:wk,lbl:getWkLbl(d),items:[]};
+      byWeek[wk].items.push(r);
     }
+  });
+  var oldWeeks=Object.keys(byWeek);
+  if(!oldWeeks.length)return;
+  // 이전 주 보고를 아카이브로 이동
+  var promises=oldWeeks.map(function(wk){
+    var grp=byWeek[wk];
+    return db.ref('reports_archive/'+wk).once('value').then(function(s){
+      var archData=s.val()||{weekLabel:grp.lbl,archivedAt:now.toISOString(),items:{}};
+      grp.items.forEach(function(r){archData.items[r.id]=r;});
+      archData.weekLabel=grp.lbl;
+      return db.ref('reports_archive/'+wk).set(archData).then(function(){
+        return grp.items.map(function(r){return r.id;});
+      });
+    });
+  });
+  Promise.all(promises).then(function(results){
+    var idsToRemove=[].concat.apply([],results);
+    return Promise.all(idsToRemove.map(function(id){return db.ref('reports/'+id).remove();}));
+  }).then(function(){
+    var lbls=oldWeeks.map(function(w){return byWeek[w].lbl;}).join(', ');
+    alert('이전 주간보고('+lbls+')가 보관함으로 이동되었습니다.');
   });
 }
 function renderArchiveSel(){
