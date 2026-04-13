@@ -438,9 +438,6 @@ function checkNewWeekArchive(){
   Promise.all(promises).then(function(results){
     var idsToRemove=[].concat.apply([],results);
     return Promise.all(idsToRemove.map(function(id){return db.ref('reports/'+id).remove();}));
-  }).then(function(){
-    var lbls=oldWeeks.map(function(w){return byWeek[w].lbl;}).join(', ');
-    alert('이전 주간보고('+lbls+')가 보관함으로 이동되었습니다.');
   });
 }
 function renderArchiveSel(){
