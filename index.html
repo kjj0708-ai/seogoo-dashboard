@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <style>
 :root{--primary:#1a3a5c;--pl:#2563a8;--accent:#e8a020;--bg:#f0f4f8;--sur:#fff;--bdr:#d1dbe8;--tx:#1e2d3d;--tx2:#4a6080;--tx3:#8a9baf;--red:#dc2626;--sh:0 2px 8px rgba(26,58,92,.10);--shl:0 8px 24px rgba(26,58,92,.15);--r:10px;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -135,23 +136,32 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 <div id="loginScreen">
   <div class="lbox">
     <div class="llogo"><div class="ico">🏛️</div><h1>서구 도시주택국</h1><p>업무 현황 대시보드</p></div>
-    <div class="ltabs">
-      <button class="ltab active" id="tabA" onclick="switchLoginTab('admin')">국장 / 관리자</button>
-      <button class="ltab" id="tabS" onclick="switchLoginTab('staff')">직원</button>
-    </div>
-    <div id="formAdmin">
-      <div class="fg"><label>비밀번호</label><input type="password" id="adminPw" placeholder="관리자 비밀번호 입력" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
-      <button class="btnLogin" onclick="doAdminLogin()">로그인</button>
-    </div>
-    <div id="formStaff" style="display:none">
-      <div class="fg"><label>이름</label><input type="text" id="staffName" placeholder="이름을 입력하세요"></div>
-      <div class="fg"><label>소속 과</label>
-        <select id="staffDept"><option value="">-- 소속 과 선택 --</option><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>주택관리과</option><option>도시재생경관과</option></select>
-      </div>
-      <div class="fg"><label>비밀번호</label><input type="password" id="staffPw" placeholder="직원 비밀번호 입력" onkeydown="if(event.key==='Enter')doStaffLogin()"></div>
-      <button class="btnLogin" onclick="doStaffLogin()">로그인</button>
-    </div>
+    <div id="loginLoading" style="text-align:center;padding:24px 0;color:var(--tx3);font-size:14px;">⏳ 인증 확인 중...</div>
+    <button class="btnLogin" id="btnGoogleLogin" onclick="doGoogleLogin()" style="display:none;align-items:center;justify-content:center;gap:10px;background:#fff;color:#333;border:1.5px solid #ddd;font-weight:600;">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Google 계정으로 로그인
+    </button>
     <div class="lerr" id="lerr"></div>
+  </div>
+</div>
+<div id="profileSetupScreen" style="display:none;position:fixed;inset:0;z-index:500;background:linear-gradient(135deg,#1a3a5c,#2563a8);align-items:center;justify-content:center;padding:20px;">
+  <div class="lbox" style="max-height:90vh;overflow-y:auto;">
+    <div class="llogo"><div class="ico">👤</div><h1 id="psGreeting">프로필 설정</h1><p id="psEmailDisp" style="font-size:12px;margin-top:4px;opacity:.7;"></p></div>
+    <p style="font-size:13px;color:var(--tx2);margin-bottom:20px;text-align:center;">소속 과·팀을 설정하고 대시보드를 시작하세요.</p>
+    <div class="fg"><label>이름</label><input type="text" id="psName" placeholder="이름을 입력하세요"></div>
+    <div class="fg"><label>소속 과</label>
+      <select id="psDept" onchange="updatePsTeam()">
+        <option value="">-- 소속 과 선택 --</option>
+        <option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>도시재생경관과</option>
+      </select>
+    </div>
+    <div class="fg"><label>소속 팀</label><select id="psTeam"><option value="">-- 팀 선택 --</option></select></div>
+    <details style="margin-bottom:16px;">
+      <summary style="font-size:13px;color:var(--tx2);cursor:pointer;user-select:none;padding:4px 0;">🔑 관리자 권한 설정 (선택사항)</summary>
+      <div class="fg" style="margin-top:10px;margin-bottom:0;"><label>관리자 코드</label><input type="password" id="psAdminCode" placeholder="관리자 코드 입력"></div>
+    </details>
+    <button class="btnLogin" onclick="saveProfileSetup()">저장 후 시작하기</button>
+    <div class="lerr" id="psErr"></div>
   </div>
 </div>
 <div id="app">
@@ -194,7 +204,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
         <button class="btn sm" style="background:#dbeafe;color:#1d4ed8;border:1px solid #3b82f6" onclick="setFilter('proc')">진행중</button>
         <button class="btn sm" style="background:#dcfce7;color:#166534;border:1px solid #22c55e" onclick="setFilter('done')">완료</button>
         <select class="fg" style="margin:0;padding:7px 12px;border:1.5px solid var(--bdr);border-radius:6px;font-size:13px;background:#fff;font-family:'Noto Sans KR',sans-serif" id="filterDept" onchange="renderIssues()">
-          <option value="">전체 부서</option><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>주택관리과</option><option>도시재생경관과</option>
+          <option value="">전체 부서</option><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>도시재생경관과</option>
         </select>
       </div>
       <div class="issueList" id="issueList"></div>
@@ -253,7 +263,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
       <div class="fr"><label>내용</label><textarea id="issContent" placeholder="상세 내용 입력..."></textarea></div>
       <div class="grid2">
         <div class="fr"><label>처리상태</label><select id="issStatus" onchange="onIssStatusChange()"><option value="proc">진행중</option><option value="done">완료</option></select></div>
-        <div class="fr"><label>담당 부서</label><select id="issDept"><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>주택관리과</option><option>도시재생경관과</option></select></div>
+        <div class="fr"><label>담당 부서</label><select id="issDept"><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>도시재생경관과</option></select></div>
       </div>
       <div class="fr" id="progressRow">
         <label>진행률 <span style="font-size:11px;color:var(--tx3)">(진행중일 때 입력 · 100% 입력 시 자동 완료)</span></label>
@@ -277,7 +287,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
       <div class="fr"><label>🟦 이번주 실적</label><textarea id="repThis" placeholder="이번 주 완료 또는 진행한 주요 업무..."></textarea></div>
       <div class="fr"><label>🟧 다음주 계획</label><textarea id="repNext" placeholder="다음 주 예정 업무 및 계획..."></textarea></div>
       <div class="grid2">
-        <div class="fr"><label>과</label><select id="repDept" onchange="updateTeamSel()"><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>주택관리과</option><option>도시재생경관과</option></select></div>
+        <div class="fr"><label>과</label><select id="repDept" onchange="updateTeamSel()"><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>도시재생경관과</option></select></div>
         <div class="fr"><label>팀</label><select id="repTeam"></select></div>
       </div>
     </div>
@@ -294,22 +304,26 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 <script>
 var ADMIN_PW='0708',STAFF_PW='1234';
 var FB={apiKey:"AIzaSyDDsAzrYojzbVXyaPilfF3Mj57pmat8JVU",authDomain:"bureau-dashboard.firebaseapp.com",databaseURL:"https://bureau-dashboard-default-rtdb.firebaseio.com",projectId:"bureau-dashboard",storageBucket:"bureau-dashboard.firebasestorage.app",messagingSenderId:"865956736976",appId:"1:865956736976:web:423c2add3bc57737c213d5"};
-var ORG={'도로과':['건설행정팀','도로팀','보도관리팀','자전거도시팀','도로조명팀'],'도시계획과':['도시행정팀','도시개발팀','도시계획팀','GB관리팀'],'건축과':['건축행정팀','건축팀','건축정보팀','공공시설팀','건축안전센터팀'],'주택과':['주택1팀','주택2팀','재개발재건축팀','주택정비팀'],'주택관리과':['주택지원팀','주거복지팀','주택민원팀'],'도시재생경관과':['도시재생전략팀','도시재생사업팀','개발행위허가팀','광고물관리팀','도시경관팀']};
+var ORG={'도로과':['건설행정팀','도로팀','보도관리팀','자전거도시팀','도로조명팀'],'도시계획과':['도시행정팀','도시개발팀','도시계획팀','GB관리팀'],'건축과':['건축행정팀','건축팀','건축정보팀','공공시설팀','건축안전센터팀'],'주택과':['주택팀','재개발재건축팀','주택정비팀','주거복지팀','주택민원팀'],'도시재생경관과':['도시재생전략팀','도시재생사업팀','광고물관리팀','도시경관팀']};
 var GCD=[];var GCAL_API_KEY=localStorage.getItem('gcal_key')||'AIzaSyDU0y_Jg9YW-ybmlRSXMFNi6PJnaUe1ROc';var GCAL_CAL_ID=localStorage.getItem('gcal_calid')||'fb33c71c30a02987ef34e18cb2f4d9f1bd2c108c618c4b23594025b09c34cf0f@group.calendar.google.com';
-var currentUser=null,db=null,issues=[],reports=[],events=[],instruction=null,archives={},archiveWk='';
+var currentUser=null,db=null,auth=null,issues=[],reports=[],events=[],instruction=null,archives={},archiveWk='';
 var calY,calM,editIssId=null,editRepId=null,pendingPhoto=null,confCb=null,statusFilter='';var _curReps=[],_curWkLbl='';
-(function(){try{firebase.initializeApp(FB);db=firebase.database();var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);db=null;loadLS();if(currentUser){renderIssues();renderDeptGrid();renderCal();renderInstr();}}db.ref('issues').on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderIssues();},_fbErr);db.ref('reports').on('value',function(s){reports=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];checkNewWeekArchive();renderDeptGrid();},_fbErr);db.ref('events').on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();},_fbErr);db.ref('instruction').on('value',function(s){instruction=s.val();renderInstr();},_fbErr);db.ref('reports_archive').on('value',function(s){archives=s.val()||{};renderArchiveSel();},_fbErr);}catch(e){console.warn('FB fail');setSyncOK(false);loadLS();}})();
+(function(){try{firebase.initializeApp(FB);db=firebase.database();auth=firebase.auth();auth.onAuthStateChanged(function(user){if(user&&!currentUser){(db?db.ref('users/'+user.uid).once('value'):Promise.resolve(null)).then(function(s){var p=s?s.val():null;if(!p){try{p=JSON.parse(localStorage.getItem('bu_profile')||'null');}catch(e){}}if(p){setCurrentUserFromProfile(user,p);enterApp();}else{showProfileSetup(user);}});}else if(!user){currentUser=null;var ld=document.getElementById('loginLoading');var btn=document.getElementById('btnGoogleLogin');if(ld)ld.style.display='none';if(btn)btn.style.display='flex';}});var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);db=null;loadLS();if(currentUser){renderIssues();renderDeptGrid();renderCal();renderInstr();}}db.ref('issues').on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderIssues();},_fbErr);db.ref('reports').on('value',function(s){reports=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];checkNewWeekArchive();renderDeptGrid();},_fbErr);db.ref('events').on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();},_fbErr);db.ref('instruction').on('value',function(s){instruction=s.val();renderInstr();},_fbErr);db.ref('reports_archive').on('value',function(s){archives=s.val()||{};renderArchiveSel();},_fbErr);}catch(e){console.warn('FB fail');setSyncOK(false);loadLS();}})();
 function loadLS(){issues=JSON.parse(localStorage.getItem('bu_iss')||'[]');reports=JSON.parse(localStorage.getItem('bu_rep')||'[]');events=JSON.parse(localStorage.getItem('bu_ev')||'[]');instruction=JSON.parse(localStorage.getItem('bu_instr')||'null');}
 function saveLS(){localStorage.setItem('bu_iss',JSON.stringify(issues));localStorage.setItem('bu_rep',JSON.stringify(reports));localStorage.setItem('bu_ev',JSON.stringify(events));localStorage.setItem('bu_instr',JSON.stringify(instruction));}
 function dbSet(p,d){if(db)db.ref(p).set(d);else saveLS();}
 function dbPush(p,d){if(db)return db.ref(p).push(d).then(function(r){return r.key;});var id=Date.now().toString();d.id=id;saveLS();return Promise.resolve(id);}
 function dbRemove(p){if(db)db.ref(p).remove();else saveLS();}
-function switchLoginTab(t){document.getElementById('tabA').classList.toggle('active',t==='admin');document.getElementById('tabS').classList.toggle('active',t==='staff');document.getElementById('formAdmin').style.display=t==='admin'?'block':'none';document.getElementById('formStaff').style.display=t==='staff'?'block':'none';document.getElementById('lerr').style.display='none';}
-function doAdminLogin(){if(document.getElementById('adminPw').value===ADMIN_PW){currentUser={type:'admin',name:'국장',dept:'전체'};enterApp();}else showLErr('비밀번호가 올바르지 않습니다.');}
-function doStaffLogin(){var n=document.getElementById('staffName').value.trim(),d=document.getElementById('staffDept').value,p=document.getElementById('staffPw').value;if(!n||!d){showLErr('이름과 소속 과를 선택해주세요.');return;}if(p===STAFF_PW){currentUser={type:'staff',name:n,dept:d};enterApp();}else showLErr('비밀번호가 올바르지 않습니다.');}
+function doGoogleLogin(){if(!auth){showLErr('인증 서비스를 사용할 수 없습니다.');return;}var btn=document.getElementById('btnGoogleLogin');if(btn){btn.disabled=true;btn.style.opacity='0.6';}var provider=new firebase.auth.GoogleAuthProvider();auth.signInWithPopup(provider).catch(function(err){var msg=err.code==='auth/popup-closed-by-user'?'로그인을 취소했습니다.':err.message;showLErr(msg);if(btn){btn.disabled=false;btn.style.opacity='1';}});}
+function setCurrentUserFromProfile(user,p){currentUser={type:p.isAdmin?'admin':'staff',name:p.name||user.displayName||user.email,dept:p.dept||'',team:p.team||'',uid:user.uid,email:user.email,isAdmin:!!p.isAdmin};localStorage.setItem('bu_profile',JSON.stringify({name:currentUser.name,dept:currentUser.dept,team:currentUser.team,isAdmin:currentUser.isAdmin}));}
+function showProfileSetup(googleUser){window._pendingGoogleUser=googleUser;document.getElementById('loginScreen').style.display='none';var el=document.getElementById('profileSetupScreen');el.style.display='flex';var pg=document.getElementById('psGreeting');if(pg)pg.textContent=(googleUser.displayName?googleUser.displayName+'님, ':'')+'프로필을 설정해주세요';var pe=document.getElementById('psEmailDisp');if(pe)pe.textContent=googleUser.email||'';var pn=document.getElementById('psName');if(pn)pn.value=googleUser.displayName||'';updatePsTeam();}
+function updatePsTeam(){var d=document.getElementById('psDept');var sel=document.getElementById('psTeam');if(!d||!sel)return;sel.innerHTML='<option value="">-- 팀 선택 --</option>'+(ORG[d.value]||[]).map(function(t){return '<option>'+t+'</option>';}).join('');}
+function saveProfileSetup(){var name=(document.getElementById('psName').value||'').trim();var dept=document.getElementById('psDept').value;var team=document.getElementById('psTeam').value;var adminCode=(document.getElementById('psAdminCode')||{}).value||'';if(!name){showPsErr('이름을 입력해주세요.');return;}if(!dept){showPsErr('소속 과를 선택해주세요.');return;}if(!team){showPsErr('소속 팀을 선택해주세요.');return;}var isAdmin=adminCode===ADMIN_PW;var user=window._pendingGoogleUser||{uid:'local',displayName:name,email:''};var profile={name:name,dept:dept,team:team,isAdmin:isAdmin,email:user.email||'',createdAt:new Date().toISOString()};function proceed(){setCurrentUserFromProfile(user,profile);document.getElementById('profileSetupScreen').style.display='none';enterApp();}if(db&&user.uid!=='local'){db.ref('users/'+user.uid).set(profile).then(proceed).catch(proceed);}else{localStorage.setItem('bu_profile',JSON.stringify(profile));proceed();}}
+function showPsErr(m){var e=document.getElementById('psErr');if(e){e.textContent=m;e.style.display='block';}}
 function showLErr(m){var e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
-function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 국장 (관리자)':currentUser.name+' ('+currentUser.dept+')';if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminCalPnl').style.display='block';}var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();renderDeptGrid();renderCal();updateWk();renderGcalSide();checkNewWeekArchive();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;}fetchGCal();if(!db)loadLS();}
-function doLogout(){currentUser=null;document.getElementById('app').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('adminPw').value='';document.getElementById('staffPw').value='';document.getElementById('adminInstrPnl').style.display='none';document.getElementById('adminCalPnl').style.display='none';document.getElementById('adminGcalPnl').style.display='none';document.getElementById('lerr').style.display='none';}
+function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';
+if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminCalPnl').style.display='block';}var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();renderDeptGrid();renderCal();updateWk();renderGcalSide();checkNewWeekArchive();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;}fetchGCal();if(!db)loadLS();}
+function doLogout(){localStorage.removeItem('bu_profile');if(auth)auth.signOut();currentUser=null;document.getElementById('app').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('loginLoading').style.display='block';var btn=document.getElementById('btnGoogleLogin');if(btn){btn.style.display='none';btn.disabled=false;btn.style.opacity='1';}document.getElementById('adminInstrPnl').style.display='none';document.getElementById('adminCalPnl').style.display='none';document.getElementById('adminGcalPnl').style.display='none';document.getElementById('lerr').style.display='none';}
 function setSyncOK(ok){var d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;if(ok){d.classList.remove('off');t.textContent='실시간 연결';}else{d.classList.add('off');t.textContent='오프라인(로컬)';}}
 function switchTab(t,btn){document.querySelectorAll('.tBtn').forEach(function(b){b.classList.remove('active');});document.querySelectorAll('.tPanel').forEach(function(p){p.classList.remove('active');});btn.classList.add('active');document.getElementById('panel-'+t).classList.add('active');if(t==='calendar')renderCal();}
 function saveInstr(){var tx=document.getElementById('instrInput').value.trim();if(!tx)return;var data={text:tx,date:new Date().toISOString()};dbSet('instruction',data);instruction=data;document.getElementById('instrEditBox').style.display='none';renderInstr();}
@@ -400,7 +414,7 @@ var _pmScale=1,_pmDist=0;
 })();
 function handlePhoto(input){var fi=input.files[0];if(!fi)return;var rd=new FileReader();rd.onload=function(e){var img=new Image();img.onload=function(){var c=document.createElement('canvas'),w=img.width,h=img.height,M=1200;if(w>M||h>M){if(w>h){h=Math.round(h*M/w);w=M;}else{w=Math.round(w*M/h);h=M;}}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);var q=0.9,d;do{d=c.toDataURL('image/jpeg',q);q-=0.05;}while(d.length>500*1024&&q>0.3);pendingPhoto=d;document.getElementById('photoPrev').innerHTML='<img src="'+d+'" style="max-width:100%;border-radius:6px">';};img.src=e.target.result;};rd.readAsDataURL(fi);}
 function updateTeamSel(){var d=document.getElementById('repDept').value;document.getElementById('repTeam').innerHTML=(ORG[d]||[]).map(function(t){return '<option>'+t+'</option>';}).join('');}
-function openRepModal(id){editRepId=id||null;if(id){var r=reports.find(function(x){return x.id===id;});document.getElementById('repModalT').textContent='주간보고 수정';document.getElementById('repThis').value=r.thisWeek||'';document.getElementById('repNext').value=r.nextWeek||'';document.getElementById('repDept').value=r.dept||'도로과';updateTeamSel();document.getElementById('repTeam').value=r.team||'';}else{document.getElementById('repModalT').textContent='주간보고 등록';document.getElementById('repThis').value='';document.getElementById('repNext').value='';if(currentUser&&currentUser.type==='staff'){document.getElementById('repDept').value=currentUser.dept;document.getElementById('repDept').disabled=true;}else{document.getElementById('repDept').disabled=false;}updateTeamSel();}document.getElementById('repModal').style.display='flex';}
+function openRepModal(id){editRepId=id||null;if(id){var r=reports.find(function(x){return x.id===id;});document.getElementById('repModalT').textContent='주간보고 수정';document.getElementById('repThis').value=r.thisWeek||'';document.getElementById('repNext').value=r.nextWeek||'';document.getElementById('repDept').value=r.dept||'도로과';updateTeamSel();document.getElementById('repTeam').value=r.team||'';}else{document.getElementById('repModalT').textContent='주간보고 등록';document.getElementById('repThis').value='';document.getElementById('repNext').value='';if(currentUser&&currentUser.type==='staff'){document.getElementById('repDept').value=currentUser.dept;document.getElementById('repDept').disabled=true;}else{document.getElementById('repDept').disabled=false;}updateTeamSel();if(currentUser&&currentUser.type==='staff'&&currentUser.team){document.getElementById('repTeam').value=currentUser.team;}}document.getElementById('repModal').style.display='flex';}
 function closeRepModal(){document.getElementById('repModal').style.display='none';}
 function saveReport(){var dept=document.getElementById('repDept').value;if(currentUser&&currentUser.type==='staff'&&dept!==currentUser.dept){alert('본인 소속 과만 등록 가능합니다.');return;}var thisW=document.getElementById('repThis').value.trim();var nextW=document.getElementById('repNext').value.trim();if(!thisW&&!nextW){alert('이번주 실적 또는 다음주 계획을 입력하세요.');return;}var data={thisWeek:thisW,nextWeek:nextW,dept:dept,team:document.getElementById('repTeam').value,weekLabel:getWkLbl(new Date()),date:new Date().toISOString(),author:currentUser?currentUser.name:''};if(editRepId){dbSet('reports/'+editRepId,Object.assign({},data,{id:editRepId}));if(!db){reports=reports.map(function(r){return r.id===editRepId?Object.assign({},data,{id:editRepId}):r;});renderDeptGrid();saveLS();}}else{dbPush('reports',data);if(!db){data.id=Date.now().toString();reports.push(data);renderDeptGrid();saveLS();}}closeRepModal();}
 function deleteReport(id){showConf('이 보고를 삭제하시겠습니까?',function(){dbRemove('reports/'+id);if(!db){reports=reports.filter(function(r){return r.id!==id;});renderDeptGrid();saveLS();}});}
@@ -597,6 +611,8 @@ function execConf(){if(confCb)confCb();closeConf();}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmtD(d){if(!(d instanceof Date)||isNaN(d))return '';return d.getFullYear()+'.'+(d.getMonth()+1+'').padStart(2,'0')+'.'+(''+d.getDate()).padStart(2,'0');}
 function pad(n){return (''+n).padStart(2,'0');}
+function saveEvent(){var t=document.getElementById('evTitle').value.trim();var d=document.getElementById('evDate').value;var ty=document.getElementById('evType').value;if(!t||!d){alert('제목과 날짜를 입력하세요.');return;}var data={title:t,date:d,type:ty};if(db){dbPush('events',data);}else{data.id=Date.now().toString();events.push(data);renderCal();saveLS();}document.getElementById('evTitle').value='';}
+function deleteEvent(id){showConf('이 일정을 삭제하시겠습니까?',function(){dbRemove('events/'+id);if(!db){events=events.filter(function(e){return e.id!==id;});renderCal();saveLS();}});}
 </script>
 </body>
 </html>
