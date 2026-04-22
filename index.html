@@ -211,12 +211,8 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
     </div>
     <div class="tPanel" id="panel-reports">
       <div class="secH">
-        <div class="secT">📊 주간보고 현황</div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <select id="archiveSel" onchange="onArchiveSelChange()" style="padding:7px 12px;border:1.5px solid var(--bdr);border-radius:6px;font-size:13px;background:#fff;font-family:Noto Sans KR,sans-serif"><option value="">현재 주간보고</option></select>
-          <span class="wkDisp" id="wkDisp"></span>
-          <button class="btn btnP" id="btnRepAdd" onclick="openRepModal()">+ 보고 등록</button>
-        </div>
+        <div class="secT">📊 사업별 진행현황</div>
+        <button class="btn btnP" id="btnProjAdd" onclick="openProjModal()">+ 사업 추가</button>
       </div>
       <div class="dGrid" id="deptGrid"></div>
     </div>
@@ -280,18 +276,20 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
     <div class="mF"><button class="btn btnG" onclick="closeIssModal()">취소</button><button class="btn btnP" onclick="saveIssue()">저장</button></div>
   </div>
 </div>
-<div class="mOverlay" id="repModal" style="display:none" onclick="if(event.target===this)closeRepModal()">
+<div class="mOverlay" id="projModal" style="display:none" onclick="if(event.target===this)closeProjModal()">
   <div class="modal">
-    <div class="mH"><span class="mT" id="repModalT">주간보고 등록</span><button class="mClose" onclick="closeRepModal()">✕</button></div>
+    <div class="mH"><span class="mT" id="projModalT">사업 추가</span><button class="mClose" onclick="closeProjModal()">✕</button></div>
     <div class="mB">
-      <div class="fr"><label>🟦 이번주 실적</label><textarea id="repThis" placeholder="이번 주 완료 또는 진행한 주요 업무..."></textarea></div>
-      <div class="fr"><label>🟧 다음주 계획</label><textarea id="repNext" placeholder="다음 주 예정 업무 및 계획..."></textarea></div>
+      <div class="fr"><label>사업명 *</label><input type="text" id="projName" placeholder="단위사업명 입력"></div>
+      <div id="prevMemoRow" style="display:none;margin-bottom:16px;"><div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:4px;">이전 메모</div><div id="prevMemoText" style="font-size:13px;color:var(--tx2);padding:8px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--bdr);white-space:pre-wrap;"></div></div>
+      <div class="fr"><label>진행상황 메모</label><textarea id="projMemo" placeholder="현재 진행상황 메모..." style="min-height:80px"></textarea></div>
       <div class="grid2">
-        <div class="fr"><label>과</label><select id="repDept" onchange="updateTeamSel()"><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>도시재생경관과</option></select></div>
-        <div class="fr"><label>팀</label><select id="repTeam"></select></div>
+        <div class="fr"><label>상태</label><select id="projStatus"><option value="before">착수전</option><option value="proc">진행중</option><option value="done">완료</option><option value="hold">보류</option></select></div>
+        <div class="fr"><label>과</label><select id="projDept" onchange="updateProjTeamSel()"><option value="">-- 선택 --</option><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>도시재생경관과</option></select></div>
       </div>
+      <div class="fr"><label>팀</label><select id="projTeam"><option value="">-- 팀 선택 --</option></select></div>
     </div>
-    <div class="mF"><button class="btn btnG" onclick="closeRepModal()">취소</button><button class="btn btnP" onclick="saveReport()">저장</button></div>
+    <div class="mF"><button class="btn btnG" onclick="closeProjModal()">취소</button><button class="btn btnP" onclick="saveProject()">저장</button></div>
   </div>
 </div>
 <div class="confOverlay" id="confDlg" style="display:none">
@@ -306,11 +304,11 @@ var ADMIN_PW='0708',STAFF_PW='1234';
 var FB={apiKey:"AIzaSyDDsAzrYojzbVXyaPilfF3Mj57pmat8JVU",authDomain:"bureau-dashboard.firebaseapp.com",databaseURL:"https://bureau-dashboard-default-rtdb.firebaseio.com",projectId:"bureau-dashboard",storageBucket:"bureau-dashboard.firebasestorage.app",messagingSenderId:"865956736976",appId:"1:865956736976:web:423c2add3bc57737c213d5"};
 var ORG={'도로과':['건설행정팀','도로팀','보도관리팀','자전거도시팀','도로조명팀'],'도시계획과':['도시행정팀','도시개발팀','도시계획팀','GB관리팀'],'건축과':['건축행정팀','건축팀','건축정보팀','공공시설팀','건축안전센터팀'],'주택과':['주택팀','재개발재건축팀','주택정비팀','주거복지팀','주택민원팀'],'도시재생경관과':['도시재생전략팀','도시재생사업팀','광고물관리팀','도시경관팀']};
 var GCD=[];var GCAL_API_KEY=localStorage.getItem('gcal_key')||'AIzaSyDU0y_Jg9YW-ybmlRSXMFNi6PJnaUe1ROc';var GCAL_CAL_ID=localStorage.getItem('gcal_calid')||'fb33c71c30a02987ef34e18cb2f4d9f1bd2c108c618c4b23594025b09c34cf0f@group.calendar.google.com';
-var currentUser=null,db=null,auth=null,issues=[],reports=[],events=[],instruction=null,archives={},archiveWk='';
-var calY,calM,editIssId=null,editRepId=null,pendingPhoto=null,confCb=null,statusFilter='';var _curReps=[],_curWkLbl='';
-(function(){try{firebase.initializeApp(FB);db=firebase.database();auth=firebase.auth();auth.onAuthStateChanged(function(user){if(user&&!currentUser){(db?db.ref('users/'+user.uid).once('value'):Promise.resolve(null)).then(function(s){var p=s?s.val():null;if(!p){try{p=JSON.parse(localStorage.getItem('bu_profile')||'null');}catch(e){}}if(p){setCurrentUserFromProfile(user,p);enterApp();}else{showProfileSetup(user);}});}else if(!user){currentUser=null;var ld=document.getElementById('loginLoading');var btn=document.getElementById('btnGoogleLogin');if(ld)ld.style.display='none';if(btn)btn.style.display='flex';}});var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);db=null;loadLS();if(currentUser){renderIssues();renderDeptGrid();renderCal();renderInstr();}}db.ref('issues').on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderIssues();},_fbErr);db.ref('reports').on('value',function(s){reports=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];checkNewWeekArchive();renderDeptGrid();},_fbErr);db.ref('events').on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();},_fbErr);db.ref('instruction').on('value',function(s){instruction=s.val();renderInstr();},_fbErr);db.ref('reports_archive').on('value',function(s){archives=s.val()||{};renderArchiveSel();},_fbErr);}catch(e){console.warn('FB fail');setSyncOK(false);loadLS();}})();
-function loadLS(){issues=JSON.parse(localStorage.getItem('bu_iss')||'[]');reports=JSON.parse(localStorage.getItem('bu_rep')||'[]');events=JSON.parse(localStorage.getItem('bu_ev')||'[]');instruction=JSON.parse(localStorage.getItem('bu_instr')||'null');}
-function saveLS(){localStorage.setItem('bu_iss',JSON.stringify(issues));localStorage.setItem('bu_rep',JSON.stringify(reports));localStorage.setItem('bu_ev',JSON.stringify(events));localStorage.setItem('bu_instr',JSON.stringify(instruction));}
+var currentUser=null,db=null,auth=null,issues=[],projects=[],events=[],instruction=null;
+var calY,calM,editIssId=null,editProjId=null,pendingPhoto=null,confCb=null,statusFilter='';
+(function(){try{firebase.initializeApp(FB);db=firebase.database();auth=firebase.auth();auth.onAuthStateChanged(function(user){if(user&&!currentUser){(db?db.ref('users/'+user.uid).once('value'):Promise.resolve(null)).then(function(s){var p=s?s.val():null;if(!p){try{p=JSON.parse(localStorage.getItem('bu_profile')||'null');}catch(e){}}if(p){setCurrentUserFromProfile(user,p);enterApp();}else{showProfileSetup(user);}});}else if(!user){currentUser=null;var ld=document.getElementById('loginLoading');var btn=document.getElementById('btnGoogleLogin');if(ld)ld.style.display='none';if(btn)btn.style.display='flex';}});var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);db=null;loadLS();if(currentUser){renderIssues();renderProjectsGrid();renderCal();renderInstr();}}db.ref('issues').on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderIssues();},_fbErr);db.ref('projects').on('value',function(s){projects=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderProjectsGrid();},_fbErr);db.ref('events').on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();},_fbErr);db.ref('instruction').on('value',function(s){instruction=s.val();renderInstr();},_fbErr);}catch(e){console.warn('FB fail');setSyncOK(false);loadLS();}})();
+function loadLS(){issues=JSON.parse(localStorage.getItem('bu_iss')||'[]');projects=JSON.parse(localStorage.getItem('bu_proj')||'[]');events=JSON.parse(localStorage.getItem('bu_ev')||'[]');instruction=JSON.parse(localStorage.getItem('bu_instr')||'null');}
+function saveLS(){localStorage.setItem('bu_iss',JSON.stringify(issues));localStorage.setItem('bu_proj',JSON.stringify(projects));localStorage.setItem('bu_ev',JSON.stringify(events));localStorage.setItem('bu_instr',JSON.stringify(instruction));}
 function dbSet(p,d){if(db)db.ref(p).set(d);else saveLS();}
 function dbPush(p,d){if(db)return db.ref(p).push(d).then(function(r){return r.key;});var id=Date.now().toString();d.id=id;saveLS();return Promise.resolve(id);}
 function dbRemove(p){if(db)db.ref(p).remove();else saveLS();}
@@ -322,7 +320,7 @@ function saveProfileSetup(){var name=(document.getElementById('psName').value||'
 function showPsErr(m){var e=document.getElementById('psErr');if(e){e.textContent=m;e.style.display='block';}}
 function showLErr(m){var e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
 function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';
-if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminCalPnl').style.display='block';}var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();renderDeptGrid();renderCal();updateWk();renderGcalSide();checkNewWeekArchive();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;}fetchGCal();if(!db)loadLS();}
+if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminCalPnl').style.display='block';}var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;}fetchGCal();if(!db)loadLS();}
 function doLogout(){localStorage.removeItem('bu_profile');if(auth)auth.signOut();currentUser=null;document.getElementById('app').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('loginLoading').style.display='block';var btn=document.getElementById('btnGoogleLogin');if(btn){btn.style.display='none';btn.disabled=false;btn.style.opacity='1';}document.getElementById('adminInstrPnl').style.display='none';document.getElementById('adminCalPnl').style.display='none';document.getElementById('adminGcalPnl').style.display='none';document.getElementById('lerr').style.display='none';}
 function setSyncOK(ok){var d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;if(ok){d.classList.remove('off');t.textContent='실시간 연결';}else{d.classList.add('off');t.textContent='오프라인(로컬)';}}
 function switchTab(t,btn){document.querySelectorAll('.tBtn').forEach(function(b){b.classList.remove('active');});document.querySelectorAll('.tPanel').forEach(function(p){p.classList.remove('active');});btn.classList.add('active');document.getElementById('panel-'+t).classList.add('active');if(t==='calendar')renderCal();}
@@ -395,8 +393,9 @@ document.addEventListener('click',function(e){
   var t=e.target;
   if(t.classList.contains('iss-edit')){openIssModal(t.getAttribute('data-id'));return;}
   if(t.classList.contains('iss-del')){deleteIssue(t.getAttribute('data-id'));return;}
-  if(t.classList.contains('rep-edit')){openRepModal(t.getAttribute('data-id'));return;}
-  if(t.classList.contains('rep-del')){deleteReport(t.getAttribute('data-id'));return;}
+  if(t.classList.contains('proj-update')){openProjModal(t.getAttribute('data-id'));return;}
+  if(t.classList.contains('proj-del')){deleteProject(t.getAttribute('data-id'));return;}
+  if(t.classList.contains('proj-hist-btn')){togProjHist(t);return;}
   if(t.classList.contains('issPhoto')&&t.getAttribute('data-id')){showPhoto(t.getAttribute('data-id'));return;}
 });
 function showPhoto(id){var s=window['_ph_'+id];if(!s)return;var img=document.getElementById('photoModalImg');img.src=s;img.style.transform='scale(1)';_pmScale=1;document.getElementById('photoModal').style.display='flex';}
@@ -413,122 +412,14 @@ var _pmScale=1,_pmDist=0;
   });
 })();
 function handlePhoto(input){var fi=input.files[0];if(!fi)return;var rd=new FileReader();rd.onload=function(e){var img=new Image();img.onload=function(){var c=document.createElement('canvas'),w=img.width,h=img.height,M=1200;if(w>M||h>M){if(w>h){h=Math.round(h*M/w);w=M;}else{w=Math.round(w*M/h);h=M;}}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);var q=0.9,d;do{d=c.toDataURL('image/jpeg',q);q-=0.05;}while(d.length>500*1024&&q>0.3);pendingPhoto=d;document.getElementById('photoPrev').innerHTML='<img src="'+d+'" style="max-width:100%;border-radius:6px">';};img.src=e.target.result;};rd.readAsDataURL(fi);}
-function updateTeamSel(){var d=document.getElementById('repDept').value;document.getElementById('repTeam').innerHTML=(ORG[d]||[]).map(function(t){return '<option>'+t+'</option>';}).join('');}
-function openRepModal(id){editRepId=id||null;if(id){var r=reports.find(function(x){return x.id===id;});document.getElementById('repModalT').textContent='주간보고 수정';document.getElementById('repThis').value=r.thisWeek||'';document.getElementById('repNext').value=r.nextWeek||'';document.getElementById('repDept').value=r.dept||'도로과';updateTeamSel();document.getElementById('repTeam').value=r.team||'';}else{document.getElementById('repModalT').textContent='주간보고 등록';document.getElementById('repThis').value='';document.getElementById('repNext').value='';if(currentUser&&currentUser.type==='staff'){document.getElementById('repDept').value=currentUser.dept;document.getElementById('repDept').disabled=true;}else{document.getElementById('repDept').disabled=false;}updateTeamSel();if(currentUser&&currentUser.type==='staff'&&currentUser.team){document.getElementById('repTeam').value=currentUser.team;}}document.getElementById('repModal').style.display='flex';}
-function closeRepModal(){document.getElementById('repModal').style.display='none';}
-function saveReport(){var dept=document.getElementById('repDept').value;if(currentUser&&currentUser.type==='staff'&&dept!==currentUser.dept){alert('본인 소속 과만 등록 가능합니다.');return;}var thisW=document.getElementById('repThis').value.trim();var nextW=document.getElementById('repNext').value.trim();if(!thisW&&!nextW){alert('이번주 실적 또는 다음주 계획을 입력하세요.');return;}var data={thisWeek:thisW,nextWeek:nextW,dept:dept,team:document.getElementById('repTeam').value,weekLabel:getWkLbl(new Date()),date:new Date().toISOString(),author:currentUser?currentUser.name:''};if(editRepId){dbSet('reports/'+editRepId,Object.assign({},data,{id:editRepId}));if(!db){reports=reports.map(function(r){return r.id===editRepId?Object.assign({},data,{id:editRepId}):r;});renderDeptGrid();saveLS();}}else{dbPush('reports',data);if(!db){data.id=Date.now().toString();reports.push(data);renderDeptGrid();saveLS();}}closeRepModal();}
-function deleteReport(id){showConf('이 보고를 삭제하시겠습니까?',function(){dbRemove('reports/'+id);if(!db){reports=reports.filter(function(r){return r.id!==id;});renderDeptGrid();saveLS();}});}
-function getWkLbl(d){var y=d.getFullYear()%100,m=d.getMonth()+1,day=d.getDate(),w=Math.ceil((day+new Date(d.getFullYear(),d.getMonth(),1).getDay())/7);return y+'년 '+m+'월 '+w+'째주';}
-function updateWk(){var e=document.getElementById('wkDisp');if(e)e.textContent=getWkLbl(new Date());}
-function getWkKey(d){var y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate(),w=Math.ceil((day+new Date(d.getFullYear(),d.getMonth(),1).getDay())/7);return y+'_'+String(m).padStart(2,'0')+'_w'+w;}
-function checkNewWeekArchive(){
-  if(!db||!reports.length)return;
-  var now=new Date();
-  var curWkKey=getWkKey(now);
-  // 현재 주와 다른 주의 보고를 그룹화
-  var byWeek={};
-  reports.forEach(function(r){
-    var d=r.date?new Date(r.date):now;
-    var wk=getWkKey(d);
-    if(wk!==curWkKey){
-      if(!byWeek[wk])byWeek[wk]={key:wk,lbl:getWkLbl(d),items:[]};
-      byWeek[wk].items.push(r);
-    }
-  });
-  var oldWeeks=Object.keys(byWeek);
-  if(!oldWeeks.length)return;
-  // 이전 주 보고를 아카이브로 이동
-  var promises=oldWeeks.map(function(wk){
-    var grp=byWeek[wk];
-    return db.ref('reports_archive/'+wk).once('value').then(function(s){
-      var archData=s.val()||{weekLabel:grp.lbl,archivedAt:now.toISOString(),items:{}};
-      grp.items.forEach(function(r){archData.items[r.id]=r;});
-      archData.weekLabel=grp.lbl;
-      return db.ref('reports_archive/'+wk).set(archData).then(function(){
-        return grp.items.map(function(r){return r.id;});
-      });
-    });
-  });
-  Promise.all(promises).then(function(results){
-    var idsToRemove=[].concat.apply([],results);
-    return Promise.all(idsToRemove.map(function(id){return db.ref('reports/'+id).remove();}));
-  });
-}
-function renderArchiveSel(){
-  var sel=document.getElementById('archiveSel');if(!sel)return;
-  var keys=Object.keys(archives).sort().reverse();
-  sel.innerHTML='<option value="">현재 주간보고</option>'+keys.map(function(k){
-    var lbl=archives[k]?archives[k].weekLabel||k:k;
-    return '<option value="'+k+'">'+lbl+'</option>';
-  }).join('');
-}
-function onArchiveSelChange(){
-  var sel=document.getElementById('archiveSel');if(!sel)return;
-  archiveWk=sel.value;
-  if(archiveWk){
-    var arc=archives[archiveWk];
-    var reps=arc&&arc.items?Object.values(arc.items):[];
-    renderDeptGridData(reps,true);
-    document.getElementById('wkDisp').textContent=arc?arc.weekLabel:'';
-  } else {
-    archiveWk='';
-    updateWk();
-    renderDeptGrid();
-  }
-}
-function renderDeptGrid(){renderDeptGridData(reports,false);}
-function downloadDeptReport(dept){
-  var dReps=_curReps.filter(function(r){return r.dept===dept;});
-  var teams=ORG[dept]||[];
-  var wkLbl=_curWkLbl||getWkLbl(new Date());
-  var rows=[];
-  teams.forEach(function(team){
-    var tReps=dReps.filter(function(r){return r.team===team;});
-    if(tReps.length===0){rows.push({team:team,thisWeek:'',nextWeek:'',firstTeam:true,teamSpan:1});}
-    else{tReps.forEach(function(r,i){rows.push({team:team,thisWeek:r.thisWeek||'',nextWeek:r.nextWeek||'',firstTeam:i===0,teamSpan:i===0?tReps.length:0});});}
-  });
-  var totalRows=rows.length||1;
-  var tdSt='border:1px solid #999;padding:8px 10px;vertical-align:top;font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word;';
-  var thSt='border:1px solid #999;padding:8px 10px;background:#dce6f1;font-weight:700;font-size:13px;text-align:center;';
-  var trs=rows.map(function(row,idx){
-    var deptTd=idx===0?'<td rowspan="'+totalRows+'" style="'+tdSt+'text-align:center;font-weight:700;background:#eaf0fb;">'+dept+'</td>':'';
-    var teamTd=row.firstTeam?'<td rowspan="'+row.teamSpan+'" style="'+tdSt+'text-align:center;background:#f5f8ff;">'+row.team+'</td>':'';
-    function toDoc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
-    return '<tr>'+deptTd+teamTd+'<td style="'+tdSt+'">'+toDoc(row.thisWeek)+'</td><td style="'+tdSt+'">'+toDoc(row.nextWeek)+'</td></tr>';
-  }).join('');
-  if(!trs)trs='<tr><td style="'+tdSt+'text-align:center;" colspan="4">등록된 보고가 없습니다.</td></tr>';
-  var html="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>"
-    +"<head><meta charset='UTF-8'>"
-    +"<meta name=ProgId content=Word.Document>"
-    +"<meta name=Generator content='Microsoft Word 15'>"
-    +"<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->"
-    +"<style>"
-    +"@page{size:A4 landscape;margin:2cm;}"
-    +"body{font-family:'맑은 고딕','Noto Sans KR',sans-serif;font-size:11pt;}"
-    +"h2{font-size:14pt;font-weight:700;margin-bottom:10pt;}"
-    +"table{border-collapse:collapse;width:100%;}"
-    +"th,td{border:1px solid #000;padding:6pt 8pt;vertical-align:top;font-size:10pt;line-height:1.5;}"
-    +"th{background:#dce6f1;font-weight:700;text-align:center;}"
-    +"td{white-space:pre-wrap;word-break:break-word;}"
-    +".dept-cell{text-align:center;font-weight:700;background:#eaf0fb;}"
-    +".team-cell{text-align:center;background:#f5f8ff;}"
-    +"</style></head><body>"
-    +"<h2>"+dept+" 주간업무보고 <span style='font-size:10pt;font-weight:400;color:#555;'>("+wkLbl+")</span></h2>"
-    +"<table><thead><tr>"
-    +"<th style='width:70pt;'>과</th>"
-    +"<th style='width:90pt;'>팀</th>"
-    +"<th>이번주 실적/현안</th>"
-    +"<th>다음주 계획</th>"
-    +"</tr></thead><tbody>"+trs+"</tbody></table>"
-    +"</body></html>";
-  var blob=new Blob(['\ufeff'+html],{type:'application/msword;charset=utf-8'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;a.download=dept+'_주간보고_'+wkLbl+'.doc';
-  document.body.appendChild(a);a.click();
-  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
-}
-function renderDeptGridData(allReps,isArchive){_curReps=allReps;var wkEl=document.getElementById('wkDisp');_curWkLbl=wkEl?wkEl.textContent:getWkLbl(new Date());var grid=document.getElementById('deptGrid');if(!grid)return;grid.innerHTML=Object.keys(ORG).map(function(dept){var teams=ORG[dept];return '<div class="dCard"><div class="dCardH" onclick="togDept(this)"><h3>📂 '+dept+'</h3><div style="display:flex;align-items:center;gap:6px;">'+(currentUser?'<button class="btn btnG sm" onclick="event.stopPropagation();downloadDeptReport(\''+dept+'\')" style="font-size:11px;padding:3px 8px;white-space:nowrap;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);">📥 저장</button>':'')+'<span class="togIco open">▼</span></div></div><div class="teamList">'+teams.map(function(team){var reps=allReps.filter(function(r){return r.dept===dept&&r.team===team;});var ce=!isArchive&&currentUser&&(currentUser.type==='admin'||currentUser.dept===dept);return '<div class="teamItem"><div class="teamH" onclick="togTeam(this)"><span class="teamNm">▼ '+team+' <span class="tCnt">'+reps.length+'</span></span></div><div class="teamReps">'+(reps.length?reps.map(function(r){return '<div class="repEntry"><div class="repTop"><div class="repTitle">'+esc(r.team)+' — '+esc(r.weekLabel||'')+'</div>'+(ce?'<div style="display:flex;gap:4px"><button class="btn btnG sm rep-edit" data-id="'+r.id+'">수정</button><button class="btn btnD sm rep-del" data-id="'+r.id+'">삭제</button></div>':'')+'</div><div class="repSec"><div class="repSecLbl">이번주 실적</div><div class="repSecCt">'+(r.thisWeek?esc(r.thisWeek):'<span style="color:var(--tx3)">미입력</span>')+'</div></div><div class="repSec"><div class="repSecLbl">다음주 계획</div><div class="repSecCt next">'+(r.nextWeek?esc(r.nextWeek):'<span style="color:var(--tx3)">미입력</span>')+'</div></div><div class="repMeta">'+esc(r.author||'')+' 작성</div></div>';}).join(''):'<div class="noRep">등록된 보고가 없습니다.</div>')+'</div></div>';}).join('')+'</div></div>';}).join('');}
+function updateProjTeamSel(){var d=document.getElementById('projDept');var sel=document.getElementById('projTeam');if(!d||!sel)return;sel.innerHTML='<option value="">-- 팀 선택 --</option>'+(ORG[d.value]||[]).map(function(t){return '<option>'+t+'</option>';}).join('');}
+function openProjModal(id,dept,team){editProjId=id||null;var prev=document.getElementById('prevMemoRow');if(id){var p=projects.find(function(x){return x.id===id;});if(!p)return;document.getElementById('projModalT').textContent='진행상황 업데이트';document.getElementById('projName').value=p.name;document.getElementById('projName').disabled=true;document.getElementById('projStatus').value=p.status||'proc';document.getElementById('projMemo').value='';document.getElementById('projMemo').placeholder='이번 업데이트 내용 (변경사항 없으면 비워도 됩니다)';document.getElementById('projDept').value=p.dept;document.getElementById('projDept').disabled=true;updateProjTeamSel();document.getElementById('projTeam').value=p.team;document.getElementById('projTeam').disabled=true;if(prev){prev.style.display=p.memo?'block':'none';var pt=document.getElementById('prevMemoText');if(pt)pt.textContent=p.memo||'';}}else{document.getElementById('projModalT').textContent='사업 추가';document.getElementById('projName').value='';document.getElementById('projName').disabled=false;document.getElementById('projStatus').value='before';document.getElementById('projMemo').value='';document.getElementById('projMemo').placeholder='초기 진행상황 메모 (선택)';if(prev)prev.style.display='none';var isStaff=currentUser&&currentUser.type==='staff';var deptEl=document.getElementById('projDept');deptEl.disabled=isStaff;deptEl.value=dept||(isStaff?currentUser.dept:'');updateProjTeamSel();var teamEl=document.getElementById('projTeam');var myTeam=isStaff&&currentUser.team;teamEl.disabled=!!(isStaff&&myTeam);teamEl.value=team||(myTeam?currentUser.team:'');}document.getElementById('projModal').style.display='flex';}
+function closeProjModal(){document.getElementById('projModal').style.display='none';['projDept','projTeam','projName'].forEach(function(id){var el=document.getElementById(id);if(el)el.disabled=false;});}
+function saveProject(){var name=document.getElementById('projName').value.trim();var status=document.getElementById('projStatus').value;var memo=document.getElementById('projMemo').value.trim();var dept=document.getElementById('projDept').value;var team=document.getElementById('projTeam').value;if(!name){alert('사업명을 입력하세요.');return;}if(!dept){alert('과를 선택하세요.');return;}if(!team){alert('팀을 선택하세요.');return;}var now=new Date().toISOString();var author=currentUser?currentUser.name:'';var logEntry={status:status,memo:memo,date:now,author:author};if(editProjId){dbSet('projects/'+editProjId+'/status',status);if(memo)dbSet('projects/'+editProjId+'/memo',memo);dbSet('projects/'+editProjId+'/updatedAt',now);dbSet('projects/'+editProjId+'/author',author);if(db){db.ref('projects/'+editProjId+'/history').push(logEntry);}else{projects=projects.map(function(p){if(p.id!==editProjId)return p;var h=Object.assign({},p.history||{});h[Date.now().toString()]=logEntry;return Object.assign({},p,{status:status,memo:memo||p.memo,updatedAt:now,author:author,history:h});});renderProjectsGrid();saveLS();}}else{var data={dept:dept,team:team,name:name,status:status,memo:memo,createdAt:now,updatedAt:now,author:author};if(db){db.ref('projects').push(data).then(function(ref){db.ref('projects/'+ref.key+'/history').push(logEntry);});}else{data.id=Date.now().toString();var h2={};h2[data.id+'_0']=logEntry;data.history=h2;projects.push(data);renderProjectsGrid();saveLS();}}closeProjModal();}
+function deleteProject(id){showConf('이 사업을 삭제하시겠습니까? 이력도 모두 삭제됩니다.',function(){dbRemove('projects/'+id);if(!db){projects=projects.filter(function(p){return p.id!==id;});renderProjectsGrid();saveLS();}});}
+function togProjHist(btn){var id=btn.getAttribute('data-id');var entry=btn.closest('.repEntry');if(!entry)return;var hist=entry.querySelector('.proj-hist');if(!hist)return;var open=hist.style.display!=='none';hist.style.display=open?'none':'block';var cnt=hist.querySelectorAll('.hist-item').length;btn.textContent=open?'이력 '+cnt+'건 보기':'이력 접기';}
+function renderProjectsGrid(){var grid=document.getElementById('deptGrid');if(!grid)return;var stLbl={before:'착수전',proc:'진행중',done:'완료',hold:'보류'};var stBg={before:'#f1f5f9',proc:'#dbeafe',done:'#dcfce7',hold:'#fef3c7'};var stClr={before:'#475569',proc:'#1d4ed8',done:'#166534',hold:'#92400e'};var stBdr={before:'#94a3b8',proc:'#3b82f6',done:'#22c55e',hold:'#f59e0b'};grid.innerHTML=Object.keys(ORG).map(function(dept){var teams=ORG[dept];var deptProjs=projects.filter(function(p){return p.dept===dept;});var canEditDept=currentUser&&(currentUser.type==='admin'||currentUser.dept===dept);return '<div class="dCard"><div class="dCardH" onclick="togDept(this)"><h3>📂 '+dept+'</h3><div style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;opacity:.7">'+deptProjs.length+'개 사업</span>'+(canEditDept?'<button class="btn btnG sm" onclick="event.stopPropagation();downloadProjReport(\''+dept+'\')" style="font-size:11px;padding:3px 8px;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);">📥 저장</button>':'')+'<span class="togIco open">▼</span></div></div><div class="teamList">'+teams.map(function(team){var teamProjs=projects.filter(function(p){return p.dept===dept&&p.team===team;});teamProjs.sort(function(a,b){var o={proc:0,before:1,hold:2,done:3};return(o[a.status]||0)-(o[b.status]||0);});var canEdit=currentUser&&(currentUser.type==='admin'||currentUser.dept===dept);return'<div class="teamItem"><div class="teamH" onclick="togTeam(this)"><span class="teamNm">▼ '+team+' <span class="tCnt">'+teamProjs.length+'</span></span>'+(canEdit?'<button class="btn btnP sm" onclick="event.stopPropagation();openProjModal(null,\''+dept+'\',\''+team+'\')" style="font-size:11px;padding:3px 8px;">+ 사업</button>':'')+'</div><div class="teamReps">'+(teamProjs.length?teamProjs.map(function(p){var bg=stBg[p.status]||'#f1f5f9';var clr=stClr[p.status]||'#475569';var bdr=stBdr[p.status]||'#94a3b8';var lb=stLbl[p.status]||p.status;var dt=p.updatedAt?fmtD(new Date(p.updatedAt)):'';var hist=p.history?Object.values(p.history).sort(function(a,b){return new Date(b.date)-new Date(a.date);}):[];var histCount=hist.length>1?hist.length-1:0;var canEditProj=currentUser&&(currentUser.type==='admin'||currentUser.dept===dept);var histHtml=histCount>0?'<div class="proj-hist" style="display:none;margin-top:8px;padding:8px 10px;background:#f8fafc;border-radius:6px;border-left:3px solid '+bdr+'">'+hist.slice(1).map(function(h){return'<div class="hist-item" style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bdr);"><div style="display:flex;gap:6px;align-items:center;margin-bottom:3px;"><span style="font-size:10px;padding:1px 6px;border-radius:3px;background:'+(stBg[h.status]||'#f1f5f9')+';color:'+(stClr[h.status]||'#475569')+'">'+(stLbl[h.status]||h.status)+'</span><span style="font-size:11px;color:var(--tx3)">'+fmtD(new Date(h.date))+' · '+esc(h.author||'')+'</span></div>'+(h.memo?'<div style="font-size:12px;color:var(--tx2);white-space:pre-wrap">'+esc(h.memo)+'</div>':'')+'</div>';}).join('')+'</div>':'';return'<div class="repEntry" style="border-left:3px solid '+bdr+'"><div class="repTop"><div style="flex:1"><div class="repTitle">'+esc(p.name)+'</div><div style="margin-top:5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:'+bg+';color:'+clr+'">'+lb+'</span><span style="font-size:11px;color:var(--tx3)">'+esc(p.author||'')+' · '+dt+'</span>'+(histCount>0?'<button class="proj-hist-btn" data-id="'+p.id+'" style="font-size:11px;color:var(--pl);background:none;border:none;cursor:pointer;padding:0;">이력 '+histCount+'건 보기</button>':'')+'</div></div>'+(canEditProj?'<div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btnP sm proj-update" data-id="'+p.id+'" style="font-size:11px">업데이트</button><button class="btn btnD sm proj-del" data-id="'+p.id+'" style="font-size:11px">삭제</button></div>':'')+'</div>'+(p.memo?'<div class="repSecCt" style="margin-top:8px;white-space:pre-wrap">'+esc(p.memo)+'</div>':'')+histHtml+'</div>';}).join(''):'<div class="noRep">등록된 사업이 없습니다.</div>')+'</div></div>';}).join('')+'</div></div>';}).join('');}
+function downloadProjReport(dept){var dProjs=projects.filter(function(p){return p.dept===dept;});var teams=ORG[dept]||[];var stLbl={before:'착수전',proc:'진행중',done:'완료',hold:'보류'};var tdSt='border:1px solid #999;padding:8px 10px;vertical-align:top;font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word;';var rows=[];teams.forEach(function(team){var tProjs=dProjs.filter(function(p){return p.team===team;});if(!tProjs.length){rows.push({team:team,name:'',status:'',memo:'',first:true,span:1});}else{tProjs.forEach(function(p,i){rows.push({team:team,name:p.name,status:stLbl[p.status]||p.status,memo:p.memo||'',first:i===0,span:i===0?tProjs.length:0});});}});var totalRows=rows.length||1;var trs=rows.map(function(row,idx){var deptTd=idx===0?'<td rowspan="'+totalRows+'" style="'+tdSt+'text-align:center;font-weight:700;background:#eaf0fb;">'+dept+'</td>':'';var teamTd=row.first?'<td rowspan="'+row.span+'" style="'+tdSt+'text-align:center;background:#f5f8ff;">'+row.team+'</td>':'';function toDoc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}return'<tr>'+deptTd+teamTd+'<td style="'+tdSt+'">'+toDoc(row.name)+'</td><td style="'+tdSt+'text-align:center;">'+row.status+'</td><td style="'+tdSt+'">'+toDoc(row.memo)+'</td></tr>';}).join('');if(!trs)trs='<tr><td colspan="5" style="'+tdSt+'text-align:center;">등록된 사업이 없습니다.</td></tr>';var now=fmtD(new Date());var html="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='UTF-8'><style>@page{size:A4 landscape;margin:2cm;}body{font-family:'맑은 고딕',sans-serif;}table{border-collapse:collapse;width:100%;}th,td{border:1px solid #000;padding:6pt 8pt;vertical-align:top;font-size:10pt;}th{background:#dce6f1;font-weight:700;text-align:center;}</style></head><body><h2>"+dept+" 사업별 진행현황 <span style='font-size:10pt;font-weight:400;color:#555;'>("+now+" 기준)</span></h2><table><thead><tr><th style='width:70pt;'>과</th><th style='width:90pt;'>팀</th><th>사업명</th><th style='width:55pt;'>상태</th><th>진행상황</th></tr></thead><tbody>"+trs+"</tbody></table></body></html>";var blob=new Blob(['\ufeff'+html],{type:'application/msword;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=dept+'_사업현황_'+now+'.doc';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);}
 function togDept(h){var ico=h.querySelector('.togIco'),list=h.nextElementSibling;var open=list.style.display!=='none';list.style.display=open?'none':'block';ico.classList.toggle('open',!open);}
 function togTeam(h){var reps=h.nextElementSibling;var open=reps.style.display!=='none';reps.style.display=open?'none':'block';var nm=h.querySelector('.teamNm');nm.innerHTML=nm.innerHTML.replace(open?'▼':'▶',open?'▶':'▼');}
 function changeMonth(dir){calM+=dir;if(calM>11){calM=0;calY++;}else if(calM<0){calM=11;calY--;}renderCal();}
