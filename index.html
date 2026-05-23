@@ -386,7 +386,11 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
       <div id="prevContentRow" style="display:none;margin-bottom:16px;"><div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:4px;">📌 현재 사업내용</div><div id="prevContentText" style="font-size:13px;color:var(--tx2);padding:8px 10px;background:#f0f4f8;border-radius:6px;border-left:3px solid var(--pl);white-space:pre-wrap;max-height:100px;overflow-y:auto;"></div></div>
       <div class="fr">
         <label>사업내용 <span style="font-size:11px;color:var(--tx3);font-weight:400;">수정 시 이력 자동 기록</span></label>
-        <label class="scanUpload"><input type="file" id="taskScanFile" accept="image/*,.pdf" onchange="handleTaskFile(this)" style="display:none">📷 이미지/PDF 스캔으로 자동 입력</label>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+          <label class="scanUpload"><input type="file" id="taskScanFile" accept="image/*" multiple style="display:none" onchange="onScanFilesSelected(this)">📷 이미지 선택 (최대 3장)</label>
+          <button id="btnScanAnalyze" class="btn btnP sm" onclick="analyzeScannedImages()" style="display:none;padding:8px 14px;">🔍 스캔 분석</button>
+        </div>
+        <div id="scanPreviews" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;"></div>
         <div id="taskOcrStatus" class="ocrStatus" style="color:var(--tx3);"></div>
         <textarea id="projContent" placeholder="사업 진행내용을 입력하세요..." style="min-height:120px"></textarea>
       </div>
@@ -563,7 +567,7 @@ var _pmScale=1,_pmDist=0;
 function handlePhoto(input){var fi=input.files[0];if(!fi)return;var rd=new FileReader();rd.onload=function(e){var img=new Image();img.onload=function(){var c=document.createElement('canvas'),w=img.width,h=img.height,M=1200;if(w>M||h>M){if(w>h){h=Math.round(h*M/w);w=M;}else{w=Math.round(w*M/h);h=M;}}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);var q=0.9,d;do{d=c.toDataURL('image/jpeg',q);q-=0.05;}while(d.length>500*1024&&q>0.3);pendingPhoto=d;document.getElementById('photoPrev').innerHTML='<img src="'+d+'" style="max-width:100%;border-radius:6px">';};img.src=e.target.result;};rd.readAsDataURL(fi);}
 function updateProjTeamSel(){var d=document.getElementById('projDept');var sel=document.getElementById('projTeam');if(!d||!sel)return;sel.innerHTML='<option value="">-- 팀 선택 --</option>'+(ORG[d.value]||[]).map(function(t){return '<option>'+t+'</option>';}).join('');}
 function openProjModal(id,dept,team,mode){editProjId=id||null;window._projMode=mode||(id?'update':'new');var prevCR=document.getElementById('prevContentRow');var dtr=document.getElementById('projDeptTeamRow');var ct=document.getElementById('projContent');if(id){var p=projects.find(function(x){return x.id===id;});if(!p)return;var isEdit=window._projMode==='edit';document.getElementById('projModalT').textContent=isEdit?'사업 수정':'📝 내용 업데이트';document.getElementById('projName').value=p.name;document.getElementById('projName').disabled=!isEdit;if(dtr)dtr.style.display='none';var hist=p.history?Object.values(p.history).sort(function(a,b){return new Date(b.date)-new Date(a.date);}):[];var latestContent=hist.length?(hist[0].content||hist[0].achieve||hist[0].memo||''):(p.content||p.memo||p.achieve||'');if(isEdit){if(ct)ct.value=latestContent;if(prevCR)prevCR.style.display='none';}else{if(ct)ct.value='';if(prevCR&&latestContent){prevCR.style.display='block';document.getElementById('prevContentText').textContent=latestContent;}else if(prevCR)prevCR.style.display='none';}}else{document.getElementById('projModalT').textContent='사업 추가';document.getElementById('projName').value='';document.getElementById('projName').disabled=false;if(ct)ct.value='';if(prevCR)prevCR.style.display='none';if(dtr)dtr.style.display='';var isStaff=currentUser&&currentUser.type==='staff';var deptEl=document.getElementById('projDept');deptEl.disabled=isStaff;deptEl.value=dept||(isStaff?currentUser.dept:'');updateProjTeamSel();var teamEl=document.getElementById('projTeam');var myTeam=isStaff&&currentUser.team;teamEl.disabled=!!(isStaff&&myTeam);teamEl.value=team||(myTeam?currentUser.team:'');}document.getElementById('projModal').style.display='flex';}
-function closeProjModal(){document.getElementById('projModal').style.display='none';['projDept','projTeam','projName','projContent'].forEach(function(id){var el=document.getElementById(id);if(el){el.disabled=false;if(id==='projContent')el.value='';}});var dtr=document.getElementById('projDeptTeamRow');if(dtr)dtr.style.display='';var pcr=document.getElementById('prevContentRow');if(pcr)pcr.style.display='none';var sf=document.getElementById('taskScanFile');if(sf)sf.value='';var os=document.getElementById('taskOcrStatus');if(os)os.textContent='';window._taskScanImg=null;}
+function closeProjModal(){document.getElementById('projModal').style.display='none';['projDept','projTeam','projName','projContent'].forEach(function(id){var el=document.getElementById(id);if(el){el.disabled=false;if(id==='projContent')el.value='';}});var dtr=document.getElementById('projDeptTeamRow');if(dtr)dtr.style.display='';var pcr=document.getElementById('prevContentRow');if(pcr)pcr.style.display='none';var sf=document.getElementById('taskScanFile');if(sf)sf.value='';var os=document.getElementById('taskOcrStatus');if(os)os.textContent='';var sp=document.getElementById('scanPreviews');if(sp)sp.innerHTML='';var ba=document.getElementById('btnScanAnalyze');if(ba){ba.style.display='none';ba.disabled=false;ba.textContent='🔍 스캔 분석';}window._taskScanImg=null;window._scanFiles=[];}
 function saveProject(){var mode=window._projMode||'new';var name=document.getElementById('projName').value.trim();var content=document.getElementById('projContent').value.trim();var dept=document.getElementById('projDept').value;var team=document.getElementById('projTeam').value;if(!name){alert('사업명을 입력하세요.');return;}var now=new Date().toISOString();var author=currentUser?currentUser.name:'';var tw=thisWeek();if(mode==='edit'&&editProjId){var ep=projPath(editProjId);if(ep){dbSet(ep+'/name',name);dbSet(ep+'/updatedAt',now);dbSet(ep+'/author',author);}if(!db){projects=projects.map(function(p){return p.id===editProjId?Object.assign({},p,{name:name,updatedAt:now,author:author}):p;});renderProjectsGrid();saveLS();}}else if(mode==='update'&&editProjId){if(!content){closeProjModal();return;}var logEntry={content:content,date:now,author:author,week:tw};var up=projPath(editProjId);if(up){dbSet(up+'/content',content);dbSet(up+'/updatedAt',now);dbSet(up+'/author',author);if(db)db.ref(up+'/history').push(logEntry);}if(!db){projects=projects.map(function(p){if(p.id!==editProjId)return p;var h=Object.assign({},p.history||{});h[Date.now().toString()]=logEntry;return Object.assign({},p,{content:content,updatedAt:now,author:author,history:h});});renderProjectsGrid();saveLS();}}else{if(!dept){alert('과를 선택하세요.');return;}if(!team){alert('팀을 선택하세요.');return;}var logEntry2={content:content,date:now,author:author,week:tw};var data={dept:dept,team:team,name:name,content:content,createdAt:now,updatedAt:now,author:author};if(db){db.ref('projects/'+dept).push(data).then(function(ref){if(content)db.ref('projects/'+dept+'/'+ref.key+'/history').push(logEntry2);});}else{data.id=Date.now().toString();if(content){var h2={};h2[data.id+'_0']=logEntry2;data.history=h2;}projects.push(data);renderProjectsGrid();saveLS();}}closeProjModal();}
 function deleteProject(id){showConf('이 사업을 삭제하시겠습니까? 이력도 모두 삭제됩니다.',function(){var dp=projPath(id);if(dp)dbRemove(dp);if(!db){projects=projects.filter(function(p){return p.id!==id;});renderProjectsGrid();saveLS();}});}
 function togProjHist(btn){var id=btn.getAttribute('data-id');var entry=btn.closest('.repEntry');if(!entry)return;var hist=entry.querySelector('.proj-hist');if(!hist)return;var open=hist.style.display!=='none';hist.style.display=open?'none':'block';var cnt=hist.querySelectorAll('.hist-item').length;btn.textContent=open?'이력 '+cnt+'건 보기':'이력 접기';}
@@ -698,7 +702,76 @@ function openProjDetail(id){
 function closeProjDetail(){document.getElementById('projDetail').style.display='none';}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeProjDetail();});
 
-/* ── OCR / 이미지스캔 ─────────────────────── */
+/* ── OCR / 이미지스캔 (다중) ──────────────── */
+window._scanFiles=[];
+function onScanFilesSelected(input){
+  var files=Array.from(input.files).slice(0,3);
+  window._scanFiles=files;
+  var prev=document.getElementById('scanPreviews');
+  var btn=document.getElementById('btnScanAnalyze');
+  var st=document.getElementById('taskOcrStatus');
+  if(!files.length){if(prev)prev.innerHTML='';if(btn)btn.style.display='none';return;}
+  /* 썸네일 미리보기 */
+  if(prev){
+    prev.innerHTML=files.map(function(f,i){
+      return'<div style="position:relative;width:80px;height:60px;border-radius:6px;overflow:hidden;border:1.5px solid var(--bdr);background:#f0f4f8;">'
+        +'<img id="sThumb'+i+'" src="" style="width:100%;height:100%;object-fit:cover;">'
+        +'<div style="position:absolute;bottom:2px;right:4px;font-size:10px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7);font-weight:700;">'+(i+1)+'</div>'
+        +'</div>';
+    }).join('');
+    files.forEach(function(f,i){
+      var r=new FileReader();
+      r.onload=function(e){var t=document.getElementById('sThumb'+i);if(t)t.src=e.target.result;};
+      r.readAsDataURL(f);
+    });
+  }
+  if(btn){btn.textContent='🔍 '+files.length+'장 OCR 분석';btn.style.display='inline-flex';}
+  if(st){st.textContent=files.length+'장 선택됨 — 분석 버튼을 눌러주세요.';st.style.color='var(--tx3)';}
+}
+function analyzeScannedImages(){
+  var files=window._scanFiles||[];
+  if(!files.length)return;
+  var st=document.getElementById('taskOcrStatus');
+  var btn=document.getElementById('btnScanAnalyze');
+  if(btn){btn.disabled=true;}
+  function setStatus(msg,color){if(st){st.textContent=msg;st.style.color=color||'var(--tx3)';}}
+  if(typeof Tesseract==='undefined'){setStatus('❌ OCR 라이브러리 로드 실패 — 새로고침 후 재시도','var(--red)');if(btn)btn.disabled=false;return;}
+  var results=[];
+  var idx=0;
+  function next(){
+    if(idx>=files.length){
+      var combined=results.filter(Boolean).join(files.length>1?'\n\n--- 다음 장 ---\n\n':'\n');
+      var ta=document.getElementById('projContent');
+      if(combined){if(ta)ta.value=combined;setStatus('✅ '+files.length+'장 분석 완료 — 내용을 확인하세요','#16a34a');}
+      else setStatus('⚠️ 텍스트 인식 실패 — 직접 입력해주세요','#d97706');
+      if(btn){btn.disabled=false;btn.textContent='🔍 '+files.length+'장 OCR 분석';}
+      return;
+    }
+    var file=files[idx];
+    setStatus('⏳ '+(idx+1)+'/'+files.length+'장 처리 중...');
+    var r=new FileReader();
+    r.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        var c=document.createElement('canvas'),w=img.width,h=img.height,M=1600;
+        if(w>M||h>M){if(w>h){h=Math.round(h*M/w);w=M;}else{w=Math.round(w*M/h);h=M;}}
+        c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+        var q=0.92,d;
+        do{d=c.toDataURL('image/jpeg',q);q-=0.05;}while(d.length>682*1024&&q>0.3);
+        if(idx===0)window._taskScanImg=d;
+        Tesseract.recognize(c,'kor+eng',{logger:function(m){
+          if(m.status==='recognizing text')setStatus('⏳ '+(idx+1)+'/'+files.length+'장 OCR '+Math.round(m.progress*100)+'%...');
+        }}).then(function(res){
+          results.push(res.data.text.trim());
+          idx++;next();
+        }).catch(function(){results.push('');idx++;next();});
+      };
+      img.src=e.target.result;
+    };
+    r.readAsDataURL(file);
+  }
+  next();
+}
 function handleTaskFile(input){
   var file=input.files[0];if(!file)return;
   var st=document.getElementById('taskOcrStatus');
