@@ -231,6 +231,20 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .pdInlineEdit{display:flex;gap:6px;margin-top:6px;align-items:flex-start;}
 .pdInlineEdit textarea{flex:1;padding:8px;font-size:14px;border:1px solid var(--border);border-radius:6px;font-family:'Noto Sans KR',sans-serif;resize:none;background:var(--bg);color:var(--tx);outline:none;}
 .pdInlineEdit.sm textarea{font-size:13px;min-height:44px;}
+/* ── 리치텍스트 툴바·에디터 ─── */
+.pdTbar{display:flex;align-items:center;gap:5px;padding:8px 10px;background:#f5f7fa;border:1.5px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;flex-wrap:wrap;}
+.pdTBtn{padding:4px 11px;font-size:13px;border:1px solid #d1d5db;border-radius:5px;cursor:pointer;background:#fff;color:var(--tx);font-family:'Noto Sans KR',sans-serif;font-weight:500;line-height:1.4;}
+.pdTBtn:hover{background:#e5e7eb;}.pdTBtnH{font-weight:700;font-size:14px;}
+.pdTSep{width:1px;height:20px;background:var(--border);margin:0 3px;flex-shrink:0;}
+.pdTColor{width:20px;height:20px;border-radius:50%;border:2px solid rgba(0,0,0,.12);cursor:pointer;padding:0;flex-shrink:0;transition:transform .1s;}
+.pdTColor:hover{transform:scale(1.25);border-color:rgba(0,0,0,.35);}
+.pdEditor{width:100%;min-height:260px;padding:14px;border:1.5px solid var(--border);border-radius:0 0 8px 8px;font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.85;background:var(--bg);color:var(--tx);outline:none;box-sizing:border-box;word-break:break-word;overflow-y:auto;}
+.pdEditor:focus{border-color:var(--pl);}
+.pdEditor:empty::before{content:attr(data-ph);color:#9ca3af;pointer-events:none;display:block;}
+.pdEditor h3{font-size:17px!important;font-weight:700!important;margin:10px 0 2px!important;}
+.pdEditor p{margin:0 0 4px!important;font-size:15px!important;}
+.pdText h3{font-size:17px;font-weight:700;margin:10px 0 2px;}
+.pdText p{margin:0 0 4px;font-size:15px;}
 </style>
 </head>
 <body>
@@ -503,7 +517,22 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
       <div class="pdEditSec">
         <div>
           <div class="pdEditLbl">내용</div>
-          <textarea id="projDetailContentTa" placeholder="사업 진행내용을 입력하세요..."></textarea>
+          <!-- 서식 툴바 -->
+          <div class="pdTbar">
+            <button class="pdTBtn" onmousedown="event.preventDefault()" onclick="pdFmtBlock('p')" title="본문">본문</button>
+            <button class="pdTBtn pdTBtnH" onmousedown="event.preventDefault()" onclick="pdFmtBlock('h3')" title="소제목">소제목</button>
+            <div class="pdTSep"></div>
+            <span style="font-size:11px;color:var(--tx3);white-space:nowrap;">색상</span>
+            <button class="pdTColor" onmousedown="event.preventDefault()" onclick="pdColor('#1a1a1a')" style="background:#1a1a1a;" title="검정"></button>
+            <button class="pdTColor" onmousedown="event.preventDefault()" onclick="pdColor('#1d4ed8')" style="background:#1d4ed8;" title="파랑"></button>
+            <button class="pdTColor" onmousedown="event.preventDefault()" onclick="pdColor('#dc2626')" style="background:#dc2626;" title="빨강"></button>
+            <button class="pdTColor" onmousedown="event.preventDefault()" onclick="pdColor('#16a34a')" style="background:#16a34a;" title="초록"></button>
+            <button class="pdTColor" onmousedown="event.preventDefault()" onclick="pdColor('#ea580c')" style="background:#ea580c;" title="주황"></button>
+            <button class="pdTColor" onmousedown="event.preventDefault()" onclick="pdColor('#7c3aed')" style="background:#7c3aed;" title="보라"></button>
+            <button class="pdTColor" onmousedown="event.preventDefault()" onclick="pdColor('#6b7280')" style="background:#6b7280;" title="회색"></button>
+          </div>
+          <!-- 리치텍스트 에디터 -->
+          <div id="projDetailEditor" class="pdEditor" contenteditable="true" data-ph="사업 진행내용을 입력하세요..."></div>
         </div>
         <div>
           <div class="pdEditLbl">이미지</div>
@@ -810,7 +839,10 @@ function openProjDetail(id){
 function renderPDView(p){
   var isTw=isThisReportWeek(p.updatedAt||p.createdAt);
   var el=document.getElementById('pdText');
-  el.textContent=_pdContent(p);
+  var c=_pdContent(p);
+  /* HTML 리치텍스트 vs 구 plain text 판별 */
+  if(/<[ph3]/i.test(c)){el.innerHTML=c;}
+  else{el.textContent=c;}
   el.className='pdText'+(isTw?' tw':'');
   /* 이미지 */
   var imgs=p.images?Object.entries(p.images):[];
@@ -837,7 +869,11 @@ function showPDImg(key){
 function startProjDetailEdit(){
   var id=window._currentProjDetailId;
   var p=projects.find(function(x){return x.id===id;});if(!p)return;
-  document.getElementById('projDetailContentTa').value=_pdContent(p);
+  var c=_pdContent(p);
+  var ed=document.getElementById('projDetailEditor');
+  /* HTML이면 그대로, plain text면 <p> 래핑 변환 */
+  if(/<[ph3]/i.test(c)){ed.innerHTML=c;}
+  else{ed.innerHTML=c?c.split('\n').map(function(ln){return '<p>'+(ln||'<br>')+'</p>';}).join(''):'<p><br></p>';}
   window._pdEditImgs=p.images?Object.entries(p.images).map(function(e){return Object.assign({key:e[0]},e[1]);}):[];
   window._pdEditLinks=p.links?Object.entries(p.links).map(function(e){return Object.assign({key:e[0]},e[1]);}):[];
   renderPDEditImgs();renderPDEditLinks();
@@ -845,7 +881,7 @@ function startProjDetailEdit(){
   document.getElementById('pdEditArea').style.display='block';
   document.getElementById('pdViewBtns').style.display='none';
   document.getElementById('pdEditBtns').style.display='flex';
-  setTimeout(function(){var ta=document.getElementById('projDetailContentTa');if(ta)ta.focus();},50);
+  setTimeout(function(){var ed2=document.getElementById('projDetailEditor');if(ed2){ed2.focus();var range=document.createRange();range.selectNodeContents(ed2);range.collapse(false);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);}},50);
 }
 
 function cancelProjDetailEdit(){
@@ -853,6 +889,18 @@ function cancelProjDetailEdit(){
   document.getElementById('pdEditArea').style.display='none';
   document.getElementById('pdViewBtns').style.display='flex';
   document.getElementById('pdEditBtns').style.display='none';
+}
+
+/* 서식 툴바 */
+function pdFmtBlock(tag){
+  var ed=document.getElementById('projDetailEditor');if(!ed)return;
+  ed.focus();
+  document.execCommand('formatBlock',false,tag);
+}
+function pdColor(hex){
+  var ed=document.getElementById('projDetailEditor');if(!ed)return;
+  ed.focus();
+  document.execCommand('foreColor',false,hex);
 }
 
 /* 이미지 편집 */
@@ -904,8 +952,8 @@ function removePDLink(i){(window._pdEditLinks||[]).splice(i,1);renderPDEditLinks
 
 /* 저장 */
 function saveProjDetailContent(){
-  var ta=document.getElementById('projDetailContentTa');if(!ta)return;
-  var content=ta.value;
+  var ed=document.getElementById('projDetailEditor');if(!ed)return;
+  var content=ed.innerHTML.trim();
   var id=window._currentProjDetailId;if(!id)return;
   var now=new Date().toISOString();
   var author=currentUser?currentUser.name:'';
