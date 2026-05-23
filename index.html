@@ -371,6 +371,10 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
           <div class="sCard" id="adminGcalPnl" style="display:none">
             <div class="sCH">🔗 Google 캘린더 연동</div>
             <div class="sCB">
+              <div style="font-size:11px;color:var(--tx2);background:var(--bg);border-radius:6px;padding:8px 10px;margin-bottom:10px;line-height:1.6;">
+                📌 API 키 발급: <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--pl);text-decoration:none;font-weight:600;">Google Cloud Console</a> → 사용자 인증 정보 → API 키 만들기<br>
+                ※ 캘린더 API 활성화 필요 (Google Calendar API)
+              </div>
               <div class="fr"><label>API 키</label><input type="text" id="gcalApiKey" style="font-size:11px;" placeholder="AIzaSy..."></div>
               <div class="fr"><label>캘린더 ID</label><input type="text" id="gcalCalId" style="font-size:11px;" placeholder="xxx@group.calendar.google.com"></div>
               <button class="btn btnP" style="width:100%;margin-bottom:8px" onclick="saveGCalConfig()">저장 &amp; 연동</button>
@@ -572,7 +576,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 var ADMIN_PW='0708',STAFF_PW='1234';
 var FB={apiKey:"AIzaSyDDsAzrYojzbVXyaPilfF3Mj57pmat8JVU",authDomain:"bureau-dashboard.firebaseapp.com",databaseURL:"https://bureau-dashboard-default-rtdb.firebaseio.com",projectId:"bureau-dashboard",storageBucket:"bureau-dashboard.firebasestorage.app",messagingSenderId:"865956736976",appId:"1:865956736976:web:423c2add3bc57737c213d5"};
 var ORG={'도로과':['건설행정팀','도로팀','보도관리팀','자전거도시팀','도로조명팀'],'도시계획과':['도시행정팀','도시개발팀','도시계획팀','GB관리팀'],'건축과':['건축행정팀','건축팀','건축정보팀','공공시설팀','건축안전센터팀'],'주택과':['주택팀','재개발재건축팀','주택정비팀','주거복지팀','주택민원팀'],'도시재생경관과':['도시재생전략팀','도시재생사업팀','광고물관리팀','도시경관팀']};
-var GCD=[];var GCAL_API_KEY=localStorage.getItem('gcal_key')||'AIzaSyDU0y_Jg9YW-ybmlRSXMFNi6PJnaUe1ROc';var GCAL_CAL_ID=localStorage.getItem('gcal_calid')||'fb33c71c30a02987ef34e18cb2f4d9f1bd2c108c618c4b23594025b09c34cf0f@group.calendar.google.com';
+var GCD=[];var GCAL_API_KEY=localStorage.getItem('gcal_key')||'';var GCAL_CAL_ID=localStorage.getItem('gcal_calid')||'fb33c71c30a02987ef34e18cb2f4d9f1bd2c108c618c4b23594025b09c34cf0f@group.calendar.google.com';
 var currentUser=null,db=null,auth=null,issues=[],projects=[],events=[],instruction=null,_projRef=null,_statusRef=null,_usersRef=null;
 var calY,calM,editIssId=null,editProjId=null,pendingPhoto=null,confCb=null,statusFilter='';
 (function(){try{firebase.initializeApp(FB);db=firebase.database();auth=firebase.auth();auth.onAuthStateChanged(function(user){if(user&&!currentUser){(db?db.ref('users/'+user.uid).once('value'):Promise.resolve(null)).then(function(s){var p=s?s.val():null;if(!p){try{p=JSON.parse(localStorage.getItem('bu_profile')||'null');}catch(e){}}if(p){var status=p.status||'approved';if(status==='pending'){setCurrentUserFromProfile(user,p);showPendingScreen('pending');setupStatusListener(user.uid);}else if(status==='rejected'){setCurrentUserFromProfile(user,p);showPendingScreen('rejected');}else{setCurrentUserFromProfile(user,p);enterApp();}}else{showProfileSetup(user);}});}else if(!user){currentUser=null;if(_statusRef){_statusRef.off('value');_statusRef=null;}var ld=document.getElementById('loginLoading');var btn=document.getElementById('btnGoogleLogin');if(ld)ld.style.display='none';if(btn)btn.style.display='flex';}});var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);db=null;loadLS();if(currentUser){renderIssues();renderProjectsGrid();renderCal();renderInstr();}}db.ref('issues').on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderIssues();},_fbErr);db.ref('events').on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();},_fbErr);db.ref('instruction').on('value',function(s){instruction=s.val();renderInstr();},_fbErr);}catch(e){console.warn('FB fail');setSyncOK(false);loadLS();}})();
@@ -748,7 +752,16 @@ function renderGcalSide(){var el=document.getElementById('gcalList');if(!el)retu
 
 function fetchGCal(){
   var listEl=document.getElementById('gcalList');
-  if(!GCAL_API_KEY||!GCAL_CAL_ID){setGCalSt('캘린더 ID 없음');return;}
+  if(!GCAL_API_KEY){
+    var isAdmin=currentUser&&currentUser.type==='admin';
+    var noKeyMsg=isAdmin
+      ?'⚙️ API 키 미설정 — 아래 <b>Google 캘린더 연동</b>에서 새 API 키를 입력하세요.'
+      :'📅 캘린더 연동이 설정되지 않았습니다.<br>관리자에게 Google 캘린더 API 키 등록을 요청하세요.';
+    if(listEl)listEl.innerHTML='<div class="gcLoad" style="color:var(--tx2);line-height:1.6;">'+noKeyMsg+'</div>';
+    setGCalSt('API 키 없음');
+    return;
+  }
+  if(!GCAL_CAL_ID){setGCalSt('캘린더 ID 없음');return;}
   if(listEl)listEl.innerHTML='<div class="gcLoad">⏳ 캘린더 로딩 중...</div>';
   var now=new Date(),tMin=new Date(now.getFullYear(),now.getMonth()-1,1).toISOString(),tMax=new Date(now.getFullYear(),now.getMonth()+3,1).toISOString();
   var url='https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(GCAL_CAL_ID)+'/events?key='+GCAL_API_KEY+'&timeMin='+encodeURIComponent(tMin)+'&timeMax='+encodeURIComponent(tMax)+'&singleEvents=true&orderBy=startTime&maxResults=500';
@@ -758,9 +771,26 @@ function fetchGCal(){
   }).then(function(res){
     console.log('[GCal] response status:',res.status, res.data);
     if(!res.ok){
-      var msg='오류 '+res.status+': '+(res.data.error&&res.data.error.message||'알 수 없는 오류');
-      setGCalSt('❌ '+msg);
-      if(listEl)listEl.innerHTML='<div class="gcLoad" style="color:red;">'+msg+'</div>';
+      var errMsg=res.data.error&&res.data.error.message||'알 수 없는 오류';
+      var isAdmin=currentUser&&currentUser.type==='admin';
+      var guideMsg='';
+      if(res.status===403){
+        if(errMsg.toLowerCase().indexOf('suspended')!==-1||errMsg.toLowerCase().indexOf('disabled')!==-1){
+          guideMsg=isAdmin
+            ?'🔑 API 키가 정지되었습니다.<br>Google Cloud Console에서 새 API 키를 발급하여<br>아래 <b>Google 캘린더 연동</b>란에 입력해 주세요.'
+            :'🔑 캘린더 API 키가 만료되었습니다.<br>관리자에게 API 키 재발급을 요청하세요.';
+        } else {
+          guideMsg=isAdmin
+            ?'🔑 접근 거부(403): API 키 권한을 확인하거나 새 키를 입력해 주세요.'
+            :'🔑 캘린더 접근이 거부되었습니다. 관리자에게 문의하세요.';
+        }
+      } else if(res.status===400){
+        guideMsg=isAdmin?'⚠️ 잘못된 요청(400): API 키 또는 캘린더 ID를 확인해 주세요.':'⚠️ 캘린더 설정 오류. 관리자에게 문의하세요.';
+      } else {
+        guideMsg='❌ 오류 '+res.status+': '+errMsg;
+      }
+      setGCalSt('❌ 오류 '+res.status);
+      if(listEl)listEl.innerHTML='<div class="gcLoad" style="color:#b91c1c;line-height:1.65;font-size:13px;">'+guideMsg+'</div>';
       return;
     }
     GCD=(res.data.items||[]).map(function(e){var d=(e.start.dateTime||e.start.date||'').slice(0,10),tm='';if(e.start.dateTime){var s=new Date(e.start.dateTime),en=new Date(e.end.dateTime);tm=pad(s.getHours())+':'+pad(s.getMinutes())+'~'+pad(en.getHours())+':'+pad(en.getMinutes());}return{t:e.summary||'(제목없음)',d:d,tm:tm};});
@@ -769,8 +799,8 @@ function fetchGCal(){
     renderCal();renderGcalSide();
   }).catch(function(e){
     console.error('[GCal] fetch error:',e);
-    setGCalSt('❌ 네트워크 오류: '+e.message);
-    if(listEl)listEl.innerHTML='<div class="gcLoad" style="color:red;">네트워크 오류</div>';
+    setGCalSt('❌ 네트워크 오류');
+    if(listEl)listEl.innerHTML='<div class="gcLoad" style="color:#b91c1c;">🌐 네트워크 오류 — 인터넷 연결을 확인해 주세요.</div>';
   });
 }
 function setGCalSt(msg){var el=document.getElementById('gcalStatus');if(el)el.textContent=msg;}
