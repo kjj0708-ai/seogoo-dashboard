@@ -751,6 +751,7 @@ function closeConf(){document.getElementById('confDlg').style.display='none';con
 function execConf(){if(confCb)confCb();closeConf();}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmtD(d){if(!(d instanceof Date)||isNaN(d))return '';return d.getFullYear()+'.'+(d.getMonth()+1+'').padStart(2,'0')+'.'+(''+d.getDate()).padStart(2,'0');}
+function fmtDT(d){if(!(d instanceof Date)||isNaN(d))return '';return fmtD(d)+' '+(''+d.getHours()).padStart(2,'0')+':'+(''+d.getMinutes()).padStart(2,'0');}
 function pad(n){return (''+n).padStart(2,'0');}
 function getISOWeek(date){var d=new Date(date);d.setHours(0,0,0,0);var day=d.getDay()||7;d.setDate(d.getDate()+4-day);var y=new Date(d.getFullYear(),0,1);var wk=Math.ceil(((d-y)/86400000+1)/7);return d.getFullYear()+'-W'+(''+wk).padStart(2,'0');}
 function thisWeek(){return getISOWeek(new Date());}
@@ -791,7 +792,7 @@ function openProjDetail(id){
   window._currentProjDetailId=id;
   var p=projects.find(function(x){return x.id===id;});
   if(!p)return;
-  var dt=p.updatedAt?fmtD(new Date(p.updatedAt)):'';
+  var dt=p.updatedAt?fmtDT(new Date(p.updatedAt)):'';
   document.getElementById('projDetailTitle').textContent=p.name;
   document.getElementById('projDetailMeta').textContent=(p.dept||'')+(p.team?' · '+p.team:'')+(p.author?' · '+p.author:'')+(dt?' · 최종수정 '+dt:'');
   var canEdit=currentUser&&(currentUser.type==='admin'||currentUser.dept===p.dept);
@@ -924,7 +925,7 @@ function saveProjDetailContent(){
   function afterSave(){
     var p2=projects.find(function(x){return x.id===id;});
     var meta=document.getElementById('projDetailMeta');
-    if(meta&&p2)meta.textContent=(p2.dept||'')+(p2.team?' · '+p2.team:'')+(p2.author?' · '+p2.author:'')+' · 최종수정 '+fmtD(new Date(now));
+    if(meta&&p2)meta.textContent=(p2.dept||'')+(p2.team?' · '+p2.team:'')+(p2.author?' · '+p2.author:'')+' · 최종수정 '+fmtDT(new Date(now));
     cancelProjDetailEdit();if(p2)renderPDView(p2);
   }
   if(db){db.ref(path).update(upd).then(afterSave).catch(function(e){alert('저장 실패: '+e.message);});}
@@ -996,13 +997,13 @@ function renderPDComments(data){
       var rid=re[0],r=re[1];
       var mineR=currentUser&&(r.authorUid===currentUser.uid||currentUser.type==='admin');
       return '<div class="pdReply">'
-        +'<div class="pdCmtH"><span class="pdCmtAuthor">'+esc(r.author)+'</span><span class="pdCmtDate"> '+fmtD(new Date(r.createdAt))+'</span></div>'
+        +'<div class="pdCmtH"><span class="pdCmtAuthor">'+esc(r.author)+'</span><span class="pdCmtDate"> '+fmtDT(new Date(r.createdAt))+'</span></div>'
         +'<div id="pdRT_'+cid+'_'+rid+'" class="pdCmtTxt">'+esc(r.text)+'</div>'
         +(mineR?'<div class="pdCmtActs"><button class="btn btnG sm" onclick="editPDReply(\''+cid+'\',\''+rid+'\')">✏️</button><button class="btn btnD sm" onclick="deletePDReply(\''+cid+'\',\''+rid+'\')">🗑️</button></div>':'')
         +'</div>';
     }).join('');
     return '<div class="pdCmt">'
-      +'<div class="pdCmtH"><span class="pdCmtAuthor">'+esc(c.author)+'</span><span class="pdCmtDate"> '+fmtD(new Date(c.createdAt))+'</span></div>'
+      +'<div class="pdCmtH"><span class="pdCmtAuthor">'+esc(c.author)+'</span><span class="pdCmtDate"> '+fmtDT(new Date(c.createdAt))+'</span></div>'
       +'<div id="pdCT_'+cid+'" class="pdCmtTxt">'+esc(c.text)+'</div>'
       +'<div class="pdCmtActs">'
         +'<button class="btn btnG sm" onclick="togglePDRpBox(\''+cid+'\')">↩ 답글</button>'
