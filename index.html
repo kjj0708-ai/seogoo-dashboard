@@ -177,7 +177,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .projDetailMeta{font-size:13px;opacity:.75;margin-top:4px;}
 .projDetailClose{background:rgba(255,255,255,.2);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s;}
 .projDetailClose:hover{background:rgba(255,255,255,.4);}
-.projDetailBody{max-width:860px;margin:0 auto;padding:28px 24px;}
+.projDetailBody{max-width:860px;margin:0 auto;}
 .pdEntry{background:#fff;border-radius:var(--r);box-shadow:var(--sh);padding:18px 22px;margin-bottom:16px;border-left:5px solid var(--bdr);}
 .pdEntry.tw{border-left-color:#2563a8;background:#f0f7ff;}
 .pdEntryDate{font-size:13px;color:var(--tx3);margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -186,7 +186,51 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .pdEntry.tw .pdEntryDate{color:#3b82f6;}
 .projNameLink{cursor:pointer;border-bottom:1.5px dotted currentColor;}
 .projNameLink:hover{color:var(--pl);}
-@media(max-width:768px){.projDetailH{padding:12px 16px;}.projDetailTitle{font-size:16px;}.projDetailBody{padding:16px;}.pdEntry{padding:14px 16px;}.pdEntryCt{font-size:14px;}}
+@media(max-width:768px){.projDetailH{padding:12px 16px;}.projDetailTitle{font-size:16px;}.pdViewSec,.pdEditSec,.pdCmtSec{padding:14px;}.pdEntry{padding:14px 16px;}.pdEntryCt{font-size:14px;}}
+/* ── 팝업 뷰/에딧/댓글 ───────────── */
+.pdHBtn{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);color:#fff;padding:6px 13px;border-radius:6px;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif;font-weight:600;transition:background .15s;white-space:nowrap;}
+.pdHBtn:hover{background:rgba(255,255,255,.35);}
+.pdHBtnSave{background:rgba(255,255,255,.3);}
+.pdViewSec{padding:24px;}
+.pdText{font-size:15px;line-height:1.85;color:var(--tx);white-space:pre-wrap;word-break:break-word;min-height:40px;}
+.pdText.tw{color:#1e40af;}
+.pdImgGrid{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;}
+.pdImgItem{border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+.pdImgItem img{display:block;max-height:180px;max-width:280px;object-fit:contain;cursor:pointer;background:#f4f4f4;}
+.pdLinkList{display:flex;flex-direction:column;gap:6px;margin-top:14px;}
+.pdLinkItem{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#eef4ff;border-radius:6px;border-left:3px solid var(--pl);}
+.pdLinkItem a{flex:1;color:var(--primary);text-decoration:none;font-size:14px;word-break:break-all;}
+.pdLinkItem a:hover{text-decoration:underline;}
+.pdEditSec{padding:24px;display:flex;flex-direction:column;gap:18px;}
+.pdEditLbl{font-size:11px;font-weight:700;color:var(--tx3);letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px;}
+.pdEditSec>div>textarea{width:100%;padding:14px;font-size:15px;line-height:1.85;border:1.5px solid var(--border);border-radius:8px;font-family:'Noto Sans KR',sans-serif;resize:vertical;min-height:260px;box-sizing:border-box;background:var(--bg);color:var(--tx);outline:none;}
+.pdEditSec>div>textarea:focus{border-color:var(--pl);}
+.pdEditImgRow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
+.pdEImgThumb{position:relative;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.pdEImgThumb img{display:block;height:80px;width:80px;object-fit:cover;}
+.pdEImgThumb button{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.55);border:none;color:#fff;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:10px;line-height:18px;text-align:center;}
+.pdLinkRow{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
+.pdLinkRow input{flex:1;padding:7px 10px;font-size:13px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--tx);font-family:'Noto Sans KR',sans-serif;outline:none;}
+.pdLinkRow input:focus{border-color:var(--pl);}
+.pdAddBtn{background:#f0f4f8;border:1px dashed #bcc5d0;border-radius:6px;padding:7px 12px;font-size:13px;color:var(--tx2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
+.pdCmtSec{padding:0 24px 56px;}
+.pdCmtDivider{border:none;border-top:1px solid var(--border);margin:4px 0 20px;}
+.pdCmtTitle{font-size:14px;font-weight:700;color:var(--tx2);margin-bottom:14px;}
+.pdCmt{border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;background:var(--bg);}
+.pdCmtH{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.pdCmtAuthor{font-size:13px;font-weight:700;color:var(--primary);}
+.pdCmtDate{font-size:11px;color:var(--tx3);}
+.pdCmtTxt{font-size:14px;color:var(--tx);line-height:1.65;white-space:pre-wrap;word-break:break-word;}
+.pdCmtActs{display:flex;gap:6px;margin-top:8px;}
+.pdReply{margin:8px 0 0 16px;padding:10px 12px;background:#f7f9fb;border-radius:8px;border-left:3px solid #dde3ee;}
+.pdRpBox{display:none;margin-top:8px;gap:6px;align-items:flex-end;}
+.pdRpBox textarea{flex:1;padding:8px 10px;font-size:13px;border:1px solid var(--border);border-radius:6px;font-family:'Noto Sans KR',sans-serif;resize:none;min-height:48px;background:var(--bg);color:var(--tx);outline:none;}
+.pdCmtInput{display:flex;gap:8px;align-items:flex-end;margin-top:18px;}
+.pdCmtInput textarea{flex:1;padding:10px 12px;font-size:14px;border:1.5px solid var(--border);border-radius:8px;font-family:'Noto Sans KR',sans-serif;resize:none;min-height:64px;background:var(--bg);color:var(--tx);outline:none;}
+.pdCmtInput textarea:focus,.pdRpBox textarea:focus{border-color:var(--pl);}
+.pdInlineEdit{display:flex;gap:6px;margin-top:6px;align-items:flex-start;}
+.pdInlineEdit textarea{flex:1;padding:8px;font-size:14px;border:1px solid var(--border);border-radius:6px;font-family:'Noto Sans KR',sans-serif;resize:none;background:var(--bg);color:var(--tx);outline:none;}
+.pdInlineEdit.sm textarea{font-size:13px;min-height:44px;}
 </style>
 </head>
 <body>
@@ -430,12 +474,62 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
       <div class="projDetailTitle" id="projDetailTitle"></div>
       <div class="projDetailMeta" id="projDetailMeta"></div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-      <button onclick="saveProjDetailContent()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:7px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif;font-weight:600;">💾 저장</button>
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+      <!-- 보기 모드 버튼 -->
+      <div id="pdViewBtns" style="display:none;gap:6px;align-items:center;">
+        <button class="pdHBtn" onclick="downloadProjDetailWord()">📥 워드</button>
+        <button class="pdHBtn" id="btnPDEdit" onclick="startProjDetailEdit()">✏️ 수정</button>
+        <button class="pdHBtn" id="btnPDDel" onclick="deleteCurrentProj()">🗑️ 삭제</button>
+      </div>
+      <!-- 편집 모드 버튼 -->
+      <div id="pdEditBtns" style="display:none;gap:6px;align-items:center;">
+        <button class="pdHBtn pdHBtnSave" onclick="saveProjDetailContent()">💾 저장</button>
+        <button class="pdHBtn" onclick="cancelProjDetailEdit()">취소</button>
+      </div>
       <button class="projDetailClose" onclick="closeProjDetail()">✕</button>
     </div>
   </div>
-  <div class="projDetailBody" id="projDetailBody" style="padding:0;display:flex;flex-direction:column;height:calc(100vh - 80px);"></div>
+  <div class="projDetailBody" id="projDetailBody">
+    <!-- 보기 모드 -->
+    <div id="pdViewArea" style="display:none;">
+      <div class="pdViewSec">
+        <div id="pdText" class="pdText"></div>
+        <div id="pdImgGrid" class="pdImgGrid"></div>
+        <div id="pdLinkList" class="pdLinkList"></div>
+      </div>
+    </div>
+    <!-- 편집 모드 -->
+    <div id="pdEditArea" style="display:none;">
+      <div class="pdEditSec">
+        <div>
+          <div class="pdEditLbl">내용</div>
+          <textarea id="projDetailContentTa" placeholder="사업 진행내용을 입력하세요..."></textarea>
+        </div>
+        <div>
+          <div class="pdEditLbl">이미지</div>
+          <div id="pdEditImgRow" class="pdEditImgRow"></div>
+          <label class="pdAddBtn" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="file" accept="image/*" multiple style="display:none" onchange="addPDImages(this)">📷 이미지 추가
+          </label>
+        </div>
+        <div>
+          <div class="pdEditLbl">링크</div>
+          <div id="pdEditLinkList"></div>
+          <button class="pdAddBtn" onclick="addPDLinkRow()" style="margin-top:6px;">+ 링크 추가</button>
+        </div>
+      </div>
+    </div>
+    <!-- 댓글 (항상 표시) -->
+    <div class="pdCmtSec">
+      <hr class="pdCmtDivider">
+      <div class="pdCmtTitle">💬 댓글</div>
+      <div id="pdCommentList"></div>
+      <div class="pdCmtInput">
+        <textarea id="pdNewCmtTa" placeholder="댓글을 입력하세요..."></textarea>
+        <button class="btn btnP" onclick="submitPDComment()" style="padding:10px 16px;flex-shrink:0;">등록</button>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="confOverlay" id="confDlg" style="display:none">
   <div class="confBox"><h3>확인</h3><p id="confMsg"></p><div class="confBtns"><button class="btn btnG" onclick="closeConf()">취소</button><button class="btn btnD" onclick="execConf()">확인</button></div></div>
@@ -685,69 +779,331 @@ function addPdfRow(){var container=document.getElementById('pdfImportRows');var 
 function importPdfItems(){var rows=document.querySelectorAll('#pdfImportRows .pdfRow');if(!rows.length){alert('가져올 항목이 없습니다.');return;}var now=new Date().toISOString();var tw=thisWeek();var author=currentUser?currentUser.name:'';var count=0;rows.forEach(function(row){var dept=(row.querySelector('.pdfDeptSel')||{}).value||'';var team=(row.querySelector('.pdfTeamSel')||{}).value||'';var name=((row.querySelector('input[type="text"]')||{}).value||'').trim();var content=((row.querySelector('textarea')||{}).value||'').trim();if(!name||!dept||!team)return;var logEntry={content:content,date:now,author:author,week:tw};var data={dept:dept,team:team,name:name,content:content,createdAt:now,updatedAt:now,author:author};if(db){db.ref('projects/'+dept).push(data).then(function(ref){if(content)db.ref('projects/'+dept+'/'+ref.key+'/history').push(logEntry);});}else{data.id=Date.now().toString()+count;if(content){var h={};h[data.id+'_0']=logEntry;data.history=h;}projects.push(data);}count++;});if(!db){renderProjectsGrid();saveLS();}closePdfImport();alert(count+'개 사업을 가져왔습니다.');}
 
 /* ── 사업 풀스크린 상세 뷰 ─────────────────── */
+var _pdCmtRef=null;
+
+function _pdContent(p){
+  var c=p.content||p.memo||p.achieve||'';
+  if(!c&&p.history){var a=Object.values(p.history).sort(function(a,b){return new Date(b.date)-new Date(a.date);});if(a.length)c=a[0].content||a[0].achieve||a[0].memo||'';}
+  return c;
+}
+
 function openProjDetail(id){
   window._currentProjDetailId=id;
   var p=projects.find(function(x){return x.id===id;});
   if(!p)return;
-  /* 내용 읽기 — 직접 content 우선, 이력 폴백 */
-  var content=p.content||p.memo||p.achieve||'';
-  if(!content&&p.history){
-    var hArr=Object.values(p.history).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
-    if(hArr.length)content=hArr[0].content||hArr[0].achieve||hArr[0].memo||'';
-  }
   var dt=p.updatedAt?fmtD(new Date(p.updatedAt)):'';
-  var isTw=isThisReportWeek(p.updatedAt||p.createdAt);
   document.getElementById('projDetailTitle').textContent=p.name;
   document.getElementById('projDetailMeta').textContent=(p.dept||'')+(p.team?' · '+p.team:'')+(p.author?' · '+p.author:'')+(dt?' · 최종수정 '+dt:'');
-  var body=document.getElementById('projDetailBody');
-  body.innerHTML='<textarea id="projDetailContentTa"'
-    +' style="flex:1;width:100%;padding:24px;font-size:15px;line-height:1.9;border:none;outline:none;resize:none;font-family:\'Noto Sans KR\',sans-serif;background:var(--bg);color:'+(isTw?'#1e40af':'var(--tx)')+';box-sizing:border-box;"'
-    +' placeholder="사업 진행내용을 입력하세요...">'+esc(content)+'</textarea>';
-  var el=document.getElementById('projDetail');
-  el.style.display='block';
-  /* textarea에 포커스 */
+  var canEdit=currentUser&&(currentUser.type==='admin'||currentUser.dept===p.dept);
+  document.getElementById('btnPDEdit').style.display=canEdit?'':'none';
+  document.getElementById('btnPDDel').style.display=canEdit?'':'none';
+  document.getElementById('pdViewBtns').style.display='flex';
+  document.getElementById('pdEditBtns').style.display='none';
+  document.getElementById('pdViewArea').style.display='block';
+  document.getElementById('pdEditArea').style.display='none';
+  renderPDView(p);
+  setupPDComments(id);
+  document.getElementById('projDetail').style.display='block';
+}
+
+function renderPDView(p){
+  var isTw=isThisReportWeek(p.updatedAt||p.createdAt);
+  var el=document.getElementById('pdText');
+  el.textContent=_pdContent(p);
+  el.className='pdText'+(isTw?' tw':'');
+  /* 이미지 */
+  var imgs=p.images?Object.entries(p.images):[];
+  window._pdImgMap={};
+  imgs.forEach(function(e){window._pdImgMap[e[0]]=e[1].data;});
+  document.getElementById('pdImgGrid').innerHTML=imgs.map(function(e,i){
+    return '<div class="pdImgItem"><img src="'+e[1].data+'" alt="이미지'+(i+1)+'" onclick="showPDImg(\''+e[0]+'\')"></div>';
+  }).join('');
+  /* 링크 */
+  var links=p.links?Object.values(p.links):[];
+  document.getElementById('pdLinkList').innerHTML=links.map(function(lk){
+    var url=(lk.url||'').startsWith('http')?lk.url:'https://'+(lk.url||'');
+    return '<div class="pdLinkItem"><span>🔗</span><a href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(lk.label||lk.url||url)+'</a></div>';
+  }).join('');
+}
+
+function showPDImg(key){
+  var src=window._pdImgMap&&window._pdImgMap[key];if(!src)return;
+  var img=document.getElementById('photoModalImg');
+  img.src=src;img.style.transform='scale(1)';
+  document.getElementById('photoModal').style.display='flex';
+}
+
+function startProjDetailEdit(){
+  var id=window._currentProjDetailId;
+  var p=projects.find(function(x){return x.id===id;});if(!p)return;
+  document.getElementById('projDetailContentTa').value=_pdContent(p);
+  window._pdEditImgs=p.images?Object.entries(p.images).map(function(e){return Object.assign({key:e[0]},e[1]);}):[];
+  window._pdEditLinks=p.links?Object.entries(p.links).map(function(e){return Object.assign({key:e[0]},e[1]);}):[];
+  renderPDEditImgs();renderPDEditLinks();
+  document.getElementById('pdViewArea').style.display='none';
+  document.getElementById('pdEditArea').style.display='block';
+  document.getElementById('pdViewBtns').style.display='none';
+  document.getElementById('pdEditBtns').style.display='flex';
   setTimeout(function(){var ta=document.getElementById('projDetailContentTa');if(ta)ta.focus();},50);
 }
-function closeProjDetail(){
-  document.getElementById('projDetail').style.display='none';
-  window._currentProjDetailId=null;
+
+function cancelProjDetailEdit(){
+  document.getElementById('pdViewArea').style.display='block';
+  document.getElementById('pdEditArea').style.display='none';
+  document.getElementById('pdViewBtns').style.display='flex';
+  document.getElementById('pdEditBtns').style.display='none';
 }
+
+/* 이미지 편집 */
+function renderPDEditImgs(){
+  var row=document.getElementById('pdEditImgRow');if(!row)return;
+  row.innerHTML=(window._pdEditImgs||[]).map(function(img,i){
+    return '<div class="pdEImgThumb"><img src="'+img.data+'" alt="'+i+'"><button onclick="removePDImg('+i+')" title="삭제">✕</button></div>';
+  }).join('');
+}
+function addPDImages(input){
+  var files=Array.from(input.files);if(!files.length)return;
+  if(!window._pdEditImgs)window._pdEditImgs=[];
+  var now=new Date().toISOString(),done=0,total=files.length;
+  files.forEach(function(file){
+    var r=new FileReader();
+    r.onload=function(ev){
+      var im=new Image();
+      im.onload=function(){
+        var c=document.createElement('canvas'),w=im.width,h=im.height,M=1400;
+        if(w>M||h>M){if(w>h){h=Math.round(h*M/w);w=M;}else{w=Math.round(w*M/h);h=M;}}
+        c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);
+        var q=0.85,d;do{d=c.toDataURL('image/jpeg',q);q-=0.05;}while(d.length>500*1024&&q>0.3);
+        window._pdEditImgs.push({data:d,name:file.name,uploadedAt:now});
+        if(++done===total)renderPDEditImgs();
+      };im.src=ev.target.result;
+    };r.readAsDataURL(file);
+  });input.value='';
+}
+function removePDImg(i){(window._pdEditImgs||[]).splice(i,1);renderPDEditImgs();}
+
+/* 링크 편집 */
+function renderPDEditLinks(){
+  var el=document.getElementById('pdEditLinkList');if(!el)return;
+  el.innerHTML=(window._pdEditLinks||[]).map(function(lk,i){
+    return '<div class="pdLinkRow">'
+      +'<input placeholder="URL" value="'+esc(lk.url||'')+'" oninput="(window._pdEditLinks=window._pdEditLinks||[])['+i+'].url=this.value">'
+      +'<input placeholder="표시 이름 (선택)" value="'+esc(lk.label||'')+'" oninput="(window._pdEditLinks=window._pdEditLinks||[])['+i+'].label=this.value">'
+      +'<button onclick="removePDLink('+i+')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:18px;padding:2px 6px;">✕</button>'
+      +'</div>';
+  }).join('');
+}
+function addPDLinkRow(){
+  if(!window._pdEditLinks)window._pdEditLinks=[];
+  window._pdEditLinks.push({url:'',label:'',addedAt:new Date().toISOString()});
+  renderPDEditLinks();
+  setTimeout(function(){var rows=document.querySelectorAll('#pdEditLinkList .pdLinkRow');if(rows.length){var inp=rows[rows.length-1].querySelector('input');if(inp)inp.focus();}},50);
+}
+function removePDLink(i){(window._pdEditLinks||[]).splice(i,1);renderPDEditLinks();}
+
+/* 저장 */
 function saveProjDetailContent(){
-  var ta=document.getElementById('projDetailContentTa');
-  if(!ta)return;
+  var ta=document.getElementById('projDetailContentTa');if(!ta)return;
   var content=ta.value;
-  var id=window._currentProjDetailId;
-  if(!id)return;
+  var id=window._currentProjDetailId;if(!id)return;
   var now=new Date().toISOString();
   var author=currentUser?currentUser.name:'';
   var path=projPath(id);
   if(!path){alert('저장 경로를 찾을 수 없습니다. 새로고침 후 다시 시도하세요.');return;}
-  /* 로컬 즉시 반영 */
-  projects=projects.map(function(p){
-    return p.id!==id?p:Object.assign({},p,{content:content,updatedAt:now,author:author});
-  });
-  /* Firebase 원자적 업데이트 */
-  if(db){
-    db.ref(path).update({content:content,updatedAt:now,author:author}).then(function(){
-      /* 헤더 날짜 갱신 */
-      var meta=document.getElementById('projDetailMeta');
-      var p2=projects.find(function(x){return x.id===id;});
-      if(meta&&p2)meta.textContent=(p2.dept||'')+(p2.team?' · '+p2.team:'')+(p2.author?' · '+p2.author:'')+' · 최종수정 '+fmtD(new Date(now));
-      var isTw=isThisReportWeek(now);
-      if(ta)ta.style.color=isTw?'#1e40af':'var(--tx)';
-      var btn=document.querySelector('.projDetailH button');
-      if(btn){var orig=btn.textContent;btn.textContent='✅ 저장됨';setTimeout(function(){btn.textContent=orig;},1500);}
-    }).catch(function(err){alert('저장 실패: '+err.message);});
-  }else{
-    renderProjectsGrid();saveLS();
-    var meta=document.getElementById('projDetailMeta');
+  /* 이미지 */
+  var imagesData=null;
+  var imgs=window._pdEditImgs||[];
+  if(imgs.length){imagesData={};imgs.forEach(function(img,i){var k=img.key||('img'+Date.now()+'_'+i);imagesData[k]={data:img.data,name:img.name||'',uploadedAt:img.uploadedAt||now};});}
+  /* 링크 */
+  var linksData=null;
+  var lks=(window._pdEditLinks||[]).filter(function(l){return (l.url||'').trim();});
+  if(lks.length){linksData={};lks.forEach(function(lk,i){var k=lk.key||('lnk'+Date.now()+'_'+i);linksData[k]={url:lk.url.trim(),label:(lk.label||'').trim()||lk.url.trim(),addedAt:lk.addedAt||now};});}
+  var upd={content:content,updatedAt:now,author:author,images:imagesData,links:linksData};
+  /* 로컬 반영 */
+  projects=projects.map(function(p){return p.id!==id?p:Object.assign({},p,upd,{images:imagesData||{},links:linksData||{}});});
+  function afterSave(){
     var p2=projects.find(function(x){return x.id===id;});
+    var meta=document.getElementById('projDetailMeta');
     if(meta&&p2)meta.textContent=(p2.dept||'')+(p2.team?' · '+p2.team:'')+(p2.author?' · '+p2.author:'')+' · 최종수정 '+fmtD(new Date(now));
-    var isTw=isThisReportWeek(now);
-    if(ta)ta.style.color=isTw?'#1e40af':'var(--tx)';
+    cancelProjDetailEdit();if(p2)renderPDView(p2);
   }
+  if(db){db.ref(path).update(upd).then(afterSave).catch(function(e){alert('저장 실패: '+e.message);});}
+  else{renderProjectsGrid();saveLS();afterSave();}
+}
+
+/* 삭제 */
+function deleteCurrentProj(){
+  var id=window._currentProjDetailId;if(!id)return;
+  showConf('이 사업을 삭제하시겠습니까?',function(){
+    var dp=projPath(id);if(dp)dbRemove(dp);
+    if(!db){projects=projects.filter(function(p){return p.id!==id;});renderProjectsGrid();saveLS();}
+    closeProjDetail();
+  });
+}
+
+/* 워드 저장 */
+function downloadProjDetailWord(){
+  var id=window._currentProjDetailId;
+  var p=projects.find(function(x){return x.id===id;});if(!p)return;
+  var content=_pdContent(p);
+  var links=p.links?Object.values(p.links):[];
+  var imgCount=p.images?Object.keys(p.images).length:0;
+  var dt=p.updatedAt?fmtD(new Date(p.updatedAt)):'';
+  function toDoc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+  var thS='border:1px solid #999;padding:5px 8px;background:#DCE6F1;font-weight:700;font-size:10pt;font-family:\'맑은 고딕\',sans-serif;text-align:center;vertical-align:middle;';
+  var tdS='border:1px solid #999;padding:6px 8px;font-size:10pt;font-family:\'맑은 고딕\',sans-serif;vertical-align:top;line-height:1.7;white-space:pre-wrap;word-break:break-word;';
+  var linksHtml=links.length?'<p style="font-size:10pt;margin-top:10pt;"><b>■ 링크</b><br>'+links.map(function(l){return esc(l.label||l.url)+' : '+l.url;}).join('<br>')+'</p>':'';
+  var imgNote=imgCount?'<p style="font-size:9pt;color:#666;margin-top:4pt;">※ 이미지 '+imgCount+'장 첨부됨</p>':'';
+  var html="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='UTF-8'><style>@page{size:A4 portrait;margin:1.27cm;}body{font-family:'맑은 고딕',sans-serif;}table{border-collapse:collapse;width:100%;}</style></head><body>"
+    +"<p style='font-size:14pt;font-weight:700;margin:0 0 4pt;'>"+esc(p.name)+"</p>"
+    +"<p style='font-size:10pt;color:#555;margin:0 0 10pt;'>"+esc((p.dept||'')+(p.team?' '+p.team:'')+(p.author?' | '+p.author:'')+(dt?' | 수정일: '+dt:''))+"</p>"
+    +"<table><thead><tr><th style='"+thS+"'>업무 현황</th></tr></thead><tbody><tr><td style='"+tdS+"'>"+toDoc(content)+"</td></tr></tbody></table>"
+    +linksHtml+imgNote+"</body></html>";
+  var blob=new Blob(['﻿'+html],{type:'application/msword;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download=p.name+'_업무현황_'+fmtD(new Date())+'.doc';
+  document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+}
+
+/* 닫기 */
+function closeProjDetail(){
+  document.getElementById('projDetail').style.display='none';
+  window._currentProjDetailId=null;
+  if(_pdCmtRef){_pdCmtRef.off('value');_pdCmtRef=null;}
 }
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeProjDetail();});
+
+/* ── 댓글 시스템 ─────────────────────────── */
+function setupPDComments(projId){
+  if(_pdCmtRef){_pdCmtRef.off('value');_pdCmtRef=null;}
+  document.getElementById('pdCommentList').innerHTML='<div style="font-size:13px;color:var(--tx3);">로딩 중...</div>';
+  document.getElementById('pdNewCmtTa').value='';
+  if(!db){renderPDComments({});return;}
+  var path=projPath(projId);if(!path){renderPDComments({});return;}
+  _pdCmtRef=db.ref(path+'/comments');
+  _pdCmtRef.on('value',function(s){renderPDComments(s.val()||{});});
+}
+
+function renderPDComments(data){
+  var list=document.getElementById('pdCommentList');if(!list)return;
+  var entries=Object.entries(data).sort(function(a,b){return new Date(a[1].createdAt)-new Date(b[1].createdAt);});
+  if(!entries.length){list.innerHTML='<div style="font-size:13px;color:var(--tx3);padding:4px 0;">아직 댓글이 없습니다.</div>';return;}
+  list.innerHTML=entries.map(function(entry){
+    var cid=entry[0],c=entry[1];
+    var mine=currentUser&&(c.authorUid===currentUser.uid||currentUser.type==='admin');
+    var rps=c.replies?Object.entries(c.replies).sort(function(a,b){return new Date(a[1].createdAt)-new Date(b[1].createdAt);}):[];
+    var rpsHtml=rps.map(function(re){
+      var rid=re[0],r=re[1];
+      var mineR=currentUser&&(r.authorUid===currentUser.uid||currentUser.type==='admin');
+      return '<div class="pdReply">'
+        +'<div class="pdCmtH"><span class="pdCmtAuthor">'+esc(r.author)+'</span><span class="pdCmtDate"> '+fmtD(new Date(r.createdAt))+'</span></div>'
+        +'<div id="pdRT_'+cid+'_'+rid+'" class="pdCmtTxt">'+esc(r.text)+'</div>'
+        +(mineR?'<div class="pdCmtActs"><button class="btn btnG sm" onclick="editPDReply(\''+cid+'\',\''+rid+'\')">✏️</button><button class="btn btnD sm" onclick="deletePDReply(\''+cid+'\',\''+rid+'\')">🗑️</button></div>':'')
+        +'</div>';
+    }).join('');
+    return '<div class="pdCmt">'
+      +'<div class="pdCmtH"><span class="pdCmtAuthor">'+esc(c.author)+'</span><span class="pdCmtDate"> '+fmtD(new Date(c.createdAt))+'</span></div>'
+      +'<div id="pdCT_'+cid+'" class="pdCmtTxt">'+esc(c.text)+'</div>'
+      +'<div class="pdCmtActs">'
+        +'<button class="btn btnG sm" onclick="togglePDRpBox(\''+cid+'\')">↩ 답글</button>'
+        +(mine?'<button class="btn btnG sm" onclick="editPDComment(\''+cid+'\')">✏️</button><button class="btn btnD sm" onclick="deletePDComment(\''+cid+'\')">🗑️</button>':'')
+      +'</div>'
+      +rpsHtml
+      +'<div id="pdRpBox_'+cid+'" class="pdRpBox">'
+        +'<textarea id="pdRpTa_'+cid+'" placeholder="답글 입력..."></textarea>'
+        +'<button class="btn btnP sm" onclick="submitPDReply(\''+cid+'\')" style="flex-shrink:0;">등록</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+/* 댓글 등록 */
+function submitPDComment(){
+  var ta=document.getElementById('pdNewCmtTa');
+  if(!ta||!ta.value.trim()){return;}
+  if(!currentUser){alert('로그인이 필요합니다.');return;}
+  if(!db){alert('오프라인 모드에서는 댓글을 사용할 수 없습니다.');return;}
+  var text=ta.value.trim();
+  var path=projPath(window._currentProjDetailId);if(!path)return;
+  db.ref(path+'/comments').push({text:text,author:currentUser.name,authorUid:currentUser.uid,createdAt:new Date().toISOString()})
+    .then(function(){ta.value='';}).catch(function(e){alert('댓글 오류: '+e.message);});
+}
+
+/* 답글 토글 */
+function togglePDRpBox(cid){
+  var box=document.getElementById('pdRpBox_'+cid);if(!box)return;
+  var open=box.style.display==='flex';
+  box.style.display=open?'none':'flex';
+  if(!open){var ta=document.getElementById('pdRpTa_'+cid);if(ta)ta.focus();}
+}
+
+/* 답글 등록 */
+function submitPDReply(cid){
+  var ta=document.getElementById('pdRpTa_'+cid);
+  if(!ta||!ta.value.trim())return;
+  if(!currentUser){alert('로그인이 필요합니다.');return;}
+  if(!db)return;
+  var text=ta.value.trim();
+  var path=projPath(window._currentProjDetailId);if(!path)return;
+  db.ref(path+'/comments/'+cid+'/replies').push({text:text,author:currentUser.name,authorUid:currentUser.uid,createdAt:new Date().toISOString()})
+    .then(function(){ta.value='';togglePDRpBox(cid);}).catch(function(e){alert('답글 오류: '+e.message);});
+}
+
+/* 댓글 수정 */
+function editPDComment(cid){
+  var el=document.getElementById('pdCT_'+cid);if(!el||el.querySelector('textarea'))return;
+  var old=el.textContent;el.dataset.old=old;
+  el.innerHTML='<div class="pdInlineEdit"><textarea rows="3">'+esc(old)+'</textarea>'
+    +'<div style="display:flex;flex-direction:column;gap:4px;">'
+    +'<button class="btn btnP sm" onclick="savePDCmt(\''+cid+'\')">저장</button>'
+    +'<button class="btn btnG sm" onclick="cancelPDCmt(\''+cid+'\')">취소</button></div></div>';
+  var ta=el.querySelector('textarea');if(ta)ta.focus();
+}
+function savePDCmt(cid){
+  var el=document.getElementById('pdCT_'+cid);if(!el)return;
+  var ta=el.querySelector('textarea');if(!ta)return;
+  var text=ta.value.trim();if(!text)return;
+  var path=projPath(window._currentProjDetailId);if(!path||!db)return;
+  db.ref(path+'/comments/'+cid+'/text').set(text).catch(function(e){alert('수정 오류: '+e.message);});
+}
+function cancelPDCmt(cid){
+  var el=document.getElementById('pdCT_'+cid);if(!el)return;
+  el.innerHTML=esc(el.dataset.old||'');delete el.dataset.old;
+}
+
+/* 댓글 삭제 */
+function deletePDComment(cid){
+  var path=projPath(window._currentProjDetailId);if(!path||!db)return;
+  showConf('댓글을 삭제하시겠습니까?',function(){db.ref(path+'/comments/'+cid).remove().catch(function(e){alert('삭제 오류: '+e.message);});});
+}
+
+/* 답글 수정 */
+function editPDReply(cid,rid){
+  var el=document.getElementById('pdRT_'+cid+'_'+rid);if(!el||el.querySelector('textarea'))return;
+  var old=el.textContent;el.dataset.old=old;
+  el.innerHTML='<div class="pdInlineEdit sm"><textarea rows="2">'+esc(old)+'</textarea>'
+    +'<div style="display:flex;flex-direction:column;gap:4px;">'
+    +'<button class="btn btnP sm" onclick="savePDReply(\''+cid+'\',\''+rid+'\')">저장</button>'
+    +'<button class="btn btnG sm" onclick="cancelPDReply(\''+cid+'\',\''+rid+'\')">취소</button></div></div>';
+  var ta=el.querySelector('textarea');if(ta)ta.focus();
+}
+function savePDReply(cid,rid){
+  var el=document.getElementById('pdRT_'+cid+'_'+rid);if(!el)return;
+  var ta=el.querySelector('textarea');if(!ta)return;
+  var text=ta.value.trim();if(!text)return;
+  var path=projPath(window._currentProjDetailId);if(!path||!db)return;
+  db.ref(path+'/comments/'+cid+'/replies/'+rid+'/text').set(text).catch(function(e){alert('수정 오류: '+e.message);});
+}
+function cancelPDReply(cid,rid){
+  var el=document.getElementById('pdRT_'+cid+'_'+rid);if(!el)return;
+  el.innerHTML=esc(el.dataset.old||'');delete el.dataset.old;
+}
+
+/* 답글 삭제 */
+function deletePDReply(cid,rid){
+  var path=projPath(window._currentProjDetailId);if(!path||!db)return;
+  showConf('답글을 삭제하시겠습니까?',function(){db.ref(path+'/comments/'+cid+'/replies/'+rid).remove().catch(function(e){alert('삭제 오류: '+e.message);});});
+}
 
 /* ── OCR / 이미지스캔 (다중) ──────────────── */
 window._scanFiles=[];
