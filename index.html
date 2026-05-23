@@ -232,7 +232,8 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .pdInlineEdit textarea{flex:1;padding:8px;font-size:14px;border:1px solid var(--border);border-radius:6px;font-family:'Noto Sans KR',sans-serif;resize:none;background:var(--bg);color:var(--tx);outline:none;}
 .pdInlineEdit.sm textarea{font-size:13px;min-height:44px;}
 /* ── 리치텍스트 툴바·에디터 ─── */
-.pdTbar{display:flex;align-items:center;gap:5px;padding:8px 10px;background:#f5f7fa;border:1.5px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;flex-wrap:wrap;}
+.pdTbar{display:flex;align-items:center;gap:5px;padding:8px 10px;background:#f5f7fa;border:1.5px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;flex-wrap:wrap;position:sticky;top:80px;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+@media(max-width:768px){.pdTbar{top:62px;}}
 .pdTBtn{padding:4px 11px;font-size:13px;border:1px solid #d1d5db;border-radius:5px;cursor:pointer;background:#fff;color:var(--tx);font-family:'Noto Sans KR',sans-serif;font-weight:500;line-height:1.4;}
 .pdTBtn:hover{background:#e5e7eb;}.pdTBtnH{font-weight:700;font-size:14px;}
 .pdTSep{width:1px;height:20px;background:var(--border);margin:0 3px;flex-shrink:0;}
@@ -588,7 +589,7 @@ function saveProfileSetup(){var name=(document.getElementById('psName').value||'
 function showPsErr(m){var e=document.getElementById('psErr');if(e){e.textContent=m;e.style.display='block';}}
 function showLErr(m){var e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
 function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('pendingScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';
-if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminCalPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';setupUsersListener();}var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();if(db)setupProjectsListener();else renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;}fetchGCal();if(!db)loadLS();}
+if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminCalPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';setupUsersListener();}var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();if(db)setupProjectsListener();else renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;}fetchGCal();if(!db)loadLS();history.pushState({inApp:true},'');}
 function teardownProjectsListener(){if(_projRef){_projRef.off('value');_projRef=null;}}
 function setupProjectsListener(){teardownProjectsListener();if(!db||!currentUser)return;if(currentUser.type==='admin'){_projRef=db.ref('projects');_projRef.on('value',function(s){projects=[];if(s.val()){Object.entries(s.val()).forEach(function(de){var dept=de[0];if(de[1]&&typeof de[1]==='object'){Object.entries(de[1]).forEach(function(pe){projects.push(Object.assign({id:pe[0],dept:dept},pe[1]));});}});}renderProjectsGrid();});}else{_projRef=db.ref('projects/'+currentUser.dept);_projRef.on('value',function(s){var dept=currentUser.dept;projects=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0],dept:dept},e[1]);}):[];renderProjectsGrid();});}}
 function projPath(id){var p=projects.find(function(x){return x.id===id;});return p?'projects/'+p.dept+'/'+id:null;}
@@ -834,6 +835,7 @@ function openProjDetail(id){
   renderPDView(p);
   setupPDComments(id);
   document.getElementById('projDetail').style.display='block';
+  history.pushState({inApp:true,popup:true},'');
 }
 
 function renderPDView(p){
@@ -1015,12 +1017,38 @@ function downloadProjDetailWord(){
 }
 
 /* 닫기 */
-function closeProjDetail(){
+var _pdBtnClose=false;
+function _closeProjDetailDOM(){
   document.getElementById('projDetail').style.display='none';
   window._currentProjDetailId=null;
   if(_pdCmtRef){_pdCmtRef.off('value');_pdCmtRef=null;}
 }
+function closeProjDetail(){
+  _closeProjDetailDOM();
+  /* ✕ 버튼·ESC로 닫을 때: popup 히스토리 항목 제거 */
+  if(history.state&&history.state.popup){_pdBtnClose=true;history.go(-1);}
+}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeProjDetail();});
+
+/* ── 뒤로가기 / 앱 이탈 처리 ─────────────── */
+window.addEventListener('popstate',function(e){
+  var st=e.state||{};
+  /* ✕·ESC로 닫힌 경우 — 이미 DOM 닫혔으므로 건너뜀 */
+  if(_pdBtnClose){_pdBtnClose=false;return;}
+  /* 뒤로가기로 팝업 닫기 */
+  if(document.getElementById('projDetail').style.display!=='none'){
+    _closeProjDetailDOM();
+    if(!st.inApp)history.pushState({inApp:true},'');
+    return;
+  }
+  /* 앱 이탈 확인 */
+  if(!st.inApp&&currentUser){
+    if(!confirm('앱을 나가시겠습니까?'))history.pushState({inApp:true},'');
+  }
+});
+window.addEventListener('beforeunload',function(e){
+  if(currentUser){e.preventDefault();e.returnValue='';}
+});
 
 /* ── 댓글 시스템 ─────────────────────────── */
 function setupPDComments(projId){
