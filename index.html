@@ -596,7 +596,7 @@ function saveProfileSetup(){var name=(document.getElementById('psName').value||'
 function showPsErr(m){var e=document.getElementById('psErr');if(e){e.textContent=m;e.style.display='block';}}
 function showLErr(m){var e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
 function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('pendingScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';
-if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminCalPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';setupUsersListener();}var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();if(db)setupProjectsListener();else renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;}fetchGCal();if(!db)loadLS();history.pushState({inApp:true},'');}
+if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminCalPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';setupUsersListener();}var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();if(db)setupProjectsListener();else renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';}if(!db){loadLS();fetchGCal();}else{db.ref('settings/gcal').once('value').then(function(snap){var s=snap.val();if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;}fetchGCal();});}history.pushState({inApp:true},'');}
 function teardownProjectsListener(){if(_projRef){_projRef.off('value');_projRef=null;}}
 function setupProjectsListener(){teardownProjectsListener();if(!db||!currentUser)return;if(currentUser.type==='admin'){_projRef=db.ref('projects');_projRef.on('value',function(s){projects=[];if(s.val()){Object.entries(s.val()).forEach(function(de){var dept=de[0];if(de[1]&&typeof de[1]==='object'){Object.entries(de[1]).forEach(function(pe){projects.push(Object.assign({id:pe[0],dept:dept},pe[1]));});}});}renderProjectsGrid();});}else{_projRef=db.ref('projects/'+currentUser.dept);_projRef.on('value',function(s){var dept=currentUser.dept;projects=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0],dept:dept},e[1]);}):[];renderProjectsGrid();});}}
 function projPath(id){var p=projects.find(function(x){return x.id===id;});return p?'projects/'+p.dept+'/'+id:null;}
@@ -807,7 +807,18 @@ function fetchGCal(){
   });
 }
 function setGCalSt(msg){var el=document.getElementById('gcalStatus');if(el)el.textContent=msg;}
-function saveGCalConfig(){var k=document.getElementById('gcalApiKey').value.trim(),id=document.getElementById('gcalCalId').value.trim();if(!k||!id){alert('API 키와 캘린더 ID를 모두 입력하세요.');return;}GCAL_API_KEY=k;GCAL_CAL_ID=id;localStorage.setItem('gcal_key',k);localStorage.setItem('gcal_calid',id);fetchGCal();}
+function saveGCalConfig(){
+  var k=document.getElementById('gcalApiKey').value.trim(),id=document.getElementById('gcalCalId').value.trim();
+  if(!k||!id){alert('API 키와 캘린더 ID를 모두 입력하세요.');return;}
+  GCAL_API_KEY=k;GCAL_CAL_ID=id;
+  localStorage.setItem('gcal_key',k);localStorage.setItem('gcal_calid',id);
+  if(db){
+    db.ref('settings/gcal').set({apiKey:k,calId:id}).then(function(){
+      setGCalSt('✅ Firebase에 저장됨 — 모든 기기에 적용');
+    }).catch(function(e){setGCalSt('⚠️ Firebase 저장 실패: '+e.message);});
+  }
+  fetchGCal();
+}
 function clearAllEvents(){showConf('등록된 일정을 모두 삭제하시겠습니까?',function(){if(db)db.ref('events').remove();events=[];renderCal();saveLS();});}
 function showConf(msg,cb){document.getElementById('confMsg').textContent=msg;confCb=cb;document.getElementById('confDlg').style.display='flex';}
 function closeConf(){document.getElementById('confDlg').style.display='none';confCb=null;}
