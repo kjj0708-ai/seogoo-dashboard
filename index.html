@@ -723,7 +723,7 @@ function togProjHist(btn){var id=btn.getAttribute('data-id');var entry=btn.close
 function renderProjectsGrid(){var grid=document.getElementById('deptGrid');if(!grid)return;var tw=thisWeek();var _dShow=(currentUser&&currentUser.type==='admin')?Object.keys(ORG):(currentUser?[currentUser.dept]:Object.keys(ORG));grid.innerHTML=_dShow.map(function(dept){var teams=ORG[dept];var deptProjs=projects.filter(function(p){return p.dept===dept;});var canEditDept=currentUser&&(currentUser.type==='admin'||currentUser.dept===dept);return'<div class="dCard"><div class="dCardH" onclick="togDept(this)"><h3>📂 '+dept+'</h3><div style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;opacity:.7">'+deptProjs.length+'개 사업</span>'+(canEditDept?'<button class="btn btnG sm" onclick="event.stopPropagation();downloadProjReport(\''+dept+'\')" style="font-size:11px;padding:3px 8px;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);">📥 저장</button>':'')+'<span class="togIco open">▼</span></div></div><div class="teamList">'+teams.map(function(team){var teamProjs=projects.filter(function(p){return p.dept===dept&&p.team===team;});teamProjs.sort(function(a,b){return new Date(b.updatedAt||0)-new Date(a.updatedAt||0);});var canEdit=currentUser&&(currentUser.type==='admin'||currentUser.dept===dept);return'<div class="teamItem"><div class="teamH" onclick="togTeam(this)"><span class="teamNm">▼ '+team+' <span class="tCnt">'+teamProjs.length+'</span></span>'+(canEdit?'<button class="btn btnP sm" onclick="event.stopPropagation();openProjModal(null,\''+dept+'\',\''+team+'\')" style="font-size:11px;padding:3px 8px;">+ 사업</button>':'')+'</div><div class="teamReps">'+(teamProjs.length?teamProjs.map(function(p){var dt=p.updatedAt?fmtD(new Date(p.updatedAt)):'';var isThisWeek=isThisReportWeek(p.updatedAt||p.createdAt);var canEditProj=currentUser&&(currentUser.type==='admin'||currentUser.dept===dept);var titleColor=isThisWeek?'#1d4ed8':'inherit';var dateColor=isThisWeek?'#3b82f6':'var(--tx3)';var borderColor=isThisWeek?'#2563a8':'var(--pl)';return'<div class="repEntry" style="border-left:3px solid '+borderColor+';"><div class="repTop"><div style="flex:1;min-width:0;"><div class="repTitle" style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;"><span class="projNameLink" onclick="event.stopPropagation();openProjDetail(\''+p.id+'\')" style="color:'+titleColor+';">'+esc(p.name)+'</span><span style="font-size:11px;font-weight:400;color:'+dateColor+';">'+dt+'</span></div>'+(p.author?'<div style="margin-top:2px;font-size:11px;color:var(--tx3);">'+esc(p.author)+'</div>':'')+'</div>'+(canEditProj?'<div style="display:flex;gap:4px;flex-shrink:0;align-items:center;margin-left:8px;"><button class="btn btnG sm proj-edit" data-id="'+p.id+'" title="제목 수정" style="padding:5px 8px;font-size:14px;line-height:1;">✏️</button><button class="btn btnD sm proj-del" data-id="'+p.id+'" title="삭제" style="padding:5px 8px;font-size:14px;line-height:1;">🗑️</button></div>':'')+'</div></div>';}).join(''):'<div class="noRep">등록된 사업이 없습니다.</div>')+'</div></div>';}).join('')+'</div></div>';}).join('');if(document.getElementById('viewWeek')&&document.getElementById('viewWeek').style.display!=='none')renderWeeklyView();}
 function downloadProjReport(dept){var dProjs=projects.filter(function(p){return p.dept===dept;});var teams=ORG[dept]||[];function toDoc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}var tdC='border:1px solid #999999;padding:2px 4px;vertical-align:top;font-size:10pt;font-family:\'맑은 고딕\',sans-serif;line-height:1.5;white-space:pre-wrap;word-break:break-word;';var tdNm='border:1px solid #999999;padding:2px 4px;vertical-align:middle;font-size:10pt;font-family:\'맑은 고딕\',sans-serif;text-align:center;background:#F5F8FF;';var tdTm='border:1px solid #999999;padding:2px 4px;vertical-align:middle;font-size:10pt;font-family:\'맑은 고딕\',sans-serif;font-weight:700;text-align:center;background:#EAF0FB;';var rows=[];teams.forEach(function(team){var tProjs=dProjs.filter(function(p){return p.team===team;});if(!tProjs.length){rows.push({team:team,span:1,first:true,p1:null,p2:null});}else{var pairs=[];for(var i=0;i<tProjs.length;i+=2){pairs.push([tProjs[i],tProjs[i+1]||null]);}pairs.forEach(function(pair,idx){rows.push({team:team,span:idx===0?pairs.length:0,first:idx===0,p1:pair[0],p2:pair[1]});});}});function projCells(p){if(!p)return'<td style="'+tdNm+'"></td><td style="'+tdC+'"></td>';var hist=p.history?Object.values(p.history).sort(function(a,b){return new Date(b.date)-new Date(a.date);}):[];var latest=hist[0]||null;var content=latest?(latest.content||latest.achieve||latest.memo||p.content||p.memo||''):(p.content||p.memo||p.achieve||'');return'<td style="'+tdNm+'">'+toDoc(p.name)+'</td><td style="'+tdC+'">'+toDoc(content)+'</td>';}var trs=rows.map(function(row){var tmTd=row.first?'<td rowspan="'+row.span+'" style="'+tdTm+'">'+row.team+'</td>':'';return'<tr>'+tmTd+projCells(row.p1)+projCells(row.p2)+'</tr>';}).join('');if(!trs)trs='<tr><td colspan="5" style="'+tdC+'text-align:center;">등록된 사업이 없습니다.</td></tr>';var now=fmtD(new Date());var thSt='border:1px solid #999999;padding:2px 4px;background:#DCE6F1;font-weight:700;font-size:10pt;font-family:\'맑은 고딕\',sans-serif;text-align:center;vertical-align:middle;';var html="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='UTF-8'><style>@page{size:A4 portrait;margin:1.27cm;}body{font-family:'맑은 고딕',sans-serif;}table{border-collapse:collapse;width:100%;table-layout:fixed;}th,td{border:1px solid #999999;word-break:break-word;}</style></head><body><p style='font-size:16pt;font-family:\"맑은 고딕\",sans-serif;margin:0 0 8pt 0;'>"+dept+" 주간 업무 보고</p><table><colgroup><col style='width:2.33cm'/><col style='width:2.82cm'/><col style='width:5.34cm'/><col style='width:3.0cm'/><col style='width:4.94cm'/></colgroup><thead><tr><th rowspan='2' style='"+thSt+"'>팀명</th><th colspan='4' style='"+thSt+"'>진행현황</th></tr><tr><th style='"+thSt+"'>사업명</th><th style='"+thSt+"'>내용</th><th style='"+thSt+"'>사업명</th><th style='"+thSt+"'>내용</th></tr></thead><tbody>"+trs+"</tbody></table></body></html>";var blob=new Blob(['\ufeff'+html],{type:'application/msword;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=dept+'_주간업무보고_'+now+'.doc';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);}
 function downloadWeeklyReport(){
-  // renderWeeklyView와 동일한 로직: 최근 7일 수정된 사업
+  // 최근 7일 수정된 사업 추출 (renderWeeklyView와 동일 로직)
   var now=new Date();
   var weekAgo=new Date(now.getTime()-7*24*60*60*1000);
   var recent=projects.filter(function(p){var d=new Date(p.updatedAt||p.createdAt);return !isNaN(d)&&d>=weekAgo&&d<=now;});
@@ -732,52 +732,46 @@ function downloadWeeklyReport(){
   var byDept={};
   recent.forEach(function(p){var d=p.dept||'미지정',t=p.team||'미지정';if(!byDept[d])byDept[d]={};if(!byDept[d][t])byDept[d][t]=[];byDept[d][t].push(p);});
   var depts=Object.keys(byDept).sort(function(a,b){var ia=deptOrder.indexOf(a),ib=deptOrder.indexOf(b);if(ia<0)ia=999;if(ib<0)ib=999;return ia-ib;});
-  var multiDept=depts.length>1;
   function toDoc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
   function getContent(p){var c=p.content||p.memo||p.achieve||'';if(!c&&p.history){var a=Object.values(p.history).sort(function(x,y){return new Date(y.date)-new Date(x.date);});if(a.length)c=a[0].content||a[0].achieve||a[0].memo||'';}return c;}
-  var thSt='border:1px solid #999999;padding:3px 5px;background:#DCE6F1;font-weight:700;font-size:10pt;font-family:\'맑은 고딕\',sans-serif;text-align:center;vertical-align:middle;';
-  var tdNm='border:1px solid #999999;padding:2px 4px;vertical-align:middle;font-size:10pt;font-family:\'맑은 고딕\',sans-serif;text-align:center;background:#F5F8FF;';
-  var tdCt='border:1px solid #999999;padding:3px 5px;vertical-align:top;font-size:10pt;font-family:\'맑은 고딕\',sans-serif;line-height:1.5;white-space:pre-wrap;word-break:break-word;';
-  var tdTm='border:1px solid #999999;padding:2px 4px;vertical-align:middle;font-size:10pt;font-family:\'맑은 고딕\',sans-serif;font-weight:700;text-align:center;background:#EAF0FB;';
-  var rows='';
+
+  // 문서 본문 생성
+  var title=now.getFullYear()+'년 '+(now.getMonth()+1)+'월 주간 업무현황 (최근 7일)';
+  var body="<p style='font-size:13pt;font-family:\"맑은 고딕\",sans-serif;margin:0 0 5pt 0;font-weight:700;'>"+toDoc(title)+"</p>";
+
   depts.forEach(function(dept){
     var teams=byDept[dept];
     var teamOrder=ORG[dept]||[];
     var teamKeys=Object.keys(teams).sort(function(a,b){var ia=teamOrder.indexOf(a),ib=teamOrder.indexOf(b);if(ia<0)ia=999;if(ib<0)ib=999;return ia-ib;});
-    // 팀별 쌍(2개) 미리 계산 및 과 전체 행수 집계
-    var deptPairCount=0;
-    var teamPairs={};
     teamKeys.forEach(function(team){
       var projs=teams[team];
-      var pairs=[];
-      for(var i=0;i<projs.length;i+=2)pairs.push([projs[i],projs[i+1]||null]);
-      if(!pairs.length)pairs.push([null,null]);
-      teamPairs[team]=pairs;
-      deptPairCount+=pairs.length;
-    });
-    var isFirstDeptRow=true;
-    teamKeys.forEach(function(team){
-      var pairs=teamPairs[team];
-      pairs.forEach(function(pair,idx){
-        var p1=pair[0],p2=pair[1];
-        var deptTd=multiDept&&isFirstDeptRow?'<td rowspan="'+deptPairCount+'" style="'+tdTm+'">'+toDoc(dept)+'</td>':'';
-        var teamTd=idx===0?'<td rowspan="'+pairs.length+'" style="'+tdTm+'">'+toDoc(team)+'</td>':'';
-        if(isFirstDeptRow)isFirstDeptRow=false;
-        var nm1=p1?'<td style="'+tdNm+'">'+toDoc(p1.name)+'</td>':'<td style="'+tdNm+'"></td>';
-        var ct1=p1?'<td style="'+tdCt+'">'+toDoc(getContent(p1))+'</td>':'<td style="'+tdCt+'"></td>';
-        var nm2=p2?'<td style="'+tdNm+'">'+toDoc(p2.name)+'</td>':'<td style="'+tdNm+'"></td>';
-        var ct2=p2?'<td style="'+tdCt+'">'+toDoc(getContent(p2))+'</td>':'<td style="'+tdCt+'"></td>';
-        rows+='<tr>'+deptTd+teamTd+nm1+ct1+nm2+ct2+'</tr>';
-      });
+      // ① 부서명 > 팀명 헤더 (표 위에 별도 표시)
+      body+="<p style='font-size:10.5pt;font-family:\"맑은 고딕\",sans-serif;margin:5pt 0 1pt 0;font-weight:700;color:#ffffff;background:#1a3a5c;padding:2px 6px;'>"+toDoc(dept)+" &gt; "+toDoc(team)+"</p>";
+      // ② 팀별 표 (2열: 제목행 + 내용행 반복)
+      body+="<table style='border-collapse:collapse;width:100%;table-layout:fixed;margin-bottom:2pt;'>";
+      for(var i=0;i<projs.length;i+=2){
+        var p1=projs[i],p2=projs[i+1]||null;
+        var nm1=p1?toDoc(p1.name):'';
+        var nm2=p2?toDoc(p2.name):'';
+        var ct1=p1?toDoc(getContent(p1)):'';
+        var ct2=p2?toDoc(getContent(p2)):'';
+        // 제목행 (상단)
+        body+="<tr>"
+          +"<td style='width:50%;border:1px solid #999;padding:2px 5px;background:#2563a8;color:#fff;font-weight:700;font-size:10pt;font-family:\"맑은 고딕\",sans-serif;'>"+nm1+"</td>"
+          +"<td style='width:50%;border:1px solid #999;padding:2px 5px;background:#2563a8;color:#fff;font-weight:700;font-size:10pt;font-family:\"맑은 고딕\",sans-serif;border-left:2px solid #fff;'>"+nm2+"</td>"
+          +"</tr>";
+        // 내용행 (하단)
+        body+="<tr>"
+          +"<td style='border:1px solid #999;padding:3px 5px;vertical-align:top;font-size:9.5pt;font-family:\"맑은 고딕\",sans-serif;line-height:1.55;white-space:pre-wrap;word-break:break-word;'>"+ct1+"</td>"
+          +"<td style='border:1px solid #999;padding:3px 5px;vertical-align:top;font-size:9.5pt;font-family:\"맑은 고딕\",sans-serif;line-height:1.55;white-space:pre-wrap;word-break:break-word;border-left:2px solid #aaa;'>"+ct2+"</td>"
+          +"</tr>";
+      }
+      body+="</table>";
     });
   });
+
   var nowFmt=fmtD(now);
-  var title=now.getFullYear()+'년 '+(now.getMonth()+1)+'월 주간 업무현황 (최근 7일)';
-  var deptColW=multiDept?'<col style="width:1.8cm"/>':'';
-  var deptThHd=multiDept?'<th style="'+thSt+'">과</th>':'';
-  var colgroup='<colgroup>'+deptColW+'<col style="width:2.3cm"/><col style="width:3.0cm"/><col style="width:5.4cm"/><col style="width:3.0cm"/><col style="width:5.4cm"/></colgroup>';
-  var thead='<tr>'+deptThHd+'<th style="'+thSt+'">팀</th><th style="'+thSt+'">사업명</th><th style="'+thSt+'">수정내용</th><th style="'+thSt+'">사업명</th><th style="'+thSt+'">수정내용</th></tr>';
-  var html="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='UTF-8'><style>@page{size:A4 landscape;margin:1.27cm;}body{font-family:'맑은 고딕',sans-serif;}table{border-collapse:collapse;width:100%;table-layout:fixed;}th,td{border:1px solid #999999;word-break:break-word;}</style></head><body><p style='font-size:14pt;font-family:\"맑은 고딕\",sans-serif;margin:0 0 8pt 0;font-weight:700;'>"+title+"</p><table>"+colgroup+"<thead>"+thead+"</thead><tbody>"+rows+"</tbody></table></body></html>";
+  var html="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='UTF-8'><style>@page{size:A4 portrait;margin:0.5cm;}body{font-family:'맑은 고딕',sans-serif;margin:0;padding:0;}table{border-collapse:collapse;width:100%;table-layout:fixed;}td{word-break:break-word;}</style></head><body>"+body+"</body></html>";
   var blob=new Blob(['﻿'+html],{type:'application/msword;charset=utf-8'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');a.href=url;a.download='주간업무현황_'+nowFmt+'.doc';
