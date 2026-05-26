@@ -2,8 +2,19 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>서구 도시주택국 대시보드</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a3a5c">
+<meta name="application-name" content="도시주택국">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="도시주택국">
+<link rel="icon" type="image/png" sizes="512x512" href="public/icon-512.png">
+<link rel="apple-touch-icon" href="public/icon-512.png">
+<link rel="shortcut icon" href="public/icon-512.png">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -17,6 +28,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#1a3a5c,#2563a8);}
 .lbox{background:#fff;border-radius:16px;padding:48px 40px;width:100%;max-width:420px;box-shadow:var(--shl);}
 .llogo{text-align:center;margin-bottom:32px;}.llogo .ico{font-size:48px;}.llogo h1{font-size:22px;font-weight:700;color:var(--primary);margin-top:10px;}.llogo p{font-size:13px;color:var(--tx2);margin-top:4px;}
+.llogo img.appIcon{width:96px;height:96px;border-radius:20px;box-shadow:0 4px 16px rgba(26,58,92,.18);object-fit:cover;}
+.hLogoImg{width:32px;height:32px;border-radius:7px;object-fit:cover;flex-shrink:0;}
+#pwaInstall{position:fixed;bottom:18px;right:18px;background:var(--accent);color:#fff;border:none;border-radius:50px;padding:11px 18px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(232,160,32,.4);display:none;z-index:200;font-family:'Noto Sans KR',sans-serif;align-items:center;gap:6px;}
+#pwaInstall:hover{background:#d68f10;}
+#pwaInstall .pwaX{margin-left:6px;opacity:.7;}
 .ltabs{display:flex;background:var(--bg);border-radius:8px;padding:4px;margin-bottom:24px;}
 .ltab{flex:1;padding:10px;border:none;background:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;color:var(--tx2);font-family:'Noto Sans KR',sans-serif;transition:all .2s;}
 .ltab.active{background:#fff;color:var(--primary);box-shadow:var(--sh);}
@@ -254,7 +270,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 <body>
 <div id="loginScreen">
   <div class="lbox">
-    <div class="llogo"><div class="ico">🏛️</div><h1>서구 도시주택국</h1><p>업무 현황 대시보드</p></div>
+    <div class="llogo"><img class="appIcon" src="public/icon-512.png" alt="도시주택국"><h1 style="margin-top:14px;">서구 도시주택국</h1><p>업무 현황 대시보드</p></div>
     <div id="loginLoading" style="text-align:center;padding:24px 0;color:var(--tx3);font-size:14px;">⏳ 인증 확인 중...</div>
     <button class="btnLogin" id="btnGoogleLogin" onclick="doGoogleLogin()" style="display:none;align-items:center;justify-content:center;gap:10px;background:#fff;color:#333;border:1.5px solid #ddd;font-weight:600;">
       <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
@@ -295,7 +311,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 </div>
 <div id="app">
   <header>
-    <div class="hL"><h1>🏛️ 서구 도시주택국 대시보드</h1><div class="sync"><div class="sdot" id="sdot"></div><span id="stxt">연결 중...</span></div></div>
+    <div class="hL"><img class="hLogoImg" src="public/icon-512.png" alt="도시주택국"><h1>서구 도시주택국 대시보드</h1><div class="sync"><div class="sdot" id="sdot"></div><span id="stxt">연결 중...</span></div></div>
     <div class="hR"><span class="ubadge" id="ubadge"></span><button class="btnOut" onclick="doLogout()">로그아웃</button></div>
   </header>
   <div class="tabsBar">
@@ -1494,6 +1510,42 @@ function changeUserTeam(uid,newDept,newTeam){
     db.ref('users/'+uid).update({dept:newDept,team:newTeam});
   });
 }
+
+/* ── PWA: 서비스워커 등록 + 설치 프롬프트 ───────── */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      console.log('[PWA] 서비스워커 등록 완료:',reg.scope);
+    }).catch(function(err){console.warn('[PWA] 서비스워커 등록 실패:',err);});
+  });
+}
+var _pwaDefer=null;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();
+  _pwaDefer=e;
+  var btn=document.getElementById('pwaInstall');
+  if(btn&&!localStorage.getItem('pwa_dismiss'))btn.style.display='inline-flex';
+});
+window.addEventListener('appinstalled',function(){
+  console.log('[PWA] 설치 완료');
+  var btn=document.getElementById('pwaInstall');if(btn)btn.style.display='none';
+  _pwaDefer=null;
+});
+function installPWA(){
+  if(!_pwaDefer){alert('이미 설치되어 있거나 설치할 수 없는 환경입니다.\n\niOS Safari: 공유 → 홈 화면에 추가\nAndroid Chrome: 메뉴 → 앱 설치');return;}
+  _pwaDefer.prompt();
+  _pwaDefer.userChoice.then(function(r){
+    if(r.outcome==='accepted')console.log('[PWA] 사용자 설치 수락');
+    _pwaDefer=null;
+    var btn=document.getElementById('pwaInstall');if(btn)btn.style.display='none';
+  });
+}
+function dismissPWA(e){
+  e.stopPropagation();
+  localStorage.setItem('pwa_dismiss','1');
+  document.getElementById('pwaInstall').style.display='none';
+}
 </script>
+<button id="pwaInstall" onclick="installPWA()" title="홈 화면에 앱으로 설치">📱 앱 설치<span class="pwaX" onclick="dismissPWA(event)" title="닫기">✕</span></button>
 </body>
 </html>
