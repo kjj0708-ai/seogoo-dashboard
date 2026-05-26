@@ -757,17 +757,19 @@ function downloadWeeklyReport(){
     body+="<table style='border-collapse:collapse;width:100%;table-layout:fixed;margin-bottom:4pt;'>";
     for(var i=0;i<cells.length;i+=2){
       var c1=cells[i], c2=cells[i+1]||null;
-      var tdBase="border:1px solid #999;padding:2px 5px;font-family:\"맑은 고딕\",sans-serif;";
-      var tdCt  ="border:1px solid #999;padding:3px 5px;vertical-align:top;font-size:9.5pt;font-family:\"맑은 고딕\",sans-serif;line-height:1.55;white-space:pre-wrap;word-break:break-word;";
-      // 팀명+사업명 행 (타이틀, 파란 배경) — 팀명은 작은 뱃지로
-      var mkTitle=function(c,extra){
-        if(!c)return "<td style='width:50%;"+tdBase+"background:#e8edf3;"+extra+"'></td>";
-        return "<td style='width:50%;"+tdBase+"background:#2563a8;color:#fff;font-size:10pt;font-weight:700;"+extra+"'>"
-          +"<span style='font-size:8pt;font-weight:400;background:rgba(255,255,255,.22);padding:0 5px;border-radius:3px;margin-right:5px;'>"+toDoc(c.team)+"</span>"
-          +toDoc(c.proj.name)+"</td>";
-      };
-      body+="<tr>"+mkTitle(c1,'')+mkTitle(c2,'border-left:2px solid #fff;')+"</tr>";
-      // 내용 행
+      var sep='border-left:2px solid #fff;';
+      var tdCt="border:1px solid #999;padding:3px 5px;vertical-align:top;font-size:9.5pt;font-family:\"맑은 고딕\",sans-serif;line-height:1.55;white-space:pre-wrap;word-break:break-word;";
+      // ① 팀명 행 — 다크 네이비 박스, 흰 테두리로 셀 구분, 소문자 느낌의 작은 폰트
+      body+="<tr>"
+        +"<td style='width:50%;border:1px solid #999;padding:1px 6px;background:#1a3a5c;color:#e8d080;font-size:8.5pt;font-weight:700;font-family:\"맑은 고딕\",sans-serif;letter-spacing:0.5pt;'>▶ "+toDoc(c1.team)+"</td>"
+        +"<td style='width:50%;border:1px solid #999;"+sep+"padding:1px 6px;background:"+(c2?'#1a3a5c':'#2d3f52')+"  ;color:#e8d080;font-size:8.5pt;font-weight:700;font-family:\"맑은 고딕\",sans-serif;letter-spacing:0.5pt;'>"+(c2?'▶ '+toDoc(c2.team):'')+"</td>"
+        +"</tr>";
+      // ② 사업명 행 — 미디엄 블루, 굵은 흰 글씨
+      body+="<tr>"
+        +"<td style='border:1px solid #999;padding:2px 6px;background:#2563a8;color:#fff;font-size:10pt;font-weight:700;font-family:\"맑은 고딕\",sans-serif;'>"+toDoc(c1.proj.name)+"</td>"
+        +"<td style='border:1px solid #999;"+sep+"padding:2px 6px;background:"+(c2?'#2563a8':'#dce6f0')+";color:"+(c2?'#fff':'transparent')+";font-size:10pt;font-weight:700;font-family:\"맑은 고딕\",sans-serif;'>"+(c2?toDoc(c2.proj.name):'')+"</td>"
+        +"</tr>";
+      // ③ 내용 행 — 흰 배경
       body+="<tr>"
         +"<td style='"+tdCt+"'>"+toDoc(getContent(c1.proj))+"</td>"
         +"<td style='"+tdCt+"border-left:2px solid #bbb;'>"+(c2?toDoc(getContent(c2.proj)):'')+"</td>"
