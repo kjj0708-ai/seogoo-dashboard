@@ -856,7 +856,105 @@ function isThisReportWeek(dateStr){
   return d>=thu&&d<=wed;
 }
 function switchProjView(v){var ba=document.getElementById('btnViewAll'),bw=document.getElementById('btnViewWeek'),va=document.getElementById('viewAll'),vw=document.getElementById('viewWeek'),wdb=document.getElementById('weekDlBtn');if(v==='week'){ba.classList.remove('active');bw.classList.add('active');va.style.display='none';vw.style.display='block';if(wdb)wdb.style.display='flex';renderWeeklyView();}else{ba.classList.add('active');bw.classList.remove('active');va.style.display='block';vw.style.display='none';if(wdb)wdb.style.display='none';}}
-function renderWeeklyView(){var container=document.getElementById('weeklyList');if(!container)return;var tw=thisWeek();var weekEntries=[];projects.forEach(function(p){if(!p.history)return;Object.values(p.history).forEach(function(h){if((h.week||getISOWeek(h.date))===tw){weekEntries.push({proj:p,entry:h});}});});if(!weekEntries.length){container.innerHTML='<div style="text-align:center;color:var(--tx3);padding:60px 20px;font-size:14px;">이번주 입력된 내용이 없습니다.<br><span style="font-size:12px;margin-top:8px;display:block;">📝 버튼으로 사업 진행상황을 업데이트해보세요.</span></div>';return;}var grouped={};var deptOrder=Object.keys(ORG);weekEntries.sort(function(a,b){var di=deptOrder.indexOf(a.proj.dept)-deptOrder.indexOf(b.proj.dept);if(di!==0)return di;var ta=ORG[a.proj.dept]||[],tb=ORG[b.proj.dept]||[];return ta.indexOf(a.proj.team)-tb.indexOf(b.proj.team);});weekEntries.forEach(function(we){var key=we.proj.dept+'||'+we.proj.team;if(!grouped[key])grouped[key]={dept:we.proj.dept,team:we.proj.team,entries:[]};grouped[key].entries.push(we);});container.innerHTML=Object.values(grouped).map(function(g){return'<div class="weeklyGroup"><div class="weeklyGroupH">📂 '+esc(g.dept)+' &nbsp;/&nbsp; '+esc(g.team)+'</div><div class="weeklyGroupB">'+g.entries.map(function(we){var h=we.entry,p=we.proj;var content=h.content||h.achieve||h.memo||'';return'<div class="weeklyItem"><div class="weeklyItemTitle"><span class="projNameLink" onclick="event.stopPropagation();openProjDetail(\''+p.id+'\')">'+esc(p.name)+'</span></div><div class="weeklyItemMeta">'+esc(h.author||'')+' · '+fmtD(new Date(h.date))+'</div>'+(content?'<div class="repSecCt" style="margin-top:6px;">'+esc(content)+'</div>':'')+'</div>';}).join('')+'</div></div>';}).join('');}
+function renderWeeklyView(){
+  var container=document.getElementById('weeklyList');
+  if(!container)return;
+  var now=new Date();
+  var weekAgo=new Date(now.getTime()-7*24*60*60*1000);
+
+  // 최근 1주일 내 수정된 사업만 추출
+  var recent=projects.filter(function(p){
+    var d=new Date(p.updatedAt||p.createdAt);
+    return !isNaN(d) && d>=weekAgo && d<=now;
+  });
+
+  if(!recent.length){
+    container.innerHTML='<div style="text-align:center;color:var(--tx3);padding:60px 20px;font-size:14px;">최근 1주일 내 수정된 사업이 없습니다.<br><span style="font-size:12px;margin-top:8px;display:block;">📝 사업을 수정하면 자동으로 여기에 표시됩니다.</span></div>';
+    return;
+  }
+
+  // 최신순 정렬
+  recent.sort(function(a,b){return new Date(b.updatedAt||b.createdAt)-new Date(a.updatedAt||a.createdAt);});
+
+  // 부서 → 팀 그룹핑
+  var deptOrder=Object.keys(ORG);
+  var byDept={};
+  recent.forEach(function(p){
+    var d=p.dept||'미지정', t=p.team||'미지정';
+    if(!byDept[d])byDept[d]={};
+    if(!byDept[d][t])byDept[d][t]=[];
+    byDept[d][t].push(p);
+  });
+
+  // 요약 헤더
+  var html='<div style="margin-bottom:14px;padding:14px 18px;background:linear-gradient(135deg,#1a3a5c,#2563a8);color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">'
+    +'<div><div style="font-size:14px;font-weight:700;">📅 최근 1주일 수정 사업</div>'
+    +'<div style="font-size:11px;opacity:.85;margin-top:3px;">'+fmtDT(weekAgo)+' ~ '+fmtDT(now)+'</div></div>'
+    +'<div style="font-size:13px;background:rgba(255,255,255,.2);padding:6px 14px;border-radius:20px;">총 <b style="font-size:16px;">'+recent.length+'</b> 건 · '+Object.keys(byDept).length+'개 부서</div>'
+    +'</div>';
+
+  // 부서 카드 렌더
+  Object.keys(byDept).sort(function(a,b){
+    var ia=deptOrder.indexOf(a), ib=deptOrder.indexOf(b);
+    if(ia<0)ia=999; if(ib<0)ib=999;
+    return ia-ib;
+  }).forEach(function(dept){
+    var teams=byDept[dept];
+    var totalDept=Object.values(teams).reduce(function(s,arr){return s+arr.length;},0);
+    var teamOrder=ORG[dept]||[];
+
+    html+='<div style="background:#fff;border-radius:10px;box-shadow:var(--sh);overflow:hidden;margin-bottom:14px;">'
+      +'<div style="background:var(--primary);color:#fff;padding:11px 18px;display:flex;justify-content:space-between;align-items:center;">'
+        +'<span style="font-size:14px;font-weight:700;">📂 '+esc(dept)+'</span>'
+        +'<span style="font-size:11px;background:rgba(255,255,255,.22);padding:3px 11px;border-radius:12px;">'+totalDept+'건</span>'
+      +'</div>';
+
+    Object.keys(teams).sort(function(a,b){
+      var ia=teamOrder.indexOf(a), ib=teamOrder.indexOf(b);
+      if(ia<0)ia=999; if(ib<0)ib=999;
+      return ia-ib;
+    }).forEach(function(team){
+      var projs=teams[team];
+      html+='<div style="border-top:1px solid var(--bdr);">'
+        +'<div style="background:#f0f4f8;padding:9px 18px;display:flex;justify-content:space-between;align-items:center;">'
+          +'<span style="font-size:13px;font-weight:600;color:var(--primary);">👥 '+esc(team)+'</span>'
+          +'<span style="font-size:11px;color:var(--tx3);">'+projs.length+'건 수정</span>'
+        +'</div>';
+
+      projs.forEach(function(p){
+        var modDate=new Date(p.updatedAt||p.createdAt);
+        var diff=now-modDate;
+        var dayAgo=Math.floor(diff/(24*60*60*1000));
+        var hourAgo=Math.floor(diff/(60*60*1000));
+        var minAgo=Math.floor(diff/(60*1000));
+        var when= minAgo<60 ? minAgo+'분 전' : hourAgo<24 ? hourAgo+'시간 전' : dayAgo===1?'어제':dayAgo+'일 전';
+        var rawContent=p.content||'';
+        // HTML 태그 제거하여 미리보기
+        var plain=rawContent.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+        var preview=plain.length>250?plain.substring(0,250)+' …':plain;
+
+        html+='<div style="padding:13px 18px 15px;border-bottom:1px solid var(--bg);">'
+          +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:5px;">'
+            +'<span class="projNameLink" onclick="event.stopPropagation();openProjDetail(\''+p.id+'\')" style="font-size:14.5px;font-weight:700;color:var(--primary);cursor:pointer;">📌 '+esc(p.name)+'</span>'
+            +'<span style="flex-shrink:0;font-size:11px;color:#fff;background:var(--accent);padding:3px 10px;border-radius:11px;font-weight:600;">'+when+'</span>'
+          +'</div>'
+          +'<div style="font-size:11px;color:var(--tx3);margin-bottom:8px;">👤 '+esc(p.author||'-')+'  ·  🕐 '+fmtDT(modDate)+'</div>';
+
+        if(preview){
+          html+='<div style="font-size:13px;color:var(--tx2);line-height:1.65;padding:11px 13px;background:var(--bg);border-radius:6px;border-left:3px solid var(--pl);word-break:break-word;white-space:pre-wrap;">'+esc(preview)+'</div>';
+        } else {
+          html+='<div style="font-size:12px;color:var(--tx3);font-style:italic;padding:8px 0;">(수정내용 없음)</div>';
+        }
+        html+='</div>';
+      });
+
+      html+='</div>';
+    });
+    html+='</div>';
+  });
+
+  container.innerHTML=html;
+}
 function saveEvent(){var t=document.getElementById('evTitle').value.trim();var d=document.getElementById('evDate').value;var ty=document.getElementById('evType').value;if(!t||!d){alert('제목과 날짜를 입력하세요.');return;}var data={title:t,date:d,type:ty};if(db){dbPush('events',data);}else{data.id=Date.now().toString();events.push(data);renderCal();saveLS();}document.getElementById('evTitle').value='';}
 function deleteEvent(id){showConf('이 일정을 삭제하시겠습니까?',function(){dbRemove('events/'+id);if(!db){events=events.filter(function(e){return e.id!==id;});renderCal();saveLS();}});}
 function openPdfImport(){document.getElementById('pdfImportModal').style.display='flex';}
