@@ -743,31 +743,37 @@ function downloadWeeklyReport(){
     var teams=byDept[dept];
     var teamOrder=ORG[dept]||[];
     var teamKeys=Object.keys(teams).sort(function(a,b){var ia=teamOrder.indexOf(a),ib=teamOrder.indexOf(b);if(ia<0)ia=999;if(ib<0)ib=999;return ia-ib;});
+
+    // 부서 전체 (팀, 사업) 셀을 하나의 평탄한 목록으로 — 팀 경계 무시하고 2열로 채움
+    var cells=[];
     teamKeys.forEach(function(team){
-      var projs=teams[team];
-      // ① 부서명 > 팀명 헤더 (표 위에 별도 표시)
-      body+="<p style='font-size:10.5pt;font-family:\"맑은 고딕\",sans-serif;margin:5pt 0 1pt 0;font-weight:700;color:#ffffff;background:#1a3a5c;padding:2px 6px;'>"+toDoc(dept)+" &gt; "+toDoc(team)+"</p>";
-      // ② 팀별 표 (2열: 제목행 + 내용행 반복)
-      body+="<table style='border-collapse:collapse;width:100%;table-layout:fixed;margin-bottom:2pt;'>";
-      for(var i=0;i<projs.length;i+=2){
-        var p1=projs[i],p2=projs[i+1]||null;
-        var nm1=p1?toDoc(p1.name):'';
-        var nm2=p2?toDoc(p2.name):'';
-        var ct1=p1?toDoc(getContent(p1)):'';
-        var ct2=p2?toDoc(getContent(p2)):'';
-        // 제목행 (상단)
-        body+="<tr>"
-          +"<td style='width:50%;border:1px solid #999;padding:2px 5px;background:#2563a8;color:#fff;font-weight:700;font-size:10pt;font-family:\"맑은 고딕\",sans-serif;'>"+nm1+"</td>"
-          +"<td style='width:50%;border:1px solid #999;padding:2px 5px;background:#2563a8;color:#fff;font-weight:700;font-size:10pt;font-family:\"맑은 고딕\",sans-serif;border-left:2px solid #fff;'>"+nm2+"</td>"
-          +"</tr>";
-        // 내용행 (하단)
-        body+="<tr>"
-          +"<td style='border:1px solid #999;padding:3px 5px;vertical-align:top;font-size:9.5pt;font-family:\"맑은 고딕\",sans-serif;line-height:1.55;white-space:pre-wrap;word-break:break-word;'>"+ct1+"</td>"
-          +"<td style='border:1px solid #999;padding:3px 5px;vertical-align:top;font-size:9.5pt;font-family:\"맑은 고딕\",sans-serif;line-height:1.55;white-space:pre-wrap;word-break:break-word;border-left:2px solid #aaa;'>"+ct2+"</td>"
-          +"</tr>";
-      }
-      body+="</table>";
+      teams[team].forEach(function(p){cells.push({team:team,proj:p});});
     });
+
+    // 부서 헤더
+    body+="<p style='font-size:11pt;font-family:\"맑은 고딕\",sans-serif;margin:6pt 0 1pt 0;font-weight:700;color:#fff;background:#1a3a5c;padding:3px 6px;'>📂 "+toDoc(dept)+"</p>";
+
+    // 부서 전체를 하나의 표로 — 2열 흐름 (팀 달라도 빈칸 없이 채움)
+    body+="<table style='border-collapse:collapse;width:100%;table-layout:fixed;margin-bottom:4pt;'>";
+    for(var i=0;i<cells.length;i+=2){
+      var c1=cells[i], c2=cells[i+1]||null;
+      var tdBase="border:1px solid #999;padding:2px 5px;font-family:\"맑은 고딕\",sans-serif;";
+      var tdCt  ="border:1px solid #999;padding:3px 5px;vertical-align:top;font-size:9.5pt;font-family:\"맑은 고딕\",sans-serif;line-height:1.55;white-space:pre-wrap;word-break:break-word;";
+      // 팀명+사업명 행 (타이틀, 파란 배경) — 팀명은 작은 뱃지로
+      var mkTitle=function(c,extra){
+        if(!c)return "<td style='width:50%;"+tdBase+"background:#e8edf3;"+extra+"'></td>";
+        return "<td style='width:50%;"+tdBase+"background:#2563a8;color:#fff;font-size:10pt;font-weight:700;"+extra+"'>"
+          +"<span style='font-size:8pt;font-weight:400;background:rgba(255,255,255,.22);padding:0 5px;border-radius:3px;margin-right:5px;'>"+toDoc(c.team)+"</span>"
+          +toDoc(c.proj.name)+"</td>";
+      };
+      body+="<tr>"+mkTitle(c1,'')+mkTitle(c2,'border-left:2px solid #fff;')+"</tr>";
+      // 내용 행
+      body+="<tr>"
+        +"<td style='"+tdCt+"'>"+toDoc(getContent(c1.proj))+"</td>"
+        +"<td style='"+tdCt+"border-left:2px solid #bbb;'>"+(c2?toDoc(getContent(c2.proj)):'')+"</td>"
+        +"</tr>";
+    }
+    body+="</table>";
   });
 
   var nowFmt=fmtD(now);
