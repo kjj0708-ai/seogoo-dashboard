@@ -104,13 +104,10 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .calWrap{background:#fff;border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;}
 .calNav{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bdr);}
 .calTitle{font-size:17px;font-weight:700;}.calNBtn{background:var(--bg);border:1px solid var(--bdr);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:16px;}
-.calGrid{display:grid;grid-template-columns:repeat(7,1fr);}
-.calGrid.weekdays-only{grid-template-columns:repeat(5,1fr);}
+.calGrid{display:grid;grid-template-columns:repeat(5,1fr);}
 .calDL{padding:8px;text-align:center;font-size:12px;font-weight:600;color:var(--tx2);background:var(--bg);}
-.calCell{min-height:88px;padding:5px;border-top:1px solid var(--bdr);border-right:1px solid var(--bdr);cursor:pointer;transition:background .15s;}
-.calCell:hover{background:#f0f4f8;}.calCell:nth-child(7n){border-right:none;}
-.calGrid.weekdays-only .calCell:nth-child(7n){border-right:1px solid var(--bdr);}
-.calGrid.weekdays-only .calCell:nth-child(5n){border-right:none;}
+.calCell{min-height:88px;padding:5px;border-top:1px solid var(--bdr);border-right:1px solid var(--bdr);cursor:pointer;transition:background .15s;overflow:hidden;}
+.calCell:hover{background:#f0f4f8;}.calCell:nth-child(5n){border-right:none;}
 .calCell.om .calDate{color:var(--tx3);}
 .calCell.today .calDate{background:var(--pl);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:700;}
 .calDate{font-size:12px;font-weight:500;margin-bottom:3px;}
@@ -139,11 +136,11 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .photoClose{position:fixed;top:16px;right:16px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);color:#fff;font-size:22px;width:44px;height:44px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:401;line-height:1;}
 .photoClose:hover{background:rgba(255,255,255,.35);}
 .archiveBadge{display:inline-block;background:#fef3c7;color:#92400e;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;margin-left:8px;}
-@media(max-width:768px){main{padding:16px;}.calLayout,.dGrid{grid-template-columns:1fr;}.statRow{grid-template-columns:repeat(2,1fr);}header{padding:0 16px;}.hL h1{font-size:14px;}.tabsBar{padding:0 8px;}.tBtn{padding:12px 10px;font-size:13px;}.calWrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}.calGrid{min-width:350px;}
-  .calGrid.weekdays-only .calCell{min-height:60px;padding:3px;}
-  .calGrid.weekdays-only .calDL{padding:5px 2px;font-size:11px;}
-  .calGrid.weekdays-only .calDate{font-size:11px;}
-  .calGrid.weekdays-only .calEv{font-size:9px;padding:1px 3px;}
+@media(max-width:768px){main{padding:16px;}.calLayout,.dGrid{grid-template-columns:1fr;}.statRow{grid-template-columns:repeat(2,1fr);}header{padding:0 16px;}.hL h1{font-size:14px;}.tabsBar{padding:0 8px;}.tBtn{padding:12px 10px;font-size:13px;}.calWrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;}.calGrid{min-width:560px;}
+  .calCell{min-height:62px;padding:3px;}
+  .calDL{padding:5px 2px;font-size:11px;}
+  .calDate{font-size:11px;}
+  .calEv{font-size:9px;padding:1px 3px;}
 }
 @media(max-width:480px){.lbox{padding:32px 20px;}.calCell{min-height:55px;}
   .calGrid.weekdays-only .calCell{min-height:50px;padding:2px;}
@@ -794,39 +791,32 @@ function renderCal(){
   var te=document.getElementById('calTitle');if(!te)return;
   te.textContent=calY+'년 '+(calM+1)+'월';
   var grid=document.getElementById('calGrid');
-  var isMobile=window.innerWidth<=768;
-  if(isMobile){grid.className='calGrid weekdays-only';}else{grid.className='calGrid';}
-  var days=isMobile?['월','화','수','목','금']:['일','월','화','수','목','금','토'];
+  // 항상 월~금 5열 표시
+  grid.className='calGrid';
+  var days=['월','화','수','목','금'];
   var html=days.map(function(d){return '<div class="calDL">'+d+'</div>';}).join('');
   var fd=new Date(calY,calM,1).getDay(),ld=new Date(calY,calM+1,0).getDate(),today=new Date(),pl=new Date(calY,calM,0).getDate();
-  if(isMobile){
-    var monOffset=(fd===0||fd===6)?0:fd-1;
-    for(var i=monOffset-1;i>=0;i--)html+='<div class="calCell om"><div class="calDate">'+(pl-i)+'</div></div>';
-    for(var dd=1;dd<=ld;dd++){
-      var dow=new Date(calY,calM,dd).getDay();
-      if(dow===0||dow===6)continue;
-      var isTd=today.getFullYear()===calY&&today.getMonth()===calM&&today.getDate()===dd;
-      var ds=calY+'-'+pad(calM+1)+'-'+pad(dd);
-      var gcEs=GCD.filter(function(e){return e.d===ds;});
-      var dbEs=events.filter(function(e){return e.date===ds;});
-      var hI=instruction&&instruction.date&&instruction.date.slice(0,10)===ds;
-      var evH=gcEs.map(function(e){return '<div class="calEv gc" title="'+esc(e.t)+'">📅'+esc(e.t)+'</div>';}).join('')+dbEs.map(function(e){return '<div class="calEv '+(e.type||'mt')+'" title="'+esc(e.title)+'">'+esc(e.title)+'</div>';}).join('')+(hI?'<div class="calEv instr">📢지시</div>':'');
-      html+='<div class="calCell'+(isTd?' today':'')+'" onclick="selDay(\''+ds+'\')"><div class="calDate">'+dd+'</div>'+evH+'</div>';
-    }
-  } else {
-    for(var i=fd-1;i>=0;i--)html+='<div class="calCell om"><div class="calDate">'+(pl-i)+'</div></div>';
-    for(var dd=1;dd<=ld;dd++){
-      var isTd=today.getFullYear()===calY&&today.getMonth()===calM&&today.getDate()===dd;
-      var ds=calY+'-'+pad(calM+1)+'-'+pad(dd);
-      var gcEs=GCD.filter(function(e){return e.d===ds;});
-      var dbEs=events.filter(function(e){return e.date===ds;});
-      var hI=instruction&&instruction.date&&instruction.date.slice(0,10)===ds;
-      var evH=gcEs.map(function(e){return '<div class="calEv gc" title="'+esc(e.t)+'">📅'+esc(e.t)+'</div>';}).join('')+dbEs.map(function(e){return '<div class="calEv '+(e.type||'mt')+'" title="'+esc(e.title)+'">'+esc(e.title)+'</div>';}).join('')+(hI?'<div class="calEv instr">📢지시</div>':'');
-      html+='<div class="calCell'+(isTd?' today':'')+'" onclick="selDay(\''+ds+'\')"><div class="calDate">'+dd+'</div>'+evH+'</div>';
-    }
-    var rem=(7-(fd+ld)%7)%7;
-    for(var d2=1;d2<=rem;d2++)html+='<div class="calCell om"><div class="calDate">'+d2+'</div></div>';
+  // 월요일 시작 오프셋 (토·일 시작이면 0, 그 외 fd-1)
+  var monOffset=(fd===0||fd===6)?0:fd-1;
+  for(var i=monOffset-1;i>=0;i--)html+='<div class="calCell om"><div class="calDate">'+(pl-i)+'</div></div>';
+  var wdCount=0;
+  for(var dd=1;dd<=ld;dd++){
+    var dow=new Date(calY,calM,dd).getDay();
+    if(dow===0||dow===6)continue; // 토·일 제외
+    wdCount++;
+    var isTd=today.getFullYear()===calY&&today.getMonth()===calM&&today.getDate()===dd;
+    var ds=calY+'-'+pad(calM+1)+'-'+pad(dd);
+    var gcEs=GCD.filter(function(e){return e.d===ds;});
+    var dbEs=events.filter(function(e){return e.date===ds;});
+    var hI=instruction&&instruction.date&&instruction.date.slice(0,10)===ds;
+    var evH=gcEs.map(function(e){return '<div class="calEv gc" title="'+esc(e.t)+'">📅'+esc(e.t)+'</div>';}).join('')
+      +dbEs.map(function(e){return '<div class="calEv '+(e.type||'mt')+'" title="'+esc(e.title)+'">'+esc(e.title)+'</div>';}).join('')
+      +(hI?'<div class="calEv instr">📢지시</div>':'');
+    html+='<div class="calCell'+(isTd?' today':'')+'" onclick="selDay(\''+ds+'\')"><div class="calDate">'+dd+'</div>'+evH+'</div>';
   }
+  // 마지막 행 빈 칸 채우기
+  var trail=(5-(monOffset+wdCount)%5)%5;
+  for(var t=1;t<=trail;t++)html+='<div class="calCell om"><div class="calDate">'+t+'</div></div>';
   grid.innerHTML=html;
 }
 function selDay(ds){var panel=document.getElementById('dayEvts');var gcEs=GCD.filter(function(e){return e.d===ds;});var dbEs=events.filter(function(e){return e.date===ds;});var hI=instruction&&instruction.date&&instruction.date.slice(0,10)===ds;if(!gcEs.length&&!dbEs.length&&!hI){panel.innerHTML='<div class="gcLoad">이 날 일정이 없습니다.</div>';}else{panel.innerHTML='<b style="font-size:13px;color:var(--primary)">'+ds+'</b><br><br>'+gcEs.map(function(e){return '<div class="gcItem"><div class="gcItemT">📅 '+esc(e.t)+'</div><div class="gcItemTime">'+esc(e.tm||'종일')+'</div></div>';}).join('')+dbEs.map(function(e){return '<div class="gcItem"><div class="gcItemT">'+esc(e.title)+'</div>'+(currentUser&&currentUser.type==='admin'?'<button class="btn btnD sm" onclick="deleteEvent(\''+e.id+'\')">삭제</button>':'')+'</div>';}).join('')+(hI?'<div class="gcItem"><div class="gcItemT">📢 국장 지시사항</div></div>':'');}if(currentUser&&currentUser.type==='admin')document.getElementById('evDate').value=ds;}
