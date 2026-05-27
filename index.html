@@ -654,7 +654,7 @@ function renderUserMgmt(usersData){var list=document.getElementById('pendingUser
 function approveUser(uid){if(!db)return;db.ref('users/'+uid+'/status').set('approved');}
 function rejectUser(uid){if(!db)return;showConf('이 사용자의 가입을 거절하시겠습니까?',function(){db.ref('users/'+uid+'/status').set('rejected');});}
 function setSyncOK(ok){var d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;if(ok){d.classList.remove('off');t.textContent='실시간 연결';}else{d.classList.add('off');t.textContent='오프라인(로컬)';}}
-function switchTab(t,btn){document.querySelectorAll('.tBtn').forEach(function(b){b.classList.remove('active');});document.querySelectorAll('.tPanel').forEach(function(p){p.classList.remove('active');});btn.classList.add('active');document.getElementById('panel-'+t).classList.add('active');if(t==='calendar'){renderCal();fetchGCal();}if(t==='orgchart'){if(window._allUsers!==undefined){renderMemberList();}else if(db){var _mlEl=document.getElementById('memberListBody');if(_mlEl)_mlEl.innerHTML='<div style="text-align:center;color:var(--tx3);padding:24px;">⏳ 데이터 로딩 중...</div>';db.ref('users').once('value').then(function(s){window._allUsers=s.val()||{};renderUserMgmt(s.val());renderMemberList();});}else{renderMemberList();}}}
+function switchTab(t,btn){document.querySelectorAll('.tBtn').forEach(function(b){b.classList.remove('active');});document.querySelectorAll('.tPanel').forEach(function(p){p.classList.remove('active');});btn.classList.add('active');document.getElementById('panel-'+t).classList.add('active');if(t==='calendar'){renderCal();fetchGCal();}if(t==='orgchart'){loadAndRenderMembers();}}
 function saveInstr(){var tx=document.getElementById('instrInput').value.trim();if(!tx)return;var data={text:tx,date:new Date().toISOString()};dbSet('instruction',data);instruction=data;document.getElementById('instrEditBox').style.display='none';renderInstr();}
 function newInstr(){document.getElementById('instrInput').value='';document.getElementById('instrEditBox').style.display='block';document.getElementById('instrInput').focus();}
 function editInstr(){document.getElementById('instrInput').value=instruction?instruction.text:'';document.getElementById('instrEditBox').style.display='block';document.getElementById('instrInput').focus();}
@@ -1576,6 +1576,26 @@ saveProject=function(){
 };
 
 /* ── 회원관리 ──────────────────────────────── */
+function loadAndRenderMembers(){
+  var el=document.getElementById('memberListBody');
+  if(!el)return;
+  if(!db){window._allUsers=window._allUsers||{};renderMemberList();return;}
+  el.innerHTML='<div style="text-align:center;color:var(--tx3);padding:20px;">⏳ 불러오는 중...</div>';
+  db.ref('users').once('value').then(function(s){
+    var data=s.val();
+    window._allUsers=data||{};
+    renderUserMgmt(data);
+    renderMemberList();
+  }).catch(function(err){
+    el.innerHTML='<div style="padding:16px;color:#b91c1c;font-size:13px;line-height:1.8;">'
+      +'❌ <b>Firebase 읽기 실패</b><br>'
+      +'오류: '+esc(err.message||String(err))+'<br><br>'
+      +'<b>해결 방법:</b><br>'
+      +'Firebase 콘솔 → Realtime Database → 규칙(Rules) 탭에서<br>'
+      +'<code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">&quot;.read&quot;: &quot;auth != null&quot;</code> 로 설정하세요.'
+      +'</div>';
+  });
+}
 function renderMemberList(){
   var el=document.getElementById('memberListBody');
   var cntEl=document.getElementById('memberCnt');
@@ -1603,7 +1623,16 @@ function renderMemberList(){
     return (roleOrd[a.role]||9)-(roleOrd[b.role]||9);
   });
   if(cntEl)cntEl.textContent=members.length+'명';
-  if(!members.length){el.innerHTML='<div style="text-align:center;color:var(--tx3);padding:24px;">'+(q?'검색 결과가 없습니다.':'등록된 회원이 없습니다.')+'</div>';return;}
+  if(!members.length){
+    var totalKeys=Object.keys(allU).length;
+    el.innerHTML='<div style="text-align:center;color:var(--tx3);padding:20px;">'
+      +(q?'검색 결과가 없습니다.':'등록된 회원이 없습니다.')+'</div>'
+      +'<div style="font-size:11px;color:#94a3b8;text-align:center;padding:0 0 12px;">'
+      +'Firebase users 노드: '+totalKeys+'건 · DB연결: '+(db?'✅':'❌')
+      +(totalKeys>0?' (rejected 상태만 있음)':'')
+      +'</div>';
+    return;
+  }
   var html='';var lastDept='',lastTeam='';
   members.forEach(function(m){
     if(m.dept!==lastDept){html+='<div class="mbrDeptLabel">📂 '+esc(m.dept||'(소속 미지정)')+'</div>';lastDept=m.dept;lastTeam='';}
