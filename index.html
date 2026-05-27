@@ -180,6 +180,18 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .orgCallBtn{display:inline-flex;align-items:center;gap:4px;background:#dcfce7;color:#166534;border:none;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;font-family:'Noto Sans KR',sans-serif;transition:background .15s;flex-shrink:0;margin-left:6px;}
 .orgCallBtn:hover{background:#16a34a;color:#fff;}
 .orgCallBtn.noPhone{background:var(--bg);color:var(--tx3);cursor:default;}
+.orgGwajangBlock{border-bottom:3px solid #1a3a5c;}
+.orgMember.isGwajang{background:linear-gradient(135deg,#1a3a5c,#1e4d7a);color:#fff;}
+.orgMember.isGwajang .orgMemberInfo{color:#f5e17a;}
+.orgMember.isGwajang .orgMemberPhone{color:rgba(255,255,255,.7);}
+.orgMember.isGwajang .orgCallBtn{background:#e8d080;color:#1a3a5c;}
+.orgMember.isGwajang .orgCallBtn:hover{background:#fbbf24;color:#1a3a5c;}
+.orgMember.isTeamjang{background:#eff6ff;border-left:3px solid var(--primary);}
+.orgRoleBadge{display:inline-block;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:6px;vertical-align:middle;}
+.orgRoleGwajang{background:#e8d080;color:#1a3a5c;}
+.orgRoleTeamjang{background:#bfdbfe;color:#1e3a8a;}
+.orgRoleStaff{background:#e2e8f0;color:#475569;}
+.orgRoleLabel{padding:4px 14px;font-size:11px;font-weight:700;color:var(--tx3);letter-spacing:.5px;background:#f8fafc;border-top:1px solid var(--bg);}
 .scanUpload{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg);border:1.5px dashed var(--bdr);border-radius:8px;cursor:pointer;font-size:13px;color:var(--tx2);margin-bottom:6px;}
 .scanUpload:hover{border-color:var(--pl);color:var(--pl);}
 .ocrStatus{font-size:12px;min-height:18px;margin-bottom:8px;}
@@ -617,7 +629,7 @@ function saveProfileSetup(){var name=(document.getElementById('psName').value||'
 function showPsErr(m){var e=document.getElementById('psErr');if(e){e.textContent=m;e.style.display='block';}}
 function showLErr(m){var e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
 function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('pendingScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';
-if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminCalPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';setupUsersListener();}var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();if(db)setupProjectsListener();else renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';/* Firebase 응답 전 즉시 현재 값으로 채우기 */var _ka0=document.getElementById('gcalApiKey');if(_ka0)_ka0.value=GCAL_API_KEY;var _ki0=document.getElementById('gcalCalId');if(_ki0)_ki0.value=GCAL_CAL_ID;setGCalSt(GCAL_API_KEY?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!db){loadLS();fetchGCal();}else{if(_gcalRef){_gcalRef.off('value');}_gcalRef=db.ref('settings/gcal');_gcalRef.on('value',function(snap){var s=snap.val();if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser&&currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;setGCalSt(s&&s.apiKey?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}fetchGCal();});}history.pushState({inApp:true},'');}
+if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminCalPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';}setupUsersListener();var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();if(db)setupProjectsListener();else renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';/* Firebase 응답 전 즉시 현재 값으로 채우기 */var _ka0=document.getElementById('gcalApiKey');if(_ka0)_ka0.value=GCAL_API_KEY;var _ki0=document.getElementById('gcalCalId');if(_ki0)_ki0.value=GCAL_CAL_ID;setGCalSt(GCAL_API_KEY?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!db){loadLS();fetchGCal();}else{if(_gcalRef){_gcalRef.off('value');}_gcalRef=db.ref('settings/gcal');_gcalRef.on('value',function(snap){var s=snap.val();if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser&&currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;setGCalSt(s&&s.apiKey?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}fetchGCal();});}history.pushState({inApp:true},'');}
 function teardownProjectsListener(){if(_projRef){_projRef.off('value');_projRef=null;}}
 function setupProjectsListener(){teardownProjectsListener();if(!db||!currentUser)return;if(currentUser.type==='admin'){_projRef=db.ref('projects');_projRef.on('value',function(s){projects=[];if(s.val()){Object.entries(s.val()).forEach(function(de){var dept=de[0];if(de[1]&&typeof de[1]==='object'){Object.entries(de[1]).forEach(function(pe){projects.push(Object.assign({id:pe[0],dept:dept},pe[1]));});}});}renderProjectsGrid();});}else{_projRef=db.ref('projects/'+currentUser.dept);_projRef.on('value',function(s){var dept=currentUser.dept;projects=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0],dept:dept},e[1]);}):[];renderProjectsGrid();});}}
 function projPath(id){var p=projects.find(function(x){return x.id===id;});return p?'projects/'+p.dept+'/'+id:null;}
@@ -648,14 +660,15 @@ function deleteIssue(id){showConf('이 이슈를 삭제하시겠습니까?',func
 function canEditIss(iss){if(!currentUser)return false;if(currentUser.type==='admin')return true;return currentUser.dept===iss.dept;}
 function renderIssues(){
   var sa=document.getElementById('statAll'),sp=document.getElementById('statProc'),sd=document.getElementById('statDone'),sap=document.getElementById('statAvgProg');
-  var procList=issues.filter(function(i){return i.status==='proc';});
-  var doneList=issues.filter(function(i){return i.status==='done';});
-  if(sa){sa.textContent=issues.length;sp.textContent=procList.length;sd.textContent=doneList.length;
-    var allProg=issues.map(function(i){return parseInt(i.progress)||0;});
-    var avg=issues.length?Math.round(allProg.reduce(function(a,b){return a+b;},0)/issues.length):0;
+  var baseIssues=(currentUser&&currentUser.type!=='admin')?issues.filter(function(i){return i.dept===currentUser.dept;}):issues;
+  var procList=baseIssues.filter(function(i){return i.status==='proc';});
+  var doneList=baseIssues.filter(function(i){return i.status==='done';});
+  if(sa){sa.textContent=baseIssues.length;sp.textContent=procList.length;sd.textContent=doneList.length;
+    var allProg=baseIssues.map(function(i){return parseInt(i.progress)||0;});
+    var avg=baseIssues.length?Math.round(allProg.reduce(function(a,b){return a+b;},0)/baseIssues.length):0;
     if(sap)sap.textContent=avg+'%';}
   var dF=document.getElementById('filterDept')?document.getElementById('filterDept').value:'';
-  var f=issues.slice();
+  var f=baseIssues.slice();
   if(statusFilter)f=f.filter(function(i){return i.status===statusFilter;});
   if(dF)f=f.filter(function(i){return i.dept===dF;});
   var ORD={proc:0,done:1};
@@ -1552,39 +1565,52 @@ function renderOrgChart(){
   var container=document.getElementById('orgChart');
   if(!container)return;
   var isAdmin=currentUser&&currentUser.isAdmin;
-  /* 팀별 직원 분류 */
-  var byTeam={};
   var allU=window._allUsers||{};
+  /* 과별 승인 직원 분류 */
+  var byDept={};
   Object.entries(allU).forEach(function(e){
     var uid=e[0],u=e[1];
     if(!u||u.status!=='approved')return;
-    var key=u.dept+'||'+u.team;
-    if(!byTeam[key])byTeam[key]=[];
-    byTeam[key].push({uid:uid,name:u.name||'',phone:u.phone||'',isAdmin:!!u.isAdmin});
+    var d=u.dept||'';if(!byDept[d])byDept[d]=[];
+    byDept[d].push({uid:uid,name:u.name||'',phone:u.phone||'',role:u.role||'주무관',team:u.team||'',isAdmin:!!u.isAdmin});
   });
-  /* 렌더 */
+  /* 멤버 카드 렌더 */
+  function mCard(m){
+    var tel=m.phone?m.phone.replace(/[^0-9+]/g,''):'';
+    var rc=m.role==='과장'?'isGwajang':m.role==='팀장'?'isTeamjang':'';
+    var bc=m.role==='과장'?'orgRoleGwajang':m.role==='팀장'?'orgRoleTeamjang':'orgRoleStaff';
+    return '<div class="orgMember '+rc+'">'
+      +'<div style="min-width:0;flex:1;">'
+        +'<div class="orgMemberInfo">'+esc(m.name)+(m.isAdmin?' 👑':'')
+          +'<span class="orgRoleBadge '+bc+'">'+esc(m.role)+'</span>'
+        +'</div>'
+        +(m.phone?'<div class="orgMemberPhone">📱 '+esc(m.phone)+'</div>':'<div class="orgMemberPhone" style="color:#f87171;">번호 미등록</div>')
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">'
+        +(tel?'<a class="orgCallBtn" href="tel:'+tel+'">📞 전화</a>':'<span class="orgCallBtn noPhone">📵 미등록</span>')
+        +(isAdmin?'<button style="font-size:11px;padding:3px 8px;background:var(--bg);border:1px solid var(--bdr);border-radius:4px;cursor:pointer;color:var(--tx2);" onclick="openTransfer(\''+m.uid+'\',\''+esc(m.name)+'\')">이관</button>':'')
+      +'</div>'
+      +'</div>';
+  }
+  /* 렌더: 과장→팀장→주무관 피라미드 */
   container.innerHTML=Object.keys(ORG).map(function(dept){
+    var dm=byDept[dept]||[];
+    /* 과장: 과 상단에 별도 표시 */
+    var gwajang=dm.filter(function(m){return m.role==='과장';});
+    var gwajangHtml=gwajang.length?'<div class="orgGwajangBlock">'+gwajang.map(mCard).join('')+'</div>':'';
+    /* 팀별: 팀장 → 주무관 */
     var teamHtml=ORG[dept].map(function(team){
-      var members=(byTeam[dept+'||'+team]||[]);
-      var memberHtml=members.length?members.map(function(m){
-        var telNum=m.phone?m.phone.replace(/[^0-9+]/g,''):'';
-        var callBtn=m.phone
-          ?'<a class="orgCallBtn" href="tel:'+telNum+'" title="'+esc(m.phone)+'">📞 전화</a>'
-          :'<span class="orgCallBtn noPhone">📵 미등록</span>';
-        return '<div class="orgMember">'
-          +'<div style="min-width:0;flex:1;">'
-            +'<div class="orgMemberInfo">'+esc(m.name)+(m.isAdmin?' 👑':'')+'</div>'
-            +(m.phone?'<div class="orgMemberPhone">📱 '+esc(m.phone)+'</div>':'<div class="orgMemberPhone" style="color:#f87171;">번호 미등록</div>')
-          +'</div>'
-          +'<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">'
-            +callBtn
-            +(isAdmin?'<button style="font-size:11px;padding:3px 8px;background:var(--bg);border:1px solid var(--bdr);border-radius:4px;cursor:pointer;color:var(--tx2);" onclick="openTransfer(\''+m.uid+'\',\''+esc(m.name)+'\')">이관</button>':'')
-          +'</div>'
-          +'</div>';
-      }).join(''):'<div style="padding:8px 18px;font-size:12px;color:var(--tx3);">등록된 직원 없음</div>';
-      return '<div class="orgTeam"><div class="orgTeamH">'+team+' <span class="tCnt">'+members.length+'명</span></div>'+memberHtml+'</div>';
+      var tm=dm.filter(function(m){return m.team===team&&m.role!=='과장';});
+      var tj=tm.filter(function(m){return m.role==='팀장';});
+      var st=tm.filter(function(m){return m.role==='주무관';});
+      var total=dm.filter(function(m){return m.team===team;}).length;
+      var inner='';
+      if(tj.length)inner+='<div class="orgRoleLabel">팀장</div>'+tj.map(mCard).join('');
+      if(st.length)inner+='<div class="orgRoleLabel">주무관</div>'+st.map(mCard).join('');
+      if(!tm.length)inner='<div style="padding:8px 18px;font-size:12px;color:var(--tx3);">등록된 직원 없음</div>';
+      return '<div class="orgTeam"><div class="orgTeamH">'+esc(team)+' <span class="tCnt">'+total+'명</span></div>'+inner+'</div>';
     }).join('');
-    return '<div class="orgDept"><div class="orgDeptH">📂 '+dept+'</div>'+teamHtml+'</div>';
+    return '<div class="orgDept"><div class="orgDeptH">📂 '+esc(dept)+'</div>'+gwajangHtml+teamHtml+'</div>';
   }).join('');
   /* 인사이동 기록 (admin) */
   if(isAdmin&&db){
