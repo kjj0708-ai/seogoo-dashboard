@@ -444,7 +444,6 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
               <div class="fr"><label>일정 제목</label><input type="text" id="evTitle" placeholder="일정명 입력"></div>
               <div class="fr"><label>날짜</label><input type="date" id="evDate"></div>
               <div class="fr"><label>시간</label><select id="evTime"></select></div>
-              <div class="fr"><label>유형</label><select id="evType"><option value="mt">회의</option><option value="is">현안</option><option value="instr">지시사항</option></select></div>
               <div style="display:flex;gap:6px;">
                 <button class="btn btnP" style="flex:1" id="btnCalSave" onclick="saveEvent()">저장</button>
                 <button class="btn btnG" style="display:none;" id="btnCalCancel" onclick="cancelCalEdit()">취소</button>
@@ -1134,7 +1133,6 @@ function editEvent(id){
   _editEventId=id;
   document.getElementById('evTitle').value=e.title||'';
   document.getElementById('evDate').value=e.date||'';
-  document.getElementById('evType').value=e.type||'mt';
   document.getElementById('evTime').value=e.time||'';
   var cardH=document.querySelector('#adminCalPnl .sCH');if(cardH)cardH.textContent='✏️ 일정 수정';
   var saveBtn=document.getElementById('btnCalSave');if(saveBtn)saveBtn.textContent='수정 저장';
@@ -1144,13 +1142,12 @@ function editEvent(id){
 function saveEvent(){
   var t=document.getElementById('evTitle').value.trim();
   var d=document.getElementById('evDate').value;
-  var ty=document.getElementById('evType').value;
   var tm=document.getElementById('evTime').value;
   if(!t||!d){alert('제목과 날짜를 입력하세요.');return;}
   var data={
     title:t,
     date:d,
-    type:ty,
+    type:'mt',
     time:tm||'',
     author:currentUser?currentUser.name:'알수없음',
     authorUid:currentUser?currentUser.uid:''
