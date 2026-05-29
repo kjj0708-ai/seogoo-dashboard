@@ -6,7 +6,7 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#ffffff",
+  "background_color": "#1a3a5c",
   "theme_color": "#1a3a5c",
   "lang": "ko",
   "categories": ["productivity", "business", "government"],
