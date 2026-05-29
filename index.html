@@ -443,7 +443,15 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
             <div class="sCB">
               <div class="fr"><label>일정 제목</label><input type="text" id="evTitle" placeholder="일정명 입력"></div>
               <div class="fr"><label>날짜</label><input type="date" id="evDate"></div>
-              <div class="fr"><label>시간</label><select id="evTime"></select></div>
+              <div class="fr" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <label style="margin:0;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--tx2);">
+                  <input type="checkbox" id="evAllDay" onchange="toggleAllDay(this.checked)" checked style="width:16px;height:16px;cursor:pointer;"> 종일 (시간 미설정)
+                </label>
+              </div>
+              <div id="evTimeRow" style="display:none;margin-bottom:8px;">
+                <div class="fr"><label>시작 시간</label><select id="evStartTime" style="font-size:12px;"></select></div>
+                <div class="fr"><label>종료 시간</label><select id="evEndTime" style="font-size:12px;"></select></div>
+              </div>
               <div style="display:flex;gap:6px;">
                 <button class="btn btnP" style="flex:1" id="btnCalSave" onclick="saveEvent()">저장</button>
                 <button class="btn btnG" style="display:none;" id="btnCalCancel" onclick="cancelCalEdit()">취소</button>
@@ -1105,19 +1113,33 @@ function isThisReportWeek(dateStr){
   return d>=thu&&d<=wed;
 }
 var _editEventId=null;
+function toggleAllDay(isAllDay){
+  var row=document.getElementById('evTimeRow');
+  if(row) row.style.display=isAllDay?'none':'block';
+}
 function initTimeDropdown(){
-  var el=document.getElementById('evTime');if(!el)return;
-  var html='<option value="">종일</option>';
-  for(var h=0;h<24;h++){
+  var startEl=document.getElementById('evStartTime');
+  var endEl=document.getElementById('evEndTime');
+  if(!startEl || !endEl) return;
+  var startHtml='', endHtml='';
+  for(var h=0; h<24; h++){
     var hh=pad(h);
-    html+='<option value="'+hh+':00">'+hh+':00</option>';
-    html+='<option value="'+hh+':30">'+hh+':30</option>';
+    startHtml+='<option value="'+hh+':00">'+hh+':00</option>';
+    startHtml+='<option value="'+hh+':30">'+hh+':30</option>';
+    endHtml+='<option value="'+hh+':00">'+hh+':00</option>';
+    endHtml+='<option value="'+hh+':30">'+hh+':30</option>';
   }
-  el.innerHTML=html;
+  endHtml+='<option value="24:00">24:00</option>';
+  startEl.innerHTML=startHtml;
+  endEl.innerHTML=endHtml;
+  startEl.value='09:00';
+  endEl.value='10:00';
 }
 function cancelCalEdit(){
   _editEventId=null;
   var titleInput=document.getElementById('evTitle');if(titleInput)titleInput.value='';
+  var chk=document.getElementById('evAllDay');if(chk)chk.checked=true;
+  toggleAllDay(true);
   var cardH=document.querySelector('#adminCalPnl .sCH');if(cardH)cardH.textContent='➕ 일정 추가';
   var saveBtn=document.getElementById('btnCalSave');if(saveBtn)saveBtn.textContent='저장';
   var cancelBtn=document.getElementById('btnCalCancel');if(cancelBtn)cancelBtn.style.display='none';
@@ -1133,7 +1155,20 @@ function editEvent(id){
   _editEventId=id;
   document.getElementById('evTitle').value=e.title||'';
   document.getElementById('evDate').value=e.date||'';
-  document.getElementById('evTime').value=e.time||'';
+  
+  var isAllDay=!e.time;
+  var chk=document.getElementById('evAllDay');
+  if(chk)chk.checked=isAllDay;
+  toggleAllDay(isAllDay);
+  
+  if(!isAllDay){
+    var parts=e.time.split('~');
+    var startEl=document.getElementById('evStartTime');
+    var endEl=document.getElementById('evEndTime');
+    if(startEl&&parts[0])startEl.value=parts[0];
+    if(endEl&&parts[1])endEl.value=parts[1];
+  }
+  
   var cardH=document.querySelector('#adminCalPnl .sCH');if(cardH)cardH.textContent='✏️ 일정 수정';
   var saveBtn=document.getElementById('btnCalSave');if(saveBtn)saveBtn.textContent='수정 저장';
   var cancelBtn=document.getElementById('btnCalCancel');if(cancelBtn)cancelBtn.style.display='block';
@@ -1142,13 +1177,25 @@ function editEvent(id){
 function saveEvent(){
   var t=document.getElementById('evTitle').value.trim();
   var d=document.getElementById('evDate').value;
-  var tm=document.getElementById('evTime').value;
   if(!t||!d){alert('제목과 날짜를 입력하세요.');return;}
+  
+  var isAllDay=document.getElementById('evAllDay').checked;
+  var tm='';
+  if(!isAllDay){
+    var startVal=document.getElementById('evStartTime').value;
+    var endVal=document.getElementById('evEndTime').value;
+    if(startVal>=endVal && endVal!=='00:00'){
+      alert('종료 시간은 시작 시간보다 늦어야 합니다.');
+      return;
+    }
+    tm=startVal+'~'+endVal;
+  }
+  
   var data={
     title:t,
     date:d,
     type:'mt',
-    time:tm||'',
+    time:tm,
     author:currentUser?currentUser.name:'알수없음',
     authorUid:currentUser?currentUser.uid:''
   };
@@ -1177,6 +1224,9 @@ function saveEvent(){
       saveLS();
     }
     document.getElementById('evTitle').value='';
+    var chk=document.getElementById('evAllDay');
+    if(chk)chk.checked=true;
+    toggleAllDay(true);
   }
 }
 function deleteEvent(id){
