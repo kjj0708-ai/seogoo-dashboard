@@ -241,6 +241,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .pdImgGrid{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;}
 .pdImgItem{border-radius:8px;overflow:hidden;border:1px solid var(--border);}
 .pdImgItem img{display:block;max-height:180px;max-width:280px;object-fit:contain;cursor:zoom-in;background:#f4f4f4;}
+.cmtBadge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:9px;margin-left:5px;vertical-align:middle;line-height:1;box-shadow:0 1px 3px rgba(220,38,38,.4);}
 .pdLinkList{display:flex;flex-direction:column;gap:6px;margin-top:14px;}
 .pdLinkItem{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#eef4ff;border-radius:6px;border-left:3px solid var(--pl);}
 .pdLinkItem a{flex:1;color:var(--primary);text-decoration:none;font-size:14px;word-break:break-all;}
@@ -1177,7 +1178,7 @@ function renderWeeklyView(){
 
         html+='<div style="padding:12px 14px 14px;border-bottom:1px solid var(--bg);'+borderR+'box-sizing:border-box;">'
           +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px;">'
-            +'<span class="projNameLink" onclick="event.stopPropagation();openProjDetail(\''+p.id+'\')" style="font-size:13.5px;font-weight:700;color:var(--primary);cursor:pointer;">📌 '+esc(p.name)+'</span>'
+            +'<span class="projNameLink" onclick="event.stopPropagation();openProjDetail(\''+p.id+'\')" style="font-size:13.5px;font-weight:700;color:var(--primary);cursor:pointer;">📌 '+esc(p.name)+(projUnread(p)>0?'<span class="cmtBadge" title="새 댓글">'+(projUnread(p)>9?'9+':projUnread(p))+'</span>':'')+'</span>'
             +'<span style="flex-shrink:0;font-size:11px;color:#fff;background:var(--accent);padding:2px 8px;border-radius:10px;font-weight:600;">'+when+'</span>'
           +'</div>'
           +'<div style="font-size:11px;color:var(--tx3);margin-bottom:7px;">👤 '+esc(p.author||'-')+'  ·  🕐 '+fmtDT(modDate)+'</div>';
@@ -1235,6 +1236,7 @@ function openProjDetail(id){
   document.getElementById('pdEditArea').style.display='none';
   renderPDView(p);
   setupPDComments(id);
+  _markProjRead(id);renderProjectsGrid();
   document.getElementById('projDetail').style.display='block';
   history.pushState({inApp:true,popup:true},'');
 }
@@ -1451,6 +1453,18 @@ window.addEventListener('beforeunload',function(e){
   if(currentUser){e.preventDefault();e.returnValue='';}
 });
 
+/* ── 안읽은 댓글 배지 ─────────────────────── */
+function _cmtReadMap(){try{return JSON.parse(localStorage.getItem('bu_cmtRead')||'{}');}catch(e){return {};}}
+function _markProjRead(id){if(!id)return;var m=_cmtReadMap();m[id]=new Date().toISOString();try{localStorage.setItem('bu_cmtRead',JSON.stringify(m));}catch(e){}}
+function projUnread(p){
+  if(!p||!p.comments||!currentUser)return 0;
+  var lr=_cmtReadMap()[p.id];var lrt=lr?new Date(lr).getTime():0;var n=0;
+  Object.values(p.comments).forEach(function(c){
+    if(c&&c.createdAt){var t=new Date(c.createdAt).getTime();if(t>lrt&&c.authorUid!==currentUser.uid)n++;}
+    if(c&&c.replies){Object.values(c.replies).forEach(function(r){if(r&&r.createdAt){var rt=new Date(r.createdAt).getTime();if(rt>lrt&&r.authorUid!==currentUser.uid)n++;}});}
+  });
+  return n;
+}
 /* ── 댓글 시스템 ─────────────────────────── */
 function setupPDComments(projId){
   if(_pdCmtRef){_pdCmtRef.off('value');_pdCmtRef=null;}
@@ -1459,7 +1473,7 @@ function setupPDComments(projId){
   if(!db){renderPDComments({});return;}
   var path=projPath(projId);if(!path){renderPDComments({});return;}
   _pdCmtRef=db.ref(path+'/comments');
-  _pdCmtRef.on('value',function(s){renderPDComments(s.val()||{});});
+  _pdCmtRef.on('value',function(s){renderPDComments(s.val()||{});if(document.getElementById('projDetail').style.display!=='none'&&window._currentProjDetailId===projId){_markProjRead(projId);renderProjectsGrid();}});
 }
 
 function renderPDComments(data){
