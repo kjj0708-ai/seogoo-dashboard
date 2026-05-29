@@ -132,7 +132,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .confBox{background:#fff;border-radius:12px;padding:28px 32px;max-width:360px;width:90%;text-align:center;box-shadow:var(--shl);}
 .confBox h3{font-size:17px;font-weight:700;margin-bottom:12px;}.confBox p{font-size:14px;color:var(--tx2);margin-bottom:24px;}.confBtns{display:flex;gap:10px;justify-content:center;}
 .photoModal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:400;display:flex;align-items:center;justify-content:center;}
-.photoModal img{max-width:90vw;max-height:90vh;border-radius:8px;transform-origin:center;transition:transform .1s;touch-action:none;user-select:none;}
+.photoModal img{max-width:90vw;max-height:90vh;border-radius:8px;transform-origin:center;transition:transform .15s;touch-action:none;user-select:none;cursor:zoom-in;}
 .photoClose{position:fixed;top:16px;right:16px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);color:#fff;font-size:22px;width:44px;height:44px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:401;line-height:1;}
 .photoClose:hover{background:rgba(255,255,255,.35);}
 .photoZoomBar{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:401;align-items:center;}
@@ -743,42 +743,131 @@ document.addEventListener('click',function(e){
   if(t.classList.contains('proj-hist-btn')){togProjHist(t);return;}
   if(t.classList.contains('issPhoto')&&t.getAttribute('data-id')){showPhoto(t.getAttribute('data-id'));return;}
 });
-function showPhoto(id){var s=window['_ph_'+id];if(!s)return;var img=document.getElementById('photoModalImg');img.src=s;img.style.transform='scale(1)';_pmScale=1;document.getElementById('photoModal').style.display='flex';}
-function closePhotoModal(){document.getElementById('photoModal').style.display='none';}
-var _pmScale=1,_pmDist=0;
+/* ── 포토 모달: pan + zoom ────────────────────────────── */
+var _pmScale=1,_pmTx=0,_pmTy=0;
+var _pmDist=0,_pmT1X=0,_pmT1Y=0;
+var _pmDrag=false,_pmLX=0,_pmLY=0;
+function _pmApply(){
+  var img=document.getElementById('photoModalImg');
+  if(img)img.style.transform='translate('+_pmTx+'px,'+_pmTy+'px) scale('+_pmScale+')';
+}
+function _pmSetCursor(){
+  var img=document.getElementById('photoModalImg');
+  if(!img)return;
+  img.style.cursor=_pmDrag?'grabbing':(_pmScale>1.05?'grab':'zoom-in');
+}
+function _pmResetState(){_pmScale=1;_pmTx=0;_pmTy=0;_pmDrag=false;}
+
+function showPhoto(id){
+  var s=window['_ph_'+id];if(!s)return;
+  var img=document.getElementById('photoModalImg');
+  _pmResetState();img.src=s;img.style.transition='none';_pmApply();_pmSetCursor();
+  document.getElementById('photoModal').style.display='flex';
+}
+function closePhotoModal(){
+  document.getElementById('photoModal').style.display='none';
+  _pmDrag=false;
+}
+
 (function(){
   document.addEventListener('DOMContentLoaded',function(){
     var modal=document.getElementById('photoModal');
     var img=document.getElementById('photoModalImg');
+
+    /* 배경 클릭 → 닫기 */
     modal.addEventListener('click',function(e){if(e.target===modal)closePhotoModal();});
-    modal.addEventListener('touchstart',function(e){if(e.touches.length===2){_pmDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}},{passive:true});
-    modal.addEventListener('touchmove',function(e){if(e.touches.length===2){e.preventDefault();var nd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);_pmScale=Math.min(5,Math.max(0.5,_pmScale*nd/_pmDist));img.style.transform='scale('+_pmScale+')';_pmDist=nd;}},{passive:false});
-    modal.addEventListener('dblclick',function(e){if(e.target===img){_pmScale=_pmScale>1.5?1:2.5;img.style.transform='scale('+_pmScale+')';}});
-    /* 마우스 휠 줌 (PC) */
+
+    /* ── 마우스 드래그 (손 모양으로 이동) ── */
+    img.addEventListener('mousedown',function(e){
+      if(e.button!==0)return;
+      e.preventDefault();
+      _pmDrag=true;_pmLX=e.clientX;_pmLY=e.clientY;
+      img.style.transition='none';
+      _pmSetCursor();
+    });
+    document.addEventListener('mousemove',function(e){
+      if(!_pmDrag)return;
+      _pmTx+=e.clientX-_pmLX;_pmTy+=e.clientY-_pmLY;
+      _pmLX=e.clientX;_pmLY=e.clientY;
+      _pmApply();
+    });
+    document.addEventListener('mouseup',function(){
+      if(!_pmDrag)return;
+      _pmDrag=false;
+      var img2=document.getElementById('photoModalImg');
+      if(img2){img2.style.transition='transform .15s';_pmSetCursor();}
+    });
+
+    /* ── 터치: 핀치 줌 + 한 손가락 드래그 ── */
+    modal.addEventListener('touchstart',function(e){
+      if(e.touches.length===2){
+        _pmDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+        _pmT1X=(e.touches[0].clientX+e.touches[1].clientX)/2;
+        _pmT1Y=(e.touches[0].clientY+e.touches[1].clientY)/2;
+      }else if(e.touches.length===1){
+        _pmT1X=e.touches[0].clientX;_pmT1Y=e.touches[0].clientY;
+      }
+    },{passive:true});
+    modal.addEventListener('touchmove',function(e){
+      e.preventDefault();
+      if(e.touches.length===2){
+        var nd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+        _pmScale=Math.min(6,Math.max(0.3,_pmScale*nd/_pmDist));_pmDist=nd;
+        var mx=(e.touches[0].clientX+e.touches[1].clientX)/2;
+        var my=(e.touches[0].clientY+e.touches[1].clientY)/2;
+        _pmTx+=mx-_pmT1X;_pmTy+=my-_pmT1Y;
+        _pmT1X=mx;_pmT1Y=my;
+        img.style.transition='none';_pmApply();
+      }else if(e.touches.length===1){
+        var dx=e.touches[0].clientX-_pmT1X;
+        var dy=e.touches[0].clientY-_pmT1Y;
+        if(_pmScale>1.05){_pmTx+=dx;_pmTy+=dy;img.style.transition='none';_pmApply();}
+        _pmT1X=e.touches[0].clientX;_pmT1Y=e.touches[0].clientY;
+      }
+    },{passive:false});
+
+    /* ── 더블클릭: 확대 ↔ 원래크기 ── */
+    modal.addEventListener('dblclick',function(e){
+      if(e.target!==img)return;
+      if(_pmScale>1.5){_pmScale=1;_pmTx=0;_pmTy=0;}
+      else{_pmScale=2.5;}
+      img.style.transition='transform .22s';
+      _pmApply();_pmSetCursor();
+      setTimeout(function(){img.style.transition='transform .15s';},220);
+    });
+
+    /* ── 마우스 휠 줌 ── */
     modal.addEventListener('wheel',function(e){
       e.preventDefault();
-      var delta=e.deltaY>0?0.88:1.14;
-      _pmScale=Math.min(6,Math.max(0.3,_pmScale*delta));
-      img.style.transform='scale('+_pmScale+')';
+      var factor=e.deltaY>0?0.88:1.14;
+      _pmScale=Math.min(6,Math.max(0.3,_pmScale*factor));
+      if(_pmScale<1.05){_pmTx=0;_pmTy=0;}
+      img.style.transition='none';
+      _pmApply();_pmSetCursor();
     },{passive:false});
-    /* 키보드: Escape 닫기, +/- 줌 */
+
+    /* ── 키보드: Esc 닫기, +/- 줌 ── */
     document.addEventListener('keydown',function(e){
       if(modal.style.display==='none')return;
       if(e.key==='Escape'){closePhotoModal();}
-      else if(e.key==='+'||e.key==='='){_pmScale=Math.min(6,_pmScale*1.2);img.style.transform='scale('+_pmScale+')';}
-      else if(e.key==='-'){_pmScale=Math.max(0.3,_pmScale*0.8);img.style.transform='scale('+_pmScale+')';}
+      else if(e.key==='+'||e.key==='='){_pmScale=Math.min(6,_pmScale*1.2);img.style.transition='transform .15s';_pmApply();_pmSetCursor();}
+      else if(e.key==='-'){_pmScale=Math.max(0.3,_pmScale*0.8);if(_pmScale<1.05){_pmTx=0;_pmTy=0;}img.style.transition='transform .15s';_pmApply();_pmSetCursor();}
     });
   });
 })();
+
 function photoZoomBy(f){
   var img=document.getElementById('photoModalImg');
-  _pmScale=(f===1)?1:Math.min(6,Math.max(0.3,_pmScale*f));
-  img.style.transform='scale('+_pmScale+')';
+  if(f===1){_pmScale=1;_pmTx=0;_pmTy=0;}
+  else{_pmScale=Math.min(6,Math.max(0.3,_pmScale*f));}
+  img.style.transition='transform .2s';
+  _pmApply();_pmSetCursor();
+  setTimeout(function(){img.style.transition='transform .15s';},200);
 }
 function openImgZoom(src){
   if(!src||src==='')return;
   var img=document.getElementById('photoModalImg');
-  img.src=src;img.style.transform='scale(1)';_pmScale=1;
+  _pmResetState();img.src=src;img.style.transition='none';_pmApply();_pmSetCursor();
   document.getElementById('photoModal').style.display='flex';
 }
 function handlePhoto(input){var fi=input.files[0];if(!fi)return;var rd=new FileReader();rd.onload=function(e){var img=new Image();img.onload=function(){var c=document.createElement('canvas'),w=img.width,h=img.height,M=1200;if(w>M||h>M){if(w>h){h=Math.round(h*M/w);w=M;}else{w=Math.round(w*M/h);h=M;}}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);var q=0.9,d;do{d=c.toDataURL('image/jpeg',q);q-=0.05;}while(d.length>500*1024&&q>0.3);pendingPhoto=d;document.getElementById('photoPrev').innerHTML='<img src="'+d+'" style="max-width:100%;border-radius:6px">';};img.src=e.target.result;};rd.readAsDataURL(fi);}
