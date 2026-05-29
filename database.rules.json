@@ -1,6 +1,32 @@
 {
   "rules": {
-    ".read": true,
-    ".write": true
+    "users": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('status').val() === 'approved' || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
+      "$uid": {
+        ".read": "$uid === auth.uid || root.child('users').child(auth.uid).child('isAdmin').val() === true",
+        ".write": "$uid === auth.uid || root.child('users').child(auth.uid).child('isAdmin').val() === true"
+      }
+    },
+    "projects": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('isAdmin').val() === true",
+      "$dept": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('status').val() === 'approved' && root.child('users').child(auth.uid).child('dept').val() === $dept)",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('isAdmin').val() === true || (root.child('users').child(auth.uid).child('status').val() === 'approved' && root.child('users').child(auth.uid).child('dept').val() === $dept))"
+      }
+    },
+    "issues": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('status').val() === 'approved' || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
+      "$issueId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('isAdmin').val() === true || (root.child('users').child(auth.uid).child('status').val() === 'approved' && ((newData.exists() && root.child('users').child(auth.uid).child('dept').val() === newData.child('dept').val()) || (!newData.exists() && root.child('users').child(auth.uid).child('dept').val() === data.child('dept').val()))))"
+      }
+    },
+    "events": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('status').val() === 'approved' || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('isAdmin').val() === true"
+    },
+    "instruction": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('status').val() === 'approved' || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('isAdmin').val() === true"
+    }
   }
 }
