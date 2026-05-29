@@ -1,0 +1,2 @@
+const fs=require("fs");const c=fs.readFileSync("C:/Users/김종진/Desktop/vibecoding/dashboard/index.html","utf8");const sc=c.substring(c.indexOf("<script>")+8,c.lastIndexOf("</script>"));const lines=sc.split("
+");let p=0,b=0;for(let i=0;i<37;i++){const l=lines[i];for(let j=0;j<l.length;j++){const ch=l[j];if(ch==="(")p++;else if(ch===")")p--;else if(ch==="{")b++;else if(ch==="}")b--;}if(p!==0||b!==0)console.log("line",i+1,"p:",p,"b:",b);}console.log("end p:",p,"b:",b);try{new Function(sc);console.log("OK");}catch(e){console.log("ERR:",e.message);}
