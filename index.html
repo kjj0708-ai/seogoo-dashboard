@@ -141,7 +141,31 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .pzReset{font-size:13px;width:54px;border-radius:20px;}
 .pzHint{font-size:11px;color:rgba(255,255,255,.55);background:rgba(0,0,0,.3);border-radius:10px;padding:3px 10px;white-space:nowrap;}
 .archiveBadge{display:inline-block;background:#fef3c7;color:#92400e;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;margin-left:8px;}
-@media(max-width:768px){main{padding:16px;}.calLayout,.dGrid{grid-template-columns:1fr;}.statRow{grid-template-columns:repeat(2,1fr);}header{padding:0 16px;}.hL h1{font-size:14px;}.tabsBar{padding:0 8px;}.tBtn{padding:12px 10px;font-size:13px;}.calWrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;}.calGrid{min-width:560px;}.issueList{grid-template-columns:1fr;}
+.mBreak{display:none;}
+.instrActions{position:absolute;top:0;right:0;display:flex;gap:6px;}
+.instrCardBtn{background:rgba(255,255,255,.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:background .2s,transform .1s;}
+.instrCardBtn:hover{background:rgba(255,255,255,.35);transform:scale(1.1);}
+.instrCardBtn.del{background:rgba(239,68,68,.35);}
+.instrCardBtn.del:hover{background:rgba(239,68,68,.6);}
+@media(max-width:768px){
+  main{padding:16px;}
+  .calLayout,.dGrid{grid-template-columns:1fr;}
+  .statRow{grid-template-columns:repeat(2,1fr);}
+  header{padding:0 12px;height:64px;}
+  .mBreak{display:block;}
+  .hL{gap:8px;}
+  .hTitle{font-size:14px!important;line-height:1.2!important;}
+  .sync{background:none;padding:0;border:none;margin-left:-4px;}
+  #stxt{display:none;}
+  .ubadge{display:none;}
+  .btnText{display:none;}
+  .btnOut{padding:8px;font-size:16px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;width:34px;height:34px;}
+  .hR{gap:6px;}
+  .tabsBar{padding:0 8px;}
+  .tBtn{padding:12px 10px;font-size:13px;}
+  .calWrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;}
+  .calGrid{min-width:560px;}
+  .issueList{grid-template-columns:1fr;}
   .calCell{min-height:62px;padding:3px;}
   .calDL{padding:5px 2px;font-size:11px;}
   .calDate{font-size:11px;}
@@ -342,8 +366,8 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 </div>
 <div id="app">
   <header>
-    <div class="hL"><img class="hLogoImg" src="public/icon-512b.png" alt="도시주택국"><h1>서구 도시주택국 대시보드</h1><div class="sync"><div class="sdot" id="sdot"></div><span id="stxt">연결 중...</span></div></div>
-    <div class="hR"><span class="ubadge" id="ubadge"></span><button class="btnOut" onclick="openProfileEdit()" style="margin-right:6px;">👤 내 프로필</button><button class="btnOut" onclick="doLogout()">로그아웃</button></div>
+    <div class="hL"><img class="hLogoImg" src="public/icon-512b.png" alt="도시주택국"><h1 class="hTitle">도시주택국<br class="mBreak">대시보드</h1><div class="sync"><div class="sdot" id="sdot"></div><span id="stxt">연결 중...</span></div></div>
+    <div class="hR"><span class="ubadge" id="ubadge"></span><button class="btnOut" onclick="openProfileEdit()" style="margin-right:6px;" title="내 프로필">👤<span class="btnText"> 내 프로필</span></button><button class="btnOut" onclick="doLogout()" title="로그아웃">🚪<span class="btnText"> 로그아웃</span></button></div>
   </header>
   <div class="tabsBar">
     <button class="tBtn active" onclick="switchTab('issues',this)">📋 현안/이슈</button>
@@ -362,11 +386,6 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
             <button class="btn btnG" onclick="cancelInstr()">취소</button>
             <button class="btn btnP" onclick="saveInstr()">저장</button>
           </div>
-        </div>
-        <div id="instrAdminBtns" style="display:flex;gap:6px;margin-bottom:4px;">
-          <button class="btn btnP sm" onclick="newInstr()">+ 신규</button>
-          <button class="btn btnG sm" id="instrEditBtn" onclick="editInstr()" style="display:none">✏️ 수정</button>
-          <button class="btn btnD sm" id="instrDelBtn" onclick="deleteInstr()" style="display:none">삭제</button>
         </div>
       </div>
       <div class="statRow">
@@ -664,7 +683,33 @@ function newInstr(){document.getElementById('instrInput').value='';document.getE
 function editInstr(){document.getElementById('instrInput').value=instruction?instruction.text:'';document.getElementById('instrEditBox').style.display='block';document.getElementById('instrInput').focus();}
 function cancelInstr(){document.getElementById('instrEditBox').style.display='none';}
 function deleteInstr(){showConf('국장 지시사항을 삭제하시겠습니까?',function(){dbRemove('instruction');instruction=null;renderInstr();});}
-function renderInstr(){var box=document.getElementById('instrDisplay');if(!box)return;var isAdmin=currentUser&&currentUser.type==='admin';if(!instruction||!instruction.text){box.innerHTML='';if(isAdmin){document.getElementById('instrEditBtn').style.display='none';document.getElementById('instrDelBtn').style.display='none';}return;}box.innerHTML='<div class="instrBox"><div class="ico">📢</div><div style="flex:1"><h3>국장 지시사항</h3><p style="white-space:pre-wrap">'+esc(instruction.text)+'</p><div class="instrDate">'+fmtD(new Date(instruction.date))+'</div></div></div>';if(isAdmin){document.getElementById('instrEditBtn').style.display='';document.getElementById('instrDelBtn').style.display='';}}
+function renderInstr(){
+  var box=document.getElementById('instrDisplay');
+  if(!box)return;
+  var isAdmin=currentUser&&currentUser.type==='admin';
+  if(!instruction||!instruction.text){
+    if(isAdmin){
+      box.innerHTML='<div class="instrBox empty" style="border:2px dashed var(--pl);background:rgba(37,99,168,0.05);color:var(--pl);cursor:pointer;padding:20px;text-align:center;font-weight:600;display:flex;justify-content:center;align-items:center;border-radius:var(--r);margin-bottom:20px;" onclick="newInstr()">📢 등록된 국장 지시사항이 없습니다. (클릭하여 신규 등록)</div>';
+    }else{
+      box.innerHTML='';
+    }
+    return;
+  }
+  var btnHtml = '';
+  if(isAdmin){
+    btnHtml = '<div class="instrActions">'
+      + '<button class="instrCardBtn" onclick="editInstr()" title="지시사항 수정">✏️</button>'
+      + '<button class="instrCardBtn del" onclick="deleteInstr()" title="지시사항 삭제">🗑️</button>'
+      + '</div>';
+  }
+  box.innerHTML='<div class="instrBox" style="position:relative;"><div class="ico">📢</div>'
+    + '<div style="flex:1;position:relative;padding-right:60px;">'
+    + '<h3>국장 지시사항</h3>'
+    + btnHtml
+    + '<p style="white-space:pre-wrap;margin-top:4px;">'+esc(instruction.text)+'</p>'
+    + '<div class="instrDate">'+fmtD(new Date(instruction.date))+'</div>'
+    + '</div></div>';
+}
 function onIssStatusChange(){var st=document.getElementById('issStatus').value;var pr=document.getElementById('progressRow');pr.style.display=st==='proc'?'block':'none';if(st==='done'){document.getElementById('issProgress').value=100;document.getElementById('issProgressVal').textContent='100%';document.getElementById('issProgressBar').style.width='100%';}}
 function syncProgressBar(){var v=document.getElementById('issProgress').value;document.getElementById('issProgressVal').textContent=v+'%';document.getElementById('issProgressBar').style.width=v+'%';}
 document.addEventListener('input',function(e){if(e.target&&e.target.id==='issProgress'){syncProgressBar();if(parseInt(e.target.value)===100){document.getElementById('issStatus').value='done';document.getElementById('progressRow').style.display='none';}}});
