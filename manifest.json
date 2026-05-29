@@ -12,13 +12,13 @@
   "categories": ["productivity", "business", "government"],
   "icons": [
     {
-      "src": "public/icon-512.png",
+      "src": "public/icon-500.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "public/icon-512.png",
+      "src": "public/icon-500.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

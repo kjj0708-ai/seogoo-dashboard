@@ -1,10 +1,10 @@
 // 서구 도시주택국 대시보드 - Service Worker
-const CACHE_NAME = 'bureau-dashboard-v3';
+const CACHE_NAME = 'bureau-dashboard-v4';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './public/icon-512.png',
+  './public/icon-500.png',
   './public/icon1024.png',
 ];
 
