@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "도시주택국 대시보드",
   "short_name": "도시주택국",
   "description": "서구 도시주택국 업무 대시보드 - 현안/이슈, 업무현황, 일정, 조직도 통합 관리",
@@ -6,19 +6,19 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#2563a8",
-  "theme_color": "#2563a8",
+  "background_color": "#ffffff",
+  "theme_color": "#1a3a5c",
   "lang": "ko",
   "categories": ["productivity", "business", "government"],
   "icons": [
     {
-      "src": "public/icon-192.png?v=14",
+      "src": "public/icon-192.png?v=15",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "public/icon-512b.png?v=14",
+      "src": "public/icon-512b.png?v=15",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
