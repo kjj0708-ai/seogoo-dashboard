@@ -1228,13 +1228,13 @@ function downloadProjDetailWord(){
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   }
   var thS='border:1px solid #999;padding:5px 8px;background:#DCE6F1;font-weight:700;font-size:10pt;font-family:\'맑은 고딕\',sans-serif;text-align:center;vertical-align:middle;';
-  var tdS='border:1px solid #999;padding:6px 8px;font-size:10pt;font-family:\'맑은 고딕\',sans-serif;vertical-align:top;line-height:1.7;word-break:break-word;';
-  var linksHtml=links.length?'<p style="font-size:10pt;margin-top:10pt;"><b>■ 링크</b><br>'+links.map(function(l){return esc(l.label||l.url)+' : '+l.url;}).join('<br>')+'</p>':'';
-  var imgNote=imgCount?'<p style="font-size:9pt;color:#666;margin-top:4pt;">※ 이미지 '+imgCount+'장 첨부됨</p>':'';
-  var html="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='UTF-8'><style>@page{size:A4 portrait;margin:1.27cm;}body{font-family:'맑은 고딕',sans-serif;}table{border-collapse:collapse;width:100%;}</style></head><body>"
-    +"<p style='font-size:14pt;font-weight:700;margin:0 0 4pt;'>"+esc(p.name)+"</p>"
-    +"<p style='font-size:10pt;color:#555;margin:0 0 10pt;'>"+esc((p.dept||'')+(p.team?' '+p.team:'')+(p.author?' | '+p.author:'')+(dt?' | 수정일: '+dt:''))+"</p>"
-    +"<table><thead><tr><th style='"+thS+"'>업무 현황</th></tr></thead><tbody><tr><td style='"+tdS+"'>"+cleanForWord(content)+"</td></tr></tbody></table>"
+  var tdS='border:1px solid #999;padding:4px 6px;font-size:9pt;font-family:\'맑은 고딕\',sans-serif;vertical-align:top;line-height:1.0;word-break:break-word;';
+  var linksHtml=links.length?'<p style="font-size:9pt;margin:4pt 0 0;line-height:1.0;"><b>■ 링크</b><br>'+links.map(function(l){return esc(l.label||l.url)+' : '+l.url;}).join('<br>')+'</p>':'';
+  var imgNote=imgCount?'<p style="font-size:8pt;color:#666;margin:2pt 0 0;line-height:1.0;">※ 이미지 '+imgCount+'장 첨부됨</p>':'';
+  var html="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='UTF-8'><style>@page{size:A4 portrait;margin:1.27cm;}body{font-family:'맑은 고딕',sans-serif;font-size:9pt;line-height:1.0;}p{margin:1pt 0;line-height:1.0;}h1,h2,h3,h4,h5,h6{margin:2pt 0;line-height:1.0;}ul,ol{margin:1pt 0;padding-left:16pt;}li{margin:0;line-height:1.0;}table{border-collapse:collapse;width:100%;}</style></head><body>"
+    +"<p style='font-size:14pt;font-weight:700;margin:0 0 2pt;line-height:1.0;'>"+esc(p.name)+"</p>"
+    +"<p style='font-size:9pt;color:#555;margin:0 0 4pt;line-height:1.0;'>"+esc((p.dept||'')+(p.team?' '+p.team:'')+(p.author?' | '+p.author:'')+(dt?' | 수정일: '+dt:''))+"</p>"
+    +"<table><tbody><tr><td style='"+tdS+"'>"+cleanForWord(content)+"</td></tr></tbody></table>"
     +linksHtml+imgNote+"</body></html>";
   var blob=new Blob(['\ufeff'+html],{type:'application/msword;charset=utf-8'});
   var url=URL.createObjectURL(blob);
