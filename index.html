@@ -1791,6 +1791,20 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('sw.js').then(function(reg){
       console.log('[PWA] 서비스워커 등록 완료:',reg.scope);
+      // 수동 업데이트 체크 트리거
+      reg.update();
+      // 새로운 서비스워커 발견 시 즉시 활성화 및 리로드 이벤트 등록
+      reg.addEventListener('updatefound', function(){
+        var newWorker = reg.installing;
+        if(newWorker) {
+          newWorker.addEventListener('statechange', function(){
+            if(newWorker.state === 'activated') {
+              console.log('[PWA] 새로운 버전이 감지되어 화면을 새로고침합니다.');
+              window.location.reload();
+            }
+          });
+        }
+      });
     }).catch(function(err){console.warn('[PWA] 서비스워커 등록 실패:',err);});
   });
 }
