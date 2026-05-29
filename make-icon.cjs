@@ -1,5 +1,5 @@
-// 풀블리드 흰색 타일 + 로고 (Chrome은 투명 모서리를 background_color로 메워 사각형으로 만든다.
-// 따라서 투명 원형은 불가능 → 처음부터 흰색으로 꽉 채워 네이비가 절대 안 나오게 함)
+// 원형 아이콘: 블루 원형 배경 + 로고
+// background_color = 원 색상과 동일 → Chrome이 투명 모서리를 채워도 원형처럼 보임
 const sharp = require('sharp');
 const path  = require('path');
 
@@ -7,30 +7,44 @@ const SRC    = path.join(__dirname, 'public', 'icon-500.png');
 const OUT512 = path.join(__dirname, 'public', 'icon-512b.png');
 const OUT192 = path.join(__dirname, 'public', 'icon-192.png');
 
-async function makeIcon(outPath, size) {
-  // ① 원본 로고의 흰 여백을 잘라내고(trim) 로고만 추출
-  const trimmed = await sharp(SRC)
-    .flatten({ background: { r: 255, g: 255, b: 255 } }) // 알파 제거 → 흰 배경
-    .trim()                                              // 주변 흰 여백 제거
-    .toBuffer();
+// 앱 테마 블루 (#2563a8)
+const BG = { r: 37, g: 99, b: 168 };
 
-  // ② 로고를 캔버스의 약 82% 크기로 리사이즈 (여백 9%씩)
-  const inner = Math.round(size * 0.82);
-  const logo = await sharp(trimmed)
+async function makeIcon(outPath, size) {
+  const r = size / 2;
+
+  // ① 원형 마스크 SVG
+  const circleMask = Buffer.from(
+    `<svg width="${size}" height="${size}">
+       <circle cx="${r}" cy="${r}" r="${r}" fill="white"/>
+     </svg>`
+  );
+
+  // ② 로고를 원 크기의 80%로 리사이즈 (흰 배경 유지)
+  const inner = Math.round(size * 0.80);
+  const logo = await sharp(SRC)
+    .flatten({ background: { r: 255, g: 255, b: 255 } })
+    .trim()
     .resize(inner, inner, {
       fit: 'contain',
       background: { r: 255, g: 255, b: 255, alpha: 1 },
     })
     .toBuffer();
 
-  // ③ 흰색 정사각형 캔버스 위에 로고를 중앙 배치 (풀블리드 흰색)
-  await sharp({
+  // ③ 블루 정사각형 캔버스에 흰 배경 로고 중앙 배치
+  const canvas = await sharp({
     create: {
       width: size, height: size, channels: 4,
-      background: { r: 255, g: 255, b: 255, alpha: 1 },
+      background: { ...BG, alpha: 1 },
     },
   })
     .composite([{ input: logo, gravity: 'center' }])
+    .png()
+    .toBuffer();
+
+  // ④ 원형 마스크 적용 → 모서리 투명
+  await sharp(canvas)
+    .composite([{ input: circleMask, blend: 'dest-in' }])
     .png()
     .toFile(outPath);
 
