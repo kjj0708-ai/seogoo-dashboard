@@ -443,8 +443,12 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
             <div class="sCB">
               <div class="fr"><label>일정 제목</label><input type="text" id="evTitle" placeholder="일정명 입력"></div>
               <div class="fr"><label>날짜</label><input type="date" id="evDate"></div>
+              <div class="fr"><label>시간</label><select id="evTime"></select></div>
               <div class="fr"><label>유형</label><select id="evType"><option value="mt">회의</option><option value="is">현안</option><option value="instr">지시사항</option></select></div>
-              <button class="btn btnP" style="width:100%" onclick="saveEvent()">저장</button>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btnP" style="flex:1" id="btnCalSave" onclick="saveEvent()">저장</button>
+                <button class="btn btnG" style="display:none;" id="btnCalCancel" onclick="cancelCalEdit()">취소</button>
+              </div>
             </div>
           </div>
           <div class="sCard"><div class="sCH">📌 선택 날짜 일정</div><div class="sCB" id="dayEvts"><div class="gcLoad">날짜를 선택하세요</div></div></div>
@@ -662,7 +666,7 @@ function showPeErr(m){var e=document.getElementById('peErr');if(e){e.textContent
 function saveProfileEdit(){if(!currentUser)return;var name=(document.getElementById('peName').value||'').trim();var dept=document.getElementById('peDept').value;var team=document.getElementById('peTeam').value;var role=document.getElementById('peRole').value;var phone=(document.getElementById('pePhone').value||'').trim();if(!name){showPeErr('이름을 입력해주세요.');return;}var prevDept=currentUser.dept;var upd={name:name,dept:dept,team:team,role:role,phone:phone};currentUser.name=name;currentUser.dept=dept;currentUser.team=team;currentUser.role=role;currentUser.phone=phone;try{var lp=JSON.parse(localStorage.getItem('bu_profile')||'{}');Object.assign(lp,upd);localStorage.setItem('bu_profile',JSON.stringify(lp));}catch(e){}var _db=db||window._origDb;if(_db&&currentUser.uid&&currentUser.uid!=='local'){_db.ref('users/'+currentUser.uid).update(upd);}var ub=document.getElementById('ubadge');if(ub)ub.textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';if(currentUser.type!=='admin'&&prevDept!==dept){setupProjectsListener();}renderIssues();renderProjectsGrid();closeProfileEdit();}
 function showLErr(m){var e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
 function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('pendingScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';
-if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminCalPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';var _mt=document.getElementById('memberTab');if(_mt)_mt.style.display='';}var _db=db||window._origDb;setupGlobalListeners();setupUsersListener();var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();if(_db)setupProjectsListener();else renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var _ka0=document.getElementById('gcalApiKey');if(_ka0)_ka0.value=GCAL_API_KEY;var _ki0=document.getElementById('gcalCalId');if(_ki0)_ki0.value=GCAL_CAL_ID;setGCalSt(GCAL_API_KEY?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!_db){loadLS();fetchGCal();}else{if(GCAL_API_KEY)fetchGCal();if(_gcalRef){_gcalRef.off('value');}_gcalRef=_db.ref('settings/gcal');_gcalRef.on('value',function(snap){var s=snap.val();var prevKey=GCAL_API_KEY;if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser&&currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;setGCalSt(s&&s.apiKey?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!prevKey||prevKey!==GCAL_API_KEY)fetchGCal();});}if(window._gcalTimer)clearInterval(window._gcalTimer);window._gcalTimer=setInterval(function(){if(currentUser)fetchGCal();},10*60*1000);history.pushState({inApp:true},'');}
+if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';var _mt=document.getElementById('memberTab');if(_mt)_mt.style.display='';}document.getElementById('adminCalPnl').style.display='block';initTimeDropdown();var _db=db||window._origDb;setupGlobalListeners();setupUsersListener();var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();if(_db)setupProjectsListener();else renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var _ka0=document.getElementById('gcalApiKey');if(_ka0)_ka0.value=GCAL_API_KEY;var _ki0=document.getElementById('gcalCalId');if(_ki0)_ki0.value=GCAL_CAL_ID;setGCalSt(GCAL_API_KEY?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!_db){loadLS();fetchGCal();}else{if(GCAL_API_KEY)fetchGCal();if(_gcalRef){_gcalRef.off('value');}_gcalRef=_db.ref('settings/gcal');_gcalRef.on('value',function(snap){var s=snap.val();var prevKey=GCAL_API_KEY;if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser&&currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;setGCalSt(s&&s.apiKey?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!prevKey||prevKey!==GCAL_API_KEY)fetchGCal();});}if(window._gcalTimer)clearInterval(window._gcalTimer);window._gcalTimer=setInterval(function(){if(currentUser)fetchGCal();},10*60*1000);history.pushState({inApp:true},'');}
 function teardownProjectsListener(){if(_projRef){_projRef.off('value');_projRef=null;}}
 function setupProjectsListener(){teardownProjectsListener();var _db=db||window._origDb;if(!_db||!currentUser)return;if(currentUser.type==='admin'){_projRef=_db.ref('projects');_projRef.on('value',function(s){projects=[];if(s.val()){Object.entries(s.val()).forEach(function(de){var dept=de[0];if(de[1]&&typeof de[1]==='object'){Object.entries(de[1]).forEach(function(pe){projects.push(Object.assign({id:pe[0],dept:dept},pe[1]));});}});}renderProjectsGrid();});}else{_projRef=_db.ref('projects/'+currentUser.dept);_projRef.on('value',function(s){var dept=currentUser.dept;projects=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0],dept:dept},e[1]);}):[];renderProjectsGrid();});}}
 function projPath(id){var p=projects.find(function(x){return x.id===id;});return p?'projects/'+p.dept+'/'+id:null;}
@@ -963,7 +967,10 @@ function renderCal(){
     var dbEs=events.filter(function(e){return e.date===ds;});
     var hI=instruction&&instruction.date&&instruction.date.slice(0,10)===ds;
     var evH=gcEs.map(function(e){return '<div class="calEv gc" title="'+esc(e.t)+'">📅'+esc(e.t)+'</div>';}).join('')
-      +dbEs.map(function(e){return '<div class="calEv '+(e.type||'mt')+'" title="'+esc(e.title)+'">'+esc(e.title)+'</div>';}).join('')
+      +dbEs.map(function(e){
+        var tLabel=e.time ? '['+e.time+'] ' : '';
+        return '<div class="calEv '+(e.type||'mt')+'" title="' + esc(e.title) + '">' + tLabel + esc(e.title) + '</div>';
+      }).join('')
       +(hI?'<div class="calEv instr">📢지시</div>':'');
     html+='<div class="calCell'+(isTd?' today':'')+'" onclick="selDay(\''+ds+'\')"><div class="calDate">'+dd+'</div>'+evH+'</div>';
   }
@@ -972,7 +979,42 @@ function renderCal(){
   for(var t=1;t<=trail;t++)html+='<div class="calCell om"><div class="calDate">'+t+'</div></div>';
   grid.innerHTML=html;
 }
-function selDay(ds){var panel=document.getElementById('dayEvts');var gcEs=GCD.filter(function(e){return e.d===ds;});var dbEs=events.filter(function(e){return e.date===ds;});var hI=instruction&&instruction.date&&instruction.date.slice(0,10)===ds;if(!gcEs.length&&!dbEs.length&&!hI){panel.innerHTML='<div class="gcLoad">이 날 일정이 없습니다.</div>';}else{panel.innerHTML='<b style="font-size:13px;color:var(--primary)">'+ds+'</b><br><br>'+gcEs.map(function(e){return '<div class="gcItem"><div class="gcItemT">📅 '+esc(e.t)+'</div><div class="gcItemTime">'+esc(e.tm||'종일')+'</div></div>';}).join('')+dbEs.map(function(e){return '<div class="gcItem"><div class="gcItemT">'+esc(e.title)+'</div>'+(currentUser&&currentUser.type==='admin'?'<button class="btn btnD sm" onclick="deleteEvent(\''+e.id+'\')">삭제</button>':'')+'</div>';}).join('')+(hI?'<div class="gcItem"><div class="gcItemT">📢 국장 지시사항</div></div>':'');}if(currentUser&&currentUser.type==='admin')document.getElementById('evDate').value=ds;}
+function selDay(ds){
+  var panel=document.getElementById('dayEvts');
+  var gcEs=GCD.filter(function(e){return e.d===ds;});
+  var dbEs=events.filter(function(e){return e.date===ds;});
+  var hI=instruction&&instruction.date&&instruction.date.slice(0,10)===ds;
+  if(!gcEs.length&&!dbEs.length&&!hI){
+    panel.innerHTML='<div class="gcLoad">이 날 일정이 없습니다.</div>';
+  }else{
+    var gcHtml=gcEs.map(function(e){
+      return '<div class="gcItem" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;">'
+        +'<div class="gcItemT">📅 '+esc(e.t)+'</div>'
+        +'<div class="gcItemTime" style="margin-left:auto;font-size:12px;color:var(--tx3);">'+esc(e.tm||'종일')+'</div>'
+        +'</div>';
+    }).join('');
+    var dbHtml=dbEs.map(function(e){
+      var timeStr=e.time ? '<span style="font-weight:600;color:var(--primary);margin-right:6px;">['+e.time+']</span>' : '';
+      var authorStr=e.author ? '<span style="font-size:11px;color:var(--tx3);margin-left:6px;">('+esc(e.author)+')</span>' : '';
+      var actionBtns='';
+      if(canEditEvent(e)){
+        actionBtns='<div style="display:flex;gap:4px;margin-left:auto;">'
+          +'<button class="btn btnG sm" style="font-size:11px;padding:3px 6px;" onclick="editEvent(\''+e.id+'\')">수정</button>'
+          +'<button class="btn btnD sm" style="font-size:11px;padding:3px 6px;" onclick="deleteEvent(\''+e.id+'\')">삭제</button>'
+          +'</div>';
+      }
+      return '<div class="gcItem" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;">'
+        +'<div class="gcItemT" style="display:flex;align-items:center;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
+        +'📌 '+timeStr+'<span style="text-overflow:ellipsis;overflow:hidden;" title="'+esc(e.title)+'">'+esc(e.title)+'</span>'+authorStr
+        +'</div>'
+        +actionBtns
+        +'</div>';
+    }).join('');
+    var instrHtml=hI?'<div class="gcItem" style="padding:8px 10px;"><div class="gcItemT">📢 국장 지시사항</div></div>':'';
+    panel.innerHTML='<b style="font-size:13px;color:var(--primary)">'+ds+'</b><br><br>'+gcHtml+dbHtml+instrHtml;
+  }
+  if(currentUser)document.getElementById('evDate').value=ds;
+}
 function renderGcalSide(){var el=document.getElementById('gcalList');if(!el)return;var now=new Date();var up=GCD.filter(function(e){return new Date(e.d)>=now;}).sort(function(a,b){return new Date(a.d)-new Date(b.d);}).slice(0,12);if(!up.length){el.innerHTML='<div class="gcLoad">예정된 일정이 없습니다.</div>';return;}el.innerHTML=up.map(function(e){return '<div class="gcItem"><div class="gcItemT">📅 '+esc(e.t)+'</div><div class="gcItemTime">'+e.d+' '+esc(e.tm||'종일')+'</div></div>';}).join('');}
 
 function fetchGCal(){
@@ -1063,8 +1105,98 @@ function isThisReportWeek(dateStr){
   var wed=new Date(thu);wed.setDate(thu.getDate()+6);wed.setHours(23,59,59,999);
   return d>=thu&&d<=wed;
 }
-function saveEvent(){var t=document.getElementById('evTitle').value.trim();var d=document.getElementById('evDate').value;var ty=document.getElementById('evType').value;if(!t||!d){alert('제목과 날짜를 입력하세요.');return;}var data={title:t,date:d,type:ty};if(db){dbPush('events',data);}else{data.id=Date.now().toString();events.push(data);renderCal();saveLS();}document.getElementById('evTitle').value='';}
-function deleteEvent(id){showConf('이 일정을 삭제하시겠습니까?',function(){dbRemove('events/'+id);if(!db){events=events.filter(function(e){return e.id!==id;});renderCal();saveLS();}});}
+var _editEventId=null;
+function initTimeDropdown(){
+  var el=document.getElementById('evTime');if(!el)return;
+  var html='<option value="">종일</option>';
+  for(var h=0;h<24;h++){
+    var hh=pad(h);
+    html+='<option value="'+hh+':00">'+hh+':00</option>';
+    html+='<option value="'+hh+':30">'+hh+':30</option>';
+  }
+  el.innerHTML=html;
+}
+function cancelCalEdit(){
+  _editEventId=null;
+  var titleInput=document.getElementById('evTitle');if(titleInput)titleInput.value='';
+  var cardH=document.querySelector('#adminCalPnl .sCH');if(cardH)cardH.textContent='➕ 일정 추가';
+  var saveBtn=document.getElementById('btnCalSave');if(saveBtn)saveBtn.textContent='저장';
+  var cancelBtn=document.getElementById('btnCalCancel');if(cancelBtn)cancelBtn.style.display='none';
+}
+function canEditEvent(e){
+  if(!currentUser)return false;
+  if(currentUser.type==='admin')return true;
+  return e.authorUid===currentUser.uid||e.author===currentUser.name;
+}
+function editEvent(id){
+  var e=events.find(function(x){return x.id===id;});if(!e)return;
+  if(!canEditEvent(e)){alert('수정 권한이 없습니다.');return;}
+  _editEventId=id;
+  document.getElementById('evTitle').value=e.title||'';
+  document.getElementById('evDate').value=e.date||'';
+  document.getElementById('evType').value=e.type||'mt';
+  document.getElementById('evTime').value=e.time||'';
+  var cardH=document.querySelector('#adminCalPnl .sCH');if(cardH)cardH.textContent='✏️ 일정 수정';
+  var saveBtn=document.getElementById('btnCalSave');if(saveBtn)saveBtn.textContent='수정 저장';
+  var cancelBtn=document.getElementById('btnCalCancel');if(cancelBtn)cancelBtn.style.display='block';
+  var card=document.getElementById('adminCalPnl');if(card)card.scrollIntoView({behavior:'smooth'});
+}
+function saveEvent(){
+  var t=document.getElementById('evTitle').value.trim();
+  var d=document.getElementById('evDate').value;
+  var ty=document.getElementById('evType').value;
+  var tm=document.getElementById('evTime').value;
+  if(!t||!d){alert('제목과 날짜를 입력하세요.');return;}
+  var data={
+    title:t,
+    date:d,
+    type:ty,
+    time:tm||'',
+    author:currentUser?currentUser.name:'알수없음',
+    authorUid:currentUser?currentUser.uid:''
+  };
+  if(_editEventId){
+    var original=events.find(function(x){return x.id===_editEventId;});
+    if(original){
+      data.author=original.author||data.author;
+      data.authorUid=original.authorUid||data.authorUid;
+    }
+    if(db){
+      dbSet('events/'+_editEventId,data);
+    }else{
+      data.id=_editEventId;
+      events=events.map(function(e){return e.id===_editEventId?data:e;});
+      renderCal();
+      saveLS();
+    }
+    cancelCalEdit();
+  }else{
+    if(db){
+      dbPush('events',data);
+    }else{
+      data.id=Date.now().toString();
+      events.push(data);
+      renderCal();
+      saveLS();
+    }
+    document.getElementById('evTitle').value='';
+  }
+}
+function deleteEvent(id){
+  var e=events.find(function(x){return x.id===id;});
+  if(e&&!canEditEvent(e)){
+    alert('삭제 권한이 없습니다.');
+    return;
+  }
+  showConf('이 일정을 삭제하시겠습니까?',function(){
+    dbRemove('events/'+id);
+    if(!db){
+      events=events.filter(function(e){return e.id!==id;});
+      renderCal();
+      saveLS();
+    }
+  });
+}
 
 /* ── 사업 풀스크린 상세 뷰 ─────────────────── */
 var _pdCmtRef=null;

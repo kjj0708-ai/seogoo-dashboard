@@ -22,7 +22,9 @@
     },
     "events": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('status').val() === 'approved' || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
-      ".write": "auth != null && root.child('users').child(auth.uid).child('isAdmin').val() === true"
+      "$eventId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('isAdmin').val() === true || (root.child('users').child(auth.uid).child('status').val() === 'approved' && (!data.exists() || data.child('authorUid').val() === auth.uid)))"
+      }
     },
     "instruction": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('status').val() === 'approved' || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
