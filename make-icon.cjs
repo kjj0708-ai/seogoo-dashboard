@@ -1,5 +1,5 @@
-// 원형 아이콘: 로고를 원에 꽉 채워 직접 클리핑
-// 파란 배경 없음 → 흰 사각형 보이는 현상 없음
+// 풀블리드 정사각형 아이콘
+// Chrome PWA는 Windows에서 항상 .ico(정사각형)로 구워짐 → 처음부터 깔끔한 사각형으로 제작
 const sharp = require('sharp');
 const path  = require('path');
 
@@ -8,25 +8,13 @@ const OUT512 = path.join(__dirname, 'public', 'icon-512b.png');
 const OUT192 = path.join(__dirname, 'public', 'icon-192.png');
 
 async function makeIcon(outPath, size) {
-  const r = size / 2;
-
-  // ① 원형 마스크
-  const circleMask = Buffer.from(
-    `<svg width="${size}" height="${size}">
-       <circle cx="${r}" cy="${r}" r="${r}" fill="white"/>
-     </svg>`
-  );
-
-  // ② 로고를 정사각형 크기로 딱 맞게 리사이즈 (흰 배경 유지, 꽉 채움)
-  const logo = await sharp(SRC)
+  // 로고를 여백 없이 정사각형에 꽉 채움 (흰 배경, 투명 없음)
+  await sharp(SRC)
     .flatten({ background: { r: 255, g: 255, b: 255 } })
-    .resize(size, size, { fit: 'cover' })  // 꽉 채움
-    .png()
-    .toBuffer();
-
-  // ③ 원형 마스크 적용 → 로고 모서리만 잘려 원형
-  await sharp(logo)
-    .composite([{ input: circleMask, blend: 'dest-in' }])
+    .resize(size, size, {
+      fit: 'contain',
+      background: { r: 255, g: 255, b: 255, alpha: 1 },
+    })
     .png()
     .toFile(outPath);
 
