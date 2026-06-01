@@ -1351,7 +1351,11 @@ function fetchGCal(_retry){
   if(listEl&&(!GCD||!GCD.length))listEl.innerHTML='<div class="gcLoad">⏳ 캘린더 로딩 중...</div>';
   var now=new Date(),tMin=new Date(now.getFullYear(),now.getMonth()-1,1).toISOString(),tMax=new Date(now.getFullYear(),now.getMonth()+3,1).toISOString();
   var url='https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(GCAL_CAL_ID)+'/events?key='+GCAL_API_KEY+'&timeMin='+encodeURIComponent(tMin)+'&timeMax='+encodeURIComponent(tMax)+'&singleEvents=true&orderBy=startTime&maxResults=500';
-  fetch(url).then(function(r){
+  /* 12초 타임아웃: fetch가 멈춰도 '로딩 중'에 갇히지 않도록 */
+  var _ctrl=null,_to=null;
+  try{_ctrl=new AbortController();_to=setTimeout(function(){try{_ctrl.abort();}catch(e){}},12000);}catch(e){}
+  fetch(url,_ctrl?{signal:_ctrl.signal}:undefined).then(function(r){
+    if(_to)clearTimeout(_to);
     return r.json().then(function(data){return{ok:r.ok,status:r.status,data:data};});
   }).then(function(res){
     if(!res.ok){
@@ -1384,6 +1388,7 @@ function fetchGCal(_retry){
     var sl=document.getElementById('gcalLastSync');if(sl){var nd=new Date();sl.textContent='🔄 '+pad(nd.getHours())+':'+pad(nd.getMinutes())+' 업데이트';}
     renderCal();renderGcalSide();
   }).catch(function(e){
+    if(_to)clearTimeout(_to);
     window._gcalFetching=false;
     /* 일시적 네트워크 오류 → 최대 2회 자동 재시도 (1.5초 간격) */
     if(_retry<2){
