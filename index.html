@@ -147,6 +147,39 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .instrCardBtn:hover{background:rgba(255,255,255,.35);transform:scale(1.1);}
 .instrCardBtn.del{background:rgba(239,68,68,.35);}
 .instrCardBtn.del:hover{background:rgba(239,68,68,.6);}
+/* ── 국장 지시사항 게시판 ── */
+.instrBoardWrap{background:#fff;border-radius:var(--r);box-shadow:var(--sh);margin-bottom:16px;overflow:hidden;}
+.instrBoardHead{padding:11px 16px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:space-between;}
+.instrBoardHTitle{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.instrUnreadBadge{background:#ef4444;color:#fff;border-radius:10px;padding:1px 8px;font-size:11px;font-weight:700;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.7;}}
+.instrRow{padding:11px 16px;border-bottom:1px solid var(--bg);display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .15s;}
+.instrRow:hover{background:#f0f4f8;}
+.instrRow:last-child{border-bottom:none;}
+.instrRowTitle{flex:1;font-size:13.5px;font-weight:600;color:var(--tx);}
+.instrRowMeta{font-size:11px;color:var(--tx3);flex-shrink:0;}
+.instrNewDot{display:inline-block;width:8px;height:8px;background:#ef4444;border-radius:50%;margin-left:6px;vertical-align:middle;}
+.instrEmpty{padding:20px;text-align:center;color:var(--tx3);font-size:13px;}
+/* 지시사항 상세 모달 */
+.instrDetailContent{font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--tx);padding:4px 0 12px;}
+.instrReadBar{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--bg);margin-top:4px;font-size:12px;flex-wrap:wrap;}
+.instrReadBtn{background:#f0f4f8;border:1px solid var(--bdr);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--tx2);transition:background .15s;}
+.instrReadBtn:hover{background:#e2e8f0;}
+.instrUnreadPanel{background:#fff9ec;border:1px solid #fcd34d;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:12px;color:#92400e;display:none;}
+/* 지시사항 댓글 */
+.instrCmtSection{border-top:1px solid var(--bg);padding-top:12px;margin-top:4px;}
+.instrCmtTitle{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:10px;}
+.instrCmt{background:#f8fafc;border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+.instrCmtH{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.instrCmtAuthor{font-size:12px;font-weight:700;color:var(--tx);}
+.instrCmtDate{font-size:11px;color:var(--tx3);}
+.instrCmtText{font-size:13px;color:var(--tx);line-height:1.6;}
+.instrCmtActs{display:flex;gap:6px;margin-top:6px;}
+.instrReply{background:#fff;border-radius:6px;padding:8px 10px;margin-top:6px;border-left:3px solid var(--bdr);}
+.instrRpBox{display:none;margin-top:8px;gap:6px;}
+.instrCmtInputWrap{display:flex;gap:8px;margin-top:10px;}
+.instrCmtTa{flex:1;padding:8px 10px;border:1.5px solid var(--bdr);border-radius:8px;font-size:13px;font-family:'Noto Sans KR',sans-serif;resize:none;min-height:60px;}
+.instrCmtTa:focus{outline:none;border-color:var(--pl);}
 @media(max-width:768px){
   main{padding:16px;}
   .calLayout,.dGrid{grid-template-columns:1fr;}
@@ -383,16 +416,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
   <main>
     <div class="tPanel active" id="panel-issues">
       <div id="instrDisplay"></div>
-      <div id="adminInstrPnl" style="display:none;margin-bottom:12px;">
-        <div id="instrEditBox" style="display:none;background:#fff;border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-bottom:8px;border:2px solid var(--accent);">
-          <div class="adminLbl">⭐ 국장 지시사항 편집</div>
-          <textarea id="instrInput" style="width:100%;padding:10px;border:1.5px solid var(--bdr);border-radius:7px;font-family:'Noto Sans KR',sans-serif;font-size:14px;resize:vertical;min-height:80px" placeholder="지시사항을 입력하세요..."></textarea>
-          <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">
-            <button class="btn btnG" onclick="cancelInstr()">취소</button>
-            <button class="btn btnP" onclick="saveInstr()">저장</button>
-          </div>
-        </div>
-      </div>
+      <div id="adminInstrPnl" style="display:none;"></div>
       <div class="statRow">
         <div class="statCard all"><div class="statNum" id="statAll">0</div><div class="statLabel">전체 이슈</div></div>
         <div class="statCard proc"><div class="statNum" id="statProc">0</div><div class="statLabel">진행중</div></div>
@@ -639,6 +663,52 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
     </div>
   </div>
 </div>
+<!-- 국장 지시사항 상세 모달 -->
+<div class="mOverlay" id="instrDetailModal" style="display:none" onclick="if(event.target===this)closeInstrDetail()">
+  <div class="modal" style="max-width:640px;">
+    <div class="mH">
+      <span class="mT" id="instrDetailModalTitle">국장 지시사항</span>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btnG sm" id="instrDetailEditBtn" onclick="openInstrWrite(_currentInstrId)" style="display:none;">✏️ 수정</button>
+        <button class="btn btnD sm" id="instrDetailDelBtn" onclick="deleteInstrItem(_currentInstrId)" style="display:none;">🗑️ 삭제</button>
+        <button class="mClose" onclick="closeInstrDetail()">✕</button>
+      </div>
+    </div>
+    <div class="mB" style="padding-bottom:0;">
+      <div style="font-size:12px;color:var(--tx3);margin-bottom:10px;" id="instrDetailMeta"></div>
+      <div class="instrDetailContent" id="instrDetailContent"></div>
+      <!-- 열람 현황 -->
+      <div class="instrReadBar" id="instrReadBar">
+        <span id="instrReadStatText" style="color:var(--tx2);">열람 현황 로딩 중...</span>
+        <button class="instrReadBtn" id="instrUnreadToggleBtn" onclick="toggleInstrUnreadPanel()" style="display:none;">미열람 회원 보기 ▼</button>
+      </div>
+      <div class="instrUnreadPanel" id="instrUnreadPanel"></div>
+      <!-- 댓글 -->
+      <div class="instrCmtSection">
+        <div class="instrCmtTitle">💬 댓글</div>
+        <div id="instrCmtList"></div>
+        <div class="instrCmtInputWrap">
+          <textarea class="instrCmtTa" id="instrCmtTa" placeholder="댓글을 입력하세요..." rows="2"></textarea>
+          <button class="btn btnP" onclick="submitInstrComment()" style="align-self:flex-end;flex-shrink:0;">등록</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 국장 지시사항 작성/수정 모달 -->
+<div class="mOverlay" id="instrWriteModal" style="display:none" onclick="if(event.target===this)closeInstrWrite()">
+  <div class="modal" style="max-width:580px;">
+    <div class="mH"><span class="mT" id="instrWriteModalTitle">지시사항 등록</span><button class="mClose" onclick="closeInstrWrite()">✕</button></div>
+    <div class="mB">
+      <div class="fg"><label>제목</label><input type="text" id="instrWTitle" placeholder="지시사항 제목을 입력하세요"></div>
+      <div class="fg"><label>내용</label><textarea id="instrWContent" style="width:100%;padding:10px;border:1.5px solid var(--bdr);border-radius:7px;font-family:'Noto Sans KR',sans-serif;font-size:14px;resize:vertical;min-height:120px;box-sizing:border-box;" placeholder="지시사항 내용을 입력하세요..."></textarea></div>
+    </div>
+    <div class="mF">
+      <button class="btn btnG" onclick="closeInstrWrite()">취소</button>
+      <button class="btn btnP" onclick="saveInstrWrite()">저장</button>
+    </div>
+  </div>
+</div>
 <div class="confOverlay" id="confDlg" style="display:none">
   <div class="confBox"><h3>확인</h3><p id="confMsg"></p><div class="confBtns"><button class="btn btnG" onclick="closeConf()">취소</button><button class="btn btnD" onclick="execConf()">확인</button></div></div>
 </div>
@@ -657,7 +727,7 @@ var ADMIN_PW='0708',STAFF_PW='1234',SUPER_ADMIN_EMAIL='kjj0708@gmail.com';
 var FB={apiKey:"AIzaSyDDsAzrYojzbVXyaPilfF3Mj57pmat8JVU",authDomain:"bureau-dashboard.firebaseapp.com",databaseURL:"https://bureau-dashboard-default-rtdb.firebaseio.com",projectId:"bureau-dashboard",storageBucket:"bureau-dashboard.firebasestorage.app",messagingSenderId:"865956736976",appId:"1:865956736976:web:423c2add3bc57737c213d5"};
 var ORG={'도로과':['건설행정팀','도로팀','보도관리팀','자전거도시팀','도로조명팀'],'도시계획과':['도시행정팀','도시개발팀','도시계획팀','GB관리팀'],'건축과':['건축행정팀','건축팀','건축정보팀','공공시설팀','건축안전센터팀'],'주택과':['주택팀','재개발재건축팀','주택정비팀','주거복지팀','주택민원팀'],'도시재생경관과':['도시재생전략팀','도시재생사업팀','광고물관리팀','도시경관팀']};
 var GCD=[];var GCAL_API_KEY=localStorage.getItem('gcal_key')||'AIzaSyDU0y_Jg9YW-ybmlRSXMFNi6PJnaUe1ROc';var GCAL_CAL_ID=localStorage.getItem('gcal_calid')||'fb33c71c30a02987ef34e18cb2f4d9f1bd2c108c618c4b23594025b09c34cf0f@group.calendar.google.com';
-var currentUser=null,db=null,auth=null,issues=[],projects=[],events=[],instruction=null,_projRef=null,_statusRef=null,_usersRef=null,_gcalRef=null,_issuesRef=null,_eventsRef=null,_instrRef=null;
+var currentUser=null,db=null,auth=null,issues=[],projects=[],events=[],_instrList=[],_instrReadsCache={},_instrCmtRef=null,_currentInstrId=null,_projRef=null,_statusRef=null,_usersRef=null,_gcalRef=null,_issuesRef=null,_eventsRef=null,_instrRef=null;
 var calY,calM,editIssId=null,editProjId=null,pendingPhoto=null,confCb=null,statusFilter='';
 (function(){try{firebase.initializeApp(FB);db=firebase.database();window._origDb=db;auth=firebase.auth();auth.onAuthStateChanged(function(user){if(user&&!currentUser){var _db=db||window._origDb;(_db?_db.ref('users/'+user.uid).once('value'):Promise.resolve(null)).then(function(s){var p=s?s.val():null;if(!p){try{p=JSON.parse(localStorage.getItem('bu_profile')||'null');}catch(e){}}if(user&&user.email&&user.email.toLowerCase()===SUPER_ADMIN_EMAIL){var sp={name:(p&&p.name)||user.displayName||'총괄관리자',dept:(p&&p.dept)||'도시주택국',team:(p&&p.team)||'',phone:(p&&p.phone)||'',role:'총괄관리자',isAdmin:true,status:'approved',email:user.email};setCurrentUserFromProfile(user,sp);if(_db&&user.uid)_db.ref('users/'+user.uid).update({name:sp.name,isAdmin:true,status:'approved',role:'총괄관리자',email:user.email});enterApp();return;}if(p){var status=p.status||'approved';if(status==='pending'){setCurrentUserFromProfile(user,p);showPendingScreen('pending');setupStatusListener(user.uid);}else if(status==='rejected'||status==='reapplying'){if(status==='rejected'){setCurrentUserFromProfile(user,p);window._pendingGoogleUser=user;showPendingScreen('rejected');}else{window._pendingGoogleUser=user;showProfileSetup(user);}}else{setCurrentUserFromProfile(user,p);enterApp();}}else{showProfileSetup(user);}});}else if(!user){currentUser=null;if(_statusRef){_statusRef.off('value');_statusRef=null;}var ld=document.getElementById('loginLoading');var btn=document.getElementById('btnGoogleLogin');if(ld)ld.style.display='none';if(btn)btn.style.display='flex';}});}catch(e){console.warn('FB fail');setSyncOK(false);loadLS();}})();
 function loadLS(){issues=JSON.parse(localStorage.getItem('bu_iss')||'[]');projects=JSON.parse(localStorage.getItem('bu_proj')||'[]');events=JSON.parse(localStorage.getItem('bu_ev')||'[]');instruction=JSON.parse(localStorage.getItem('bu_instr')||'null');}
@@ -678,7 +748,7 @@ function showPeErr(m){var e=document.getElementById('peErr');if(e){e.textContent
 function saveProfileEdit(){if(!currentUser)return;var name=(document.getElementById('peName').value||'').trim();var dept=document.getElementById('peDept').value;var team=document.getElementById('peTeam').value;var role=document.getElementById('peRole').value;var phone=(document.getElementById('pePhone').value||'').trim();if(!name){showPeErr('이름을 입력해주세요.');return;}phone=phone.replace(/[^0-9]/g,'');if(!phone||phone.length<9){showPeErr('휴대폰 번호를 입력해주세요. (숫자만, 9자리 이상)');return;}var prevDept=currentUser.dept;var upd={name:name,dept:dept,team:team,role:role,phone:phone};currentUser.name=name;currentUser.dept=dept;currentUser.team=team;currentUser.role=role;currentUser.phone=phone;try{var lp=JSON.parse(localStorage.getItem('bu_profile')||'{}');Object.assign(lp,upd);localStorage.setItem('bu_profile',JSON.stringify(lp));}catch(e){}var _db=db||window._origDb;if(_db&&currentUser.uid&&currentUser.uid!=='local'){_db.ref('users/'+currentUser.uid).update(upd);}var ub=document.getElementById('ubadge');if(ub)ub.textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';if(currentUser.type!=='admin'&&prevDept!==dept){setupProjectsListener();}renderIssues();renderProjectsGrid();closeProfileEdit();}
 function showLErr(m){var e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
 function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('pendingScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';
-if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';var _mt=document.getElementById('memberTab');if(_mt)_mt.style.display='';}document.getElementById('adminCalPnl').style.display='block';initTimeDropdown();var _db=db||window._origDb;setupGlobalListeners();setupUsersListener();var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstr();renderIssues();if(_db)setupProjectsListener();else renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var _ka0=document.getElementById('gcalApiKey');if(_ka0)_ka0.value=GCAL_API_KEY;var _ki0=document.getElementById('gcalCalId');if(_ki0)_ki0.value=GCAL_CAL_ID;setGCalSt(GCAL_API_KEY?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!_db){loadLS();fetchGCal();}else{if(GCAL_API_KEY)fetchGCal();if(_gcalRef){_gcalRef.off('value');}_gcalRef=_db.ref('settings/gcal');_gcalRef.on('value',function(snap){var s=snap.val();var prevKey=GCAL_API_KEY;if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser&&currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;setGCalSt(s&&s.apiKey?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!prevKey||prevKey!==GCAL_API_KEY)fetchGCal();});}if(window._gcalTimer)clearInterval(window._gcalTimer);window._gcalTimer=setInterval(function(){if(currentUser)fetchGCal();},10*60*1000);history.pushState({inApp:true},'');}
+if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';var _mt=document.getElementById('memberTab');if(_mt)_mt.style.display='';}document.getElementById('adminCalPnl').style.display='block';initTimeDropdown();var _db=db||window._origDb;setupGlobalListeners();setupUsersListener();var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstrBoard();renderIssues();if(_db)setupProjectsListener();else renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var _ka0=document.getElementById('gcalApiKey');if(_ka0)_ka0.value=GCAL_API_KEY;var _ki0=document.getElementById('gcalCalId');if(_ki0)_ki0.value=GCAL_CAL_ID;setGCalSt(GCAL_API_KEY?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!_db){loadLS();fetchGCal();}else{if(GCAL_API_KEY)fetchGCal();if(_gcalRef){_gcalRef.off('value');}_gcalRef=_db.ref('settings/gcal');_gcalRef.on('value',function(snap){var s=snap.val();var prevKey=GCAL_API_KEY;if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser&&currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;setGCalSt(s&&s.apiKey?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!prevKey||prevKey!==GCAL_API_KEY)fetchGCal();});}if(window._gcalTimer)clearInterval(window._gcalTimer);window._gcalTimer=setInterval(function(){if(currentUser)fetchGCal();},10*60*1000);history.pushState({inApp:true},'');}
 function teardownProjectsListener(){if(_projRef){_projRef.off('value');_projRef=null;}}
 function setupProjectsListener(){teardownProjectsListener();var _db=db||window._origDb;if(!_db||!currentUser)return;if(currentUser.type==='admin'){_projRef=_db.ref('projects');_projRef.on('value',function(s){projects=[];if(s.val()){Object.entries(s.val()).forEach(function(de){var dept=de[0];if(de[1]&&typeof de[1]==='object'){Object.entries(de[1]).forEach(function(pe){projects.push(Object.assign({id:pe[0],dept:dept},pe[1]));});}});}renderProjectsGrid();});}else{_projRef=_db.ref('projects/'+currentUser.dept);_projRef.on('value',function(s){var dept=currentUser.dept;projects=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0],dept:dept},e[1]);}):[];renderProjectsGrid();});}}
 function projPath(id){var p=projects.find(function(x){return x.id===id;});return p?'projects/'+p.dept+'/'+id:null;}
@@ -687,7 +757,7 @@ function showPendingScreen(reason){document.getElementById('loginScreen').style.
 function doReapply(){var user=window._pendingGoogleUser||(currentUser?{uid:currentUser.uid,displayName:currentUser.name,email:currentUser.email}:null);if(!user)return;/* Firebase에서 거절 상태 제거 후 프로필 설정 화면으로 */var _db=db||window._origDb;function goSetup(){document.getElementById('pendingScreen').style.display='none';showProfileSetup(user);}if(_db&&user.uid){_db.ref('users/'+user.uid+'/status').set('reapplying').then(goSetup).catch(goSetup);}else{goSetup();}}
 function setupStatusListener(uid){var _db=db||window._origDb;if(!_db)return;if(_statusRef){_statusRef.off('value');_statusRef=null;}_statusRef=_db.ref('users/'+uid+'/status');_statusRef.on('value',function(s){var status=s.val();if(status==='approved'){if(_statusRef){_statusRef.off('value');_statusRef=null;}var _db2=db||window._origDb;if(_db2)_db2.ref('users/'+uid).once('value').then(function(snap){var p=snap.val();if(p){setCurrentUserFromProfile({uid:uid,displayName:p.name,email:p.email||''},p);enterApp();}});} else if(status==='rejected'){showPendingScreen('rejected');}});}
 function setupUsersListener(){var _db=db||window._origDb;console.log('[Users] setupUsersListener called, db=',!!db,'_origDb=',!!window._origDb,'type=',currentUser&&currentUser.type);if(!_db){console.warn('[Users] no db available');window._allUsers={};renderMemberList();return;}if(_usersRef){_usersRef.off('value');_usersRef=null;}_usersRef=_db.ref('users');_usersRef.on('value',function(s){var data=s.val();console.log('[Users] listener got data:',data?Object.keys(data).length+'명':'null');window._allUsers=data||{};renderUserMgmt(data);renderMemberList();_updatePendingBadge(data);},function(err){console.error('[Users] listener FAILED:',err.code,err.message);var list=document.getElementById('pendingUserList');if(list&&currentUser&&currentUser.type==='admin'){list.innerHTML='<div style="padding:12px;color:#b91c1c;font-size:13px;line-height:1.7;">❌ <b>사용자 목록 읽기 실패</b><br>Firebase 보안 규칙에서 <code>users</code> 노드의 읽기가 제한되어 있습니다.<br><br><b>해결:</b> Firebase 콘솔 → Realtime Database → Rules에서:<br><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">{"rules":{".read":"auth != null",".write":"auth != null"}}</code><br>또는 users 노드에 읽기 권한을 추가하세요.</div>';}var el=document.getElementById('memberListBody');if(el){el.innerHTML='<div style="padding:16px;color:#b91c1c;font-size:13px;">❌ 사용자 데이터 읽기 권한이 없습니다.<br>오류: '+esc(err.message||err.code||'')+'</div>';}setTimeout(function(){var _db2=db||window._origDb;if(_db2){console.log('[Users] retrying with once...');_db2.ref('users').once('value').then(function(s2){var d2=s2.val();console.log('[Users] retry got:',d2?Object.keys(d2).length+'명':'null');window._allUsers=d2||{};renderUserMgmt(d2);renderMemberList();_updatePendingBadge(d2);}).catch(function(e2){console.error('[Users] retry also failed:',e2);});}},3000);});if(currentUser&&currentUser.type==='admin'){_db.ref('users').once('value').then(function(s){var data=s.val();console.log('[Users] admin once got:',data?Object.keys(data).length+'명':'null');window._allUsers=data||{};renderUserMgmt(data);renderMemberList();_updatePendingBadge(data);}).catch(function(e){console.error('[Users] admin once FAILED:',e.code,e.message);});}}
-function setupGlobalListeners(){var _db=db||window._origDb;console.log('[Global] setupGlobalListeners called, db=',!!_db);if(!_db){loadLS();return;}teardownGlobalListeners();var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);loadLS();if(currentUser){renderIssues();renderProjectsGrid();renderCal();renderInstr();}}_issuesRef=_db.ref('issues');_issuesRef.on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderIssues();},_fbErr);_eventsRef=_db.ref('events');_eventsRef.on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();},_fbErr);_instrRef=_db.ref('instruction');_instrRef.on('value',function(s){instruction=s.val();renderInstr();},_fbErr);}
+function setupGlobalListeners(){var _db=db||window._origDb;console.log('[Global] setupGlobalListeners called, db=',!!_db);if(!_db){loadLS();return;}teardownGlobalListeners();var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);loadLS();if(currentUser){renderIssues();renderProjectsGrid();renderCal();renderInstrBoard();}}_issuesRef=_db.ref('issues');_issuesRef.on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderIssues();},_fbErr);_eventsRef=_db.ref('events');_eventsRef.on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();},_fbErr);_instrRef=_db.ref('instructions');_instrRef.on('value',function(s){_instrList=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);}):[];renderInstrBoard();},_fbErr);}
 function teardownGlobalListeners(){if(_issuesRef){try{_issuesRef.off('value');}catch(e){}_issuesRef=null;}if(_eventsRef){try{_eventsRef.off('value');}catch(e){}_eventsRef=null;}if(_instrRef){try{_instrRef.off('value');}catch(e){}_instrRef=null;}}
 function _updatePendingBadge(data){var mt=document.getElementById('memberTab');if(!mt)return;var cnt=0;if(data){Object.values(data).forEach(function(u){if(u&&u.status==='pending')cnt++;});}mt.innerHTML='👥 회원관리'+(cnt>0?' <span style="background:#ef4444;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:3px;">'+cnt+'</span>':'');}
 function renderUserMgmt(usersData){var list=document.getElementById('pendingUserList');var cnt=document.getElementById('pendingCnt');if(!list)return;if(!usersData){list.innerHTML='<div style="font-size:13px;color:var(--tx3);">대기 중인 신청이 없습니다.</div>';if(cnt)cnt.textContent='';return;}var pending=Object.entries(usersData).filter(function(e){return e[1]&&e[1].status==='pending';});console.log('[Users] pending count:',pending.length,pending.map(function(e){return e[1].name;}));if(cnt)cnt.textContent=pending.length>0?pending.length:'';if(pending.length===0){list.innerHTML='<div style="font-size:13px;color:var(--tx3);">대기 중인 신청이 없습니다.</div>';return;}list.innerHTML=pending.map(function(e){var uid=e[0];var u=e[1];return '<div class="uRow"><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">'+esc(u.name||'')+(u.role?' <span style="font-size:11px;font-weight:400;color:var(--tx3);">('+esc(u.role)+')</span>':'')+'</div><div style="font-size:12px;color:var(--tx3)">'+esc(u.dept||'')+' '+esc(u.team||'')+' · '+esc(u.email||'')+'</div></div><div style="display:flex;gap:6px"><button class="btn btnP" style="padding:5px 12px;font-size:12px" onclick="approveUser(\''+uid+'\')">승인</button><button class="btn btnD" style="padding:5px 12px;font-size:12px" onclick="rejectUser(\''+uid+'\')">거절</button></div></div>'}).join('');}
@@ -695,38 +765,198 @@ function approveUser(uid){var _db=db||window._origDb;if(!_db)return;_db.ref('use
 function rejectUser(uid){var _db=db||window._origDb;if(!_db)return;showConf('이 사용자의 가입을 거절하시겠습니까?',function(){_db.ref('users/'+uid+'/status').set('rejected');});}
 function setSyncOK(ok){var d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;if(ok){d.classList.remove('off');t.textContent='실시간 연결';}else{d.classList.add('off');t.textContent='오프라인(로컬)';}}
 function switchTab(t,btn){document.querySelectorAll('.tBtn').forEach(function(b){b.classList.remove('active');});document.querySelectorAll('.tPanel').forEach(function(p){p.classList.remove('active');});btn.classList.add('active');document.getElementById('panel-'+t).classList.add('active');if(t==='calendar'){renderCal();fetchGCal();}if(t==='orgchart'){loadAndRenderMembers();}}
-function saveInstr(){var tx=document.getElementById('instrInput').value.trim();if(!tx)return;var data={text:tx,date:new Date().toISOString()};dbSet('instruction',data);instruction=data;document.getElementById('instrEditBox').style.display='none';renderInstr();}
-function newInstr(){document.getElementById('instrInput').value='';document.getElementById('instrEditBox').style.display='block';document.getElementById('instrInput').focus();}
-function editInstr(){document.getElementById('instrInput').value=instruction?instruction.text:'';document.getElementById('instrEditBox').style.display='block';document.getElementById('instrInput').focus();}
-function cancelInstr(){document.getElementById('instrEditBox').style.display='none';}
-function deleteInstr(){showConf('국장 지시사항을 삭제하시겠습니까?',function(){dbRemove('instruction');instruction=null;renderInstr();});}
-function renderInstr(){
-  var box=document.getElementById('instrDisplay');
-  if(!box)return;
+/* ── 국장 지시사항 게시판 ──────────────────── */
+function renderInstrBoard(){
+  var box=document.getElementById('instrDisplay');if(!box)return;
   var isAdmin=currentUser&&currentUser.type==='admin';
-  if(!instruction||!instruction.text){
-    if(isAdmin){
-      box.innerHTML='<div class="instrBox empty" style="border:2px dashed var(--pl);background:rgba(37,99,168,0.05);color:var(--pl);cursor:pointer;padding:20px;text-align:center;font-weight:600;display:flex;justify-content:center;align-items:center;border-radius:var(--r);margin-bottom:20px;" onclick="newInstr()">📢 등록된 국장 지시사항이 없습니다. (클릭하여 신규 등록)</div>';
-    }else{
-      box.innerHTML='';
-    }
-    return;
-  }
-  var btnHtml = '';
-  if(isAdmin){
-    btnHtml = '<div class="instrActions">'
-      + '<button class="instrCardBtn" onclick="editInstr()" title="지시사항 수정">✏️</button>'
-      + '<button class="instrCardBtn del" onclick="deleteInstr()" title="지시사항 삭제">🗑️</button>'
-      + '</div>';
-  }
-  box.innerHTML='<div class="instrBox" style="position:relative;"><div class="ico">📢</div>'
-    + '<div style="flex:1;position:relative;padding-right:60px;">'
-    + '<h3>국장 지시사항</h3>'
-    + btnHtml
-    + '<p style="white-space:pre-wrap;margin-top:4px;">'+esc(instruction.text)+'</p>'
-    + '<div class="instrDate">'+fmtD(new Date(instruction.date))+'</div>'
-    + '</div></div>';
+  /* 읽기 완료 목록 (localStorage 기반 빠른 접근) */
+  var readMap=_getInstrLocalReads();
+  var unread=_instrList.filter(function(i){return!readMap[i.id];}).length;
+  var badgeHtml=unread>0?'<span class="instrUnreadBadge">'+unread+'</span>':'';
+  var addBtn=isAdmin?'<button class="btn sm" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.5);font-size:12px;padding:4px 10px;" onclick="openInstrWrite(null)">+ 신규</button>':'';
+  var rows=_instrList.length?_instrList.map(function(i){
+    var isNew=!readMap[i.id];
+    var newDot=isNew?'<span class="instrNewDot"></span>':'';
+    return '<div class="instrRow" onclick="openInstrDetail(\''+i.id+'\')">'
+      +'<span class="instrRowTitle">📌 '+esc(i.title||'(제목없음)')+newDot+'</span>'
+      +'<span class="instrRowMeta">'+fmtD(new Date(i.date))+'</span>'
+      +'</div>';
+  }).join(''):'<div class="instrEmpty">등록된 지시사항이 없습니다.'+(isAdmin?' (<span style="cursor:pointer;color:var(--pl);text-decoration:underline;" onclick="openInstrWrite(null)">신규 등록</span>)':'')+'</div>';
+  box.innerHTML='<div class="instrBoardWrap">'
+    +'<div class="instrBoardHead"><span class="instrBoardHTitle">📢 국장 지시사항 '+badgeHtml+'</span>'+addBtn+'</div>'
+    +rows+'</div>';
 }
+function _getInstrLocalReads(){try{return JSON.parse(localStorage.getItem('instrReads')||'{}');}catch(e){return{};}}
+function _markInstrLocalRead(id){var m=_getInstrLocalReads();m[id]=Date.now();try{localStorage.setItem('instrReads',JSON.stringify(m));}catch(e){}}
+function openInstrDetail(id){
+  _currentInstrId=id;
+  var instr=_instrList.find(function(i){return i.id===id;});if(!instr)return;
+  var isAdmin=currentUser&&currentUser.type==='admin';
+  document.getElementById('instrDetailModalTitle').textContent=instr.title||'지시사항';
+  document.getElementById('instrDetailMeta').textContent=(instr.author||'')+(instr.date?' · '+fmtDT(new Date(instr.date)):'');
+  document.getElementById('instrDetailContent').textContent=instr.content||instr.text||'';
+  document.getElementById('instrDetailEditBtn').style.display=isAdmin?'':'none';
+  document.getElementById('instrDetailDelBtn').style.display=isAdmin?'':'none';
+  document.getElementById('instrDetailModal').style.display='flex';
+  /* 열람 처리 */
+  _markInstrLocalRead(id);
+  var _db=db||window._origDb;
+  if(_db&&currentUser&&currentUser.uid){
+    _db.ref('instrReads/'+id+'/'+currentUser.uid).set({name:currentUser.name,readAt:new Date().toISOString()});
+  }
+  renderInstrBoard(); /* 배지 즉시 갱신 */
+  /* 열람 현황 로드 */
+  _loadInstrReadStat(id);
+  /* 댓글 리스너 */
+  _setupInstrCmtListener(id);
+  history.pushState({inApp:true,popup:true},'');
+}
+function closeInstrDetail(){
+  document.getElementById('instrDetailModal').style.display='none';
+  _currentInstrId=null;
+  if(_instrCmtRef){_instrCmtRef.off('value');_instrCmtRef=null;}
+  document.getElementById('instrUnreadPanel').style.display='none';
+}
+function _loadInstrReadStat(id){
+  var statEl=document.getElementById('instrReadStatText');
+  var toggleBtn=document.getElementById('instrUnreadToggleBtn');
+  if(!statEl)return;
+  var _db=db||window._origDb;
+  if(!_db||currentUser.type!=='admin'){statEl.textContent='';if(toggleBtn)toggleBtn.style.display='none';return;}
+  _db.ref('instrReads/'+id).once('value').then(function(s){
+    var reads=s.val()||{};
+    var allUsers=window._allUsers||{};
+    var approvedUids=Object.entries(allUsers).filter(function(e){return e[1]&&e[1].status==='approved';}).map(function(e){return e[0];});
+    var readUids=Object.keys(reads);
+    var unreadUids=approvedUids.filter(function(uid){return!reads[uid];});
+    statEl.innerHTML='<span style="color:var(--tx2);">열람 <b>'+readUids.length+'</b>명</span>'
+      +(unreadUids.length>0?'  /  <span style="color:#dc2626;">미열람 <b>'+unreadUids.length+'</b>명</span>':'  /  <span style="color:#16a34a;">✅ 전원 열람</span>');
+    if(unreadUids.length>0&&toggleBtn){
+      toggleBtn.style.display='';
+      _instrReadsCache[id]={reads:reads,unreadUids:unreadUids,allUsers:allUsers};
+    }else{if(toggleBtn)toggleBtn.style.display='none';}
+  }).catch(function(){statEl.textContent='열람 현황 조회 불가';});
+}
+function toggleInstrUnreadPanel(){
+  var panel=document.getElementById('instrUnreadPanel');
+  if(!panel)return;
+  var open=panel.style.display==='block';
+  if(open){panel.style.display='none';document.getElementById('instrUnreadToggleBtn').textContent='미열람 회원 보기 ▼';return;}
+  var id=_currentInstrId;
+  var cache=_instrReadsCache[id];
+  if(!cache){panel.style.display='block';panel.textContent='데이터 없음';return;}
+  var names=cache.unreadUids.map(function(uid){var u=cache.allUsers[uid];return u?esc(u.name||uid)+'('+esc(u.dept||'')+(u.team?' '+esc(u.team):'')+')':(uid);});
+  panel.innerHTML='<b>미열람 회원 ('+names.length+'명)</b><br>'+names.join('  ·  ');
+  panel.style.display='block';
+  document.getElementById('instrUnreadToggleBtn').textContent='미열람 회원 닫기 ▲';
+}
+function openInstrWrite(id){
+  var isEdit=!!id;
+  document.getElementById('instrWriteModalTitle').textContent=isEdit?'지시사항 수정':'지시사항 등록';
+  if(isEdit){
+    var instr=_instrList.find(function(i){return i.id===id;});
+    if(instr){document.getElementById('instrWTitle').value=instr.title||'';document.getElementById('instrWContent').value=instr.content||instr.text||'';}
+    document.getElementById('instrWriteModal').dataset.editId=id;
+  }else{
+    document.getElementById('instrWTitle').value='';document.getElementById('instrWContent').value='';
+    delete document.getElementById('instrWriteModal').dataset.editId;
+  }
+  document.getElementById('instrWriteModal').style.display='flex';
+  document.getElementById('instrDetailModal').style.display='none';
+  setTimeout(function(){document.getElementById('instrWTitle').focus();},100);
+}
+function closeInstrWrite(){document.getElementById('instrWriteModal').style.display='none';}
+function saveInstrWrite(){
+  var title=(document.getElementById('instrWTitle').value||'').trim();
+  var content=(document.getElementById('instrWContent').value||'').trim();
+  if(!title){alert('제목을 입력하세요.');return;}
+  if(!content){alert('내용을 입력하세요.');return;}
+  var editId=document.getElementById('instrWriteModal').dataset.editId;
+  var _db=db||window._origDb;
+  var now=new Date().toISOString();
+  var data={title:title,content:content,date:now,author:currentUser?currentUser.name:'',authorUid:currentUser?currentUser.uid:''};
+  if(editId){
+    data.date=(_instrList.find(function(i){return i.id===editId;})||{date:now}).date; /* 수정 시 원본 날짜 유지 */
+    data.updatedAt=now;
+    if(_db){_db.ref('instructions/'+editId).update(data);}
+  }else{
+    if(_db){_db.ref('instructions').push(data);}
+    else{data.id=Date.now().toString();_instrList.unshift(data);renderInstrBoard();}
+  }
+  closeInstrWrite();
+}
+function deleteInstrItem(id){
+  showConf('이 지시사항을 삭제하시겠습니까?',function(){
+    var _db=db||window._origDb;
+    if(_db){_db.ref('instructions/'+id).remove();_db.ref('instrReads/'+id).remove();}
+    else{_instrList=_instrList.filter(function(i){return i.id!==id;});renderInstrBoard();}
+    closeInstrDetail();
+  });
+}
+/* ── 지시사항 댓글 ── */
+function _setupInstrCmtListener(instrId){
+  if(_instrCmtRef){_instrCmtRef.off('value');_instrCmtRef=null;}
+  document.getElementById('instrCmtList').innerHTML='<div style="font-size:12px;color:var(--tx3);">로딩 중...</div>';
+  var _db=db||window._origDb;
+  if(!_db){_renderInstrCmts({});return;}
+  _instrCmtRef=_db.ref('instructions/'+instrId+'/comments');
+  _instrCmtRef.on('value',function(s){_renderInstrCmts(s.val()||{});});
+}
+function _renderInstrCmts(data){
+  var list=document.getElementById('instrCmtList');if(!list)return;
+  var entries=Object.entries(data).sort(function(a,b){return new Date(a[1].date)-new Date(b[1].date);});
+  if(!entries.length){list.innerHTML='<div style="font-size:12px;color:var(--tx3);padding:4px 0 8px;">댓글이 없습니다.</div>';return;}
+  list.innerHTML=entries.map(function(e){
+    var cid=e[0],c=e[1];
+    var mine=currentUser&&(c.authorUid===currentUser.uid||currentUser.type==='admin');
+    var replies=c.replies?Object.entries(c.replies).sort(function(a,b){return new Date(a[1].date)-new Date(b[1].date)}):[];
+    var repliesHtml=replies.map(function(re){
+      var rid=re[0],r=re[1];
+      var mineR=currentUser&&(r.authorUid===currentUser.uid||currentUser.type==='admin');
+      return '<div class="instrReply">'
+        +'<div class="instrCmtH"><span class="instrCmtAuthor">'+esc(r.author)+'</span><span class="instrCmtDate"> '+fmtDT(new Date(r.date))+'</span></div>'
+        +'<div class="instrCmtText">'+esc(r.text)+'</div>'
+        +(mineR?'<div class="instrCmtActs"><button class="btn btnD sm" onclick="deleteInstrReply(\''+cid+'\',\''+rid+'\')">🗑️</button></div>':'')
+        +'</div>';
+    }).join('');
+    var rpBoxId='instrRpBox_'+cid;
+    return '<div class="instrCmt">'
+      +'<div class="instrCmtH"><span class="instrCmtAuthor">'+esc(c.author)+'</span><span class="instrCmtDate"> '+fmtDT(new Date(c.date))+'</span></div>'
+      +'<div class="instrCmtText">'+esc(c.text)+'</div>'
+      +'<div class="instrCmtActs">'
+        +'<button class="btn btnG sm" onclick="toggleInstrRpBox(\''+cid+'\')">↩ 답글</button>'
+        +(mine?'<button class="btn btnD sm" onclick="deleteInstrComment(\''+cid+'\')">🗑️</button>':'')
+      +'</div>'
+      +repliesHtml
+      +'<div class="instrRpBox" id="'+rpBoxId+'" style="display:none;margin-top:6px;gap:6px;">'
+        +'<textarea class="instrCmtTa" id="instrRpTa_'+cid+'" placeholder="답글 입력..." style="min-height:44px;"></textarea>'
+        +'<button class="btn btnP sm" onclick="submitInstrReply(\''+cid+'\')">등록</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+function submitInstrComment(){
+  var ta=document.getElementById('instrCmtTa');if(!ta||!ta.value.trim())return;
+  var _db=db||window._origDb;if(!_db){alert('오프라인 모드에서는 댓글을 사용할 수 없습니다.');return;}
+  var id=_currentInstrId;if(!id)return;
+  _db.ref('instructions/'+id+'/comments').push({text:ta.value.trim(),author:currentUser.name,authorUid:currentUser.uid,date:new Date().toISOString()}).then(function(){ta.value='';});
+}
+function toggleInstrRpBox(cid){var b=document.getElementById('instrRpBox_'+cid);if(b)b.style.display=b.style.display==='flex'?'none':'flex';}
+function submitInstrReply(cid){
+  var ta=document.getElementById('instrRpTa_'+cid);if(!ta||!ta.value.trim())return;
+  var _db=db||window._origDb;if(!_db)return;
+  var id=_currentInstrId;if(!id)return;
+  _db.ref('instructions/'+id+'/comments/'+cid+'/replies').push({text:ta.value.trim(),author:currentUser.name,authorUid:currentUser.uid,date:new Date().toISOString()}).then(function(){ta.value='';document.getElementById('instrRpBox_'+cid).style.display='none';});
+}
+function deleteInstrComment(cid){showConf('댓글을 삭제하시겠습니까?',function(){var _db=db||window._origDb;if(_db&&_currentInstrId)_db.ref('instructions/'+_currentInstrId+'/comments/'+cid).remove();});}
+function deleteInstrReply(cid,rid){showConf('답글을 삭제하시겠습니까?',function(){var _db=db||window._origDb;if(_db&&_currentInstrId)_db.ref('instructions/'+_currentInstrId+'/comments/'+cid+'/replies/'+rid).remove();});}
+/* 하위 호환: 기존 코드에서 호출하는 경우 대비 */
+function newInstr(){openInstrWrite(null);}
+function editInstr(){if(_currentInstrId)openInstrWrite(_currentInstrId);}
+function deleteInstr(){if(_currentInstrId)deleteInstrItem(_currentInstrId);}
+function cancelInstr(){closeInstrWrite();}
+function saveInstr(){saveInstrWrite();}
+function renderInstr(){renderInstrBoard();}
 function onIssStatusChange(){var st=document.getElementById('issStatus').value;var pr=document.getElementById('progressRow');pr.style.display=st==='proc'?'block':'none';if(st==='done'){document.getElementById('issProgress').value=100;document.getElementById('issProgressVal').textContent='100%';document.getElementById('issProgressBar').style.width='100%';}}
 function syncProgressBar(){var v=document.getElementById('issProgress').value;document.getElementById('issProgressVal').textContent=v+'%';document.getElementById('issProgressBar').style.width=v+'%';}
 document.addEventListener('input',function(e){if(e.target&&e.target.id==='issProgress'){syncProgressBar();if(parseInt(e.target.value)===100){document.getElementById('issStatus').value='done';document.getElementById('progressRow').style.display='none';}}});
