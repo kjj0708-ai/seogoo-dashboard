@@ -741,7 +741,7 @@ var ADMIN_PW='0708',STAFF_PW='1234',SUPER_ADMIN_EMAIL='kjj0708@gmail.com';
 var FB={apiKey:"AIzaSyDDsAzrYojzbVXyaPilfF3Mj57pmat8JVU",authDomain:"bureau-dashboard.firebaseapp.com",databaseURL:"https://bureau-dashboard-default-rtdb.firebaseio.com",projectId:"bureau-dashboard",storageBucket:"bureau-dashboard.firebasestorage.app",messagingSenderId:"865956736976",appId:"1:865956736976:web:423c2add3bc57737c213d5"};
 var ORG={'도로과':['건설행정팀','도로팀','보도관리팀','자전거도시팀','도로조명팀'],'도시계획과':['도시행정팀','도시개발팀','도시계획팀','GB관리팀'],'건축과':['건축행정팀','건축팀','건축정보팀','공공시설팀','건축안전센터팀'],'주택과':['주택팀','재개발재건축팀','주택정비팀','주거복지팀','주택민원팀'],'도시재생경관과':['도시재생전략팀','도시재생사업팀','광고물관리팀','도시경관팀']};
 var GCD=[];var GCAL_API_KEY=localStorage.getItem('gcal_key')||'AIzaSyDU0y_Jg9YW-ybmlRSXMFNi6PJnaUe1ROc';var GCAL_CAL_ID=localStorage.getItem('gcal_calid')||'fb33c71c30a02987ef34e18cb2f4d9f1bd2c108c618c4b23594025b09c34cf0f@group.calendar.google.com';
-var currentUser=null,db=null,auth=null,issues=[],projects=[],events=[],_instrList=[],_instrReadsCache={},_instrCmtRef=null,_currentInstrId=null,_projRef=null,_statusRef=null,_usersRef=null,_gcalRef=null,_issuesRef=null,_eventsRef=null,_instrRef=null;
+var currentUser=null,db=null,auth=null,issues=[],projects=[],events=[],instruction=null,_instrList=[],_instrReadsCache={},_instrCmtRef=null,_currentInstrId=null,_projRef=null,_statusRef=null,_usersRef=null,_gcalRef=null,_issuesRef=null,_eventsRef=null,_instrRef=null;
 var calY,calM,editIssId=null,editProjId=null,pendingPhoto=null,confCb=null,statusFilter='';
 (function(){try{firebase.initializeApp(FB);db=firebase.database();window._origDb=db;auth=firebase.auth();auth.onAuthStateChanged(function(user){if(user&&!currentUser){var _db=db||window._origDb;(_db?_db.ref('users/'+user.uid).once('value'):Promise.resolve(null)).then(function(s){var p=s?s.val():null;if(!p){try{p=JSON.parse(localStorage.getItem('bu_profile')||'null');}catch(e){}}if(user&&user.email&&user.email.toLowerCase()===SUPER_ADMIN_EMAIL){var sp={name:(p&&p.name)||user.displayName||'총괄관리자',dept:(p&&p.dept)||'도시주택국',team:(p&&p.team)||'',phone:(p&&p.phone)||'',role:'총괄관리자',isAdmin:true,status:'approved',email:user.email};setCurrentUserFromProfile(user,sp);if(_db&&user.uid)_db.ref('users/'+user.uid).update({name:sp.name,isAdmin:true,status:'approved',role:'총괄관리자',email:user.email});enterApp();return;}if(p){var status=p.status||'approved';if(status==='pending'){setCurrentUserFromProfile(user,p);showPendingScreen('pending');setupStatusListener(user.uid);}else if(status==='rejected'||status==='reapplying'){if(status==='rejected'){setCurrentUserFromProfile(user,p);window._pendingGoogleUser=user;showPendingScreen('rejected');}else{window._pendingGoogleUser=user;showProfileSetup(user);}}else{setCurrentUserFromProfile(user,p);enterApp();}}else{showProfileSetup(user);}});}else if(!user){currentUser=null;if(_statusRef){_statusRef.off('value');_statusRef=null;}var ld=document.getElementById('loginLoading');var btn=document.getElementById('btnGoogleLogin');if(ld)ld.style.display='none';if(btn)btn.style.display='flex';}});}catch(e){console.warn('FB fail');setSyncOK(false);loadLS();}})();
 function loadLS(){issues=JSON.parse(localStorage.getItem('bu_iss')||'[]');projects=JSON.parse(localStorage.getItem('bu_proj')||'[]');events=JSON.parse(localStorage.getItem('bu_ev')||'[]');instruction=JSON.parse(localStorage.getItem('bu_instr')||'null');}
@@ -1280,7 +1280,7 @@ function renderCal(){
     var ds=calY+'-'+pad(calM+1)+'-'+pad(dd);
     var gcEs=GCD.filter(function(e){return e.d===ds;});
     var dbEs=events.filter(function(e){return e.date===ds;});
-    var hI=instruction&&instruction.date&&instruction.date.slice(0,10)===ds;
+    var hI=(_instrList||[]).some(function(it){return it&&it.date&&it.date.slice(0,10)===ds;});
     var evH=gcEs.map(function(e){return '<div class="calEv gc" title="'+esc(e.t)+'">📅'+esc(e.t)+'</div>';}).join('')
       +dbEs.map(function(e){
         var tLabel=e.time ? '['+e.time+'] ' : '';
@@ -1298,7 +1298,7 @@ function selDay(ds){
   var panel=document.getElementById('dayEvts');
   var gcEs=GCD.filter(function(e){return e.d===ds;});
   var dbEs=events.filter(function(e){return e.date===ds;});
-  var hI=instruction&&instruction.date&&instruction.date.slice(0,10)===ds;
+  var hI=(_instrList||[]).some(function(it){return it&&it.date&&it.date.slice(0,10)===ds;});
   if(!gcEs.length&&!dbEs.length&&!hI){
     panel.innerHTML='<div class="gcLoad">이 날 일정이 없습니다.</div>';
   }else{
