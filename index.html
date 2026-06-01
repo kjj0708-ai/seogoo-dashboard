@@ -784,7 +784,7 @@ function showPendingScreen(reason){document.getElementById('loginScreen').style.
 function doReapply(){var user=window._pendingGoogleUser||(currentUser?{uid:currentUser.uid,displayName:currentUser.name,email:currentUser.email}:null);if(!user)return;/* Firebase에서 거절 상태 제거 후 프로필 설정 화면으로 */var _db=db||window._origDb;function goSetup(){document.getElementById('pendingScreen').style.display='none';showProfileSetup(user);}if(_db&&user.uid){_db.ref('users/'+user.uid+'/status').set('reapplying').then(goSetup).catch(goSetup);}else{goSetup();}}
 function setupStatusListener(uid){var _db=db||window._origDb;if(!_db)return;if(_statusRef){_statusRef.off('value');_statusRef=null;}_statusRef=_db.ref('users/'+uid+'/status');_statusRef.on('value',function(s){var status=s.val();if(status==='approved'){if(_statusRef){_statusRef.off('value');_statusRef=null;}var _db2=db||window._origDb;if(_db2)_db2.ref('users/'+uid).once('value').then(function(snap){var p=snap.val();if(p){setCurrentUserFromProfile({uid:uid,displayName:p.name,email:p.email||''},p);enterApp();}});} else if(status==='rejected'){showPendingScreen('rejected');}});}
 function setupUsersListener(){var _db=db||window._origDb;console.log('[Users] setupUsersListener called, db=',!!db,'_origDb=',!!window._origDb,'type=',currentUser&&currentUser.type);if(!_db){console.warn('[Users] no db available');window._allUsers={};renderMemberList();return;}if(_usersRef){_usersRef.off('value');_usersRef=null;}_usersRef=_db.ref('users');_usersRef.on('value',function(s){var data=s.val();console.log('[Users] listener got data:',data?Object.keys(data).length+'명':'null');window._allUsers=data||{};renderUserMgmt(data);renderMemberList();_updatePendingBadge(data);},function(err){console.error('[Users] listener FAILED:',err.code,err.message);var list=document.getElementById('pendingUserList');if(list&&currentUser&&currentUser.type==='admin'){list.innerHTML='<div style="padding:12px;color:#b91c1c;font-size:13px;line-height:1.7;">❌ <b>사용자 목록 읽기 실패</b><br>Firebase 보안 규칙에서 <code>users</code> 노드의 읽기가 제한되어 있습니다.<br><br><b>해결:</b> Firebase 콘솔 → Realtime Database → Rules에서:<br><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">{"rules":{".read":"auth != null",".write":"auth != null"}}</code><br>또는 users 노드에 읽기 권한을 추가하세요.</div>';}var el=document.getElementById('memberListBody');if(el){el.innerHTML='<div style="padding:16px;color:#b91c1c;font-size:13px;">❌ 사용자 데이터 읽기 권한이 없습니다.<br>오류: '+esc(err.message||err.code||'')+'</div>';}setTimeout(function(){var _db2=db||window._origDb;if(_db2){console.log('[Users] retrying with once...');_db2.ref('users').once('value').then(function(s2){var d2=s2.val();console.log('[Users] retry got:',d2?Object.keys(d2).length+'명':'null');window._allUsers=d2||{};renderUserMgmt(d2);renderMemberList();_updatePendingBadge(d2);}).catch(function(e2){console.error('[Users] retry also failed:',e2);});}},3000);});if(currentUser&&currentUser.type==='admin'){_db.ref('users').once('value').then(function(s){var data=s.val();console.log('[Users] admin once got:',data?Object.keys(data).length+'명':'null');window._allUsers=data||{};renderUserMgmt(data);renderMemberList();_updatePendingBadge(data);}).catch(function(e){console.error('[Users] admin once FAILED:',e.code,e.message);});}}
-function setupGlobalListeners(){var _db=db||window._origDb;console.log('[Global] setupGlobalListeners called, db=',!!_db);if(!_db){loadLS();return;}teardownGlobalListeners();var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);loadLS();if(currentUser){renderIssues();renderProjectsGrid();renderCal();renderInstrBoard();}}_issuesRef=_db.ref('issues');_issuesRef.on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderIssues();},_fbErr);_eventsRef=_db.ref('events');_eventsRef.on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();},_fbErr);_instrRef=_db.ref('instructions');_instrRef.on('value',function(s){_instrList=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);}):[];renderInstrBoard();},_fbErr);
+function setupGlobalListeners(){var _db=db||window._origDb;console.log('[Global] setupGlobalListeners called, db=',!!_db);if(!_db){loadLS();return;}teardownGlobalListeners();var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);loadLS();if(currentUser){renderIssues();renderProjectsGrid();renderCal();renderInstrBoard();}}_issuesRef=_db.ref('issues');_issuesRef.on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderIssues();},_fbErr);_eventsRef=_db.ref('events');_eventsRef.on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();if(window._selDayDs)selDay(window._selDayDs);},_fbErr);_instrRef=_db.ref('instructions');_instrRef.on('value',function(s){_instrList=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);}):[];renderInstrBoard();},_fbErr);
   /* 본인 열람기록(Firebase) 실시간 반영 → 배지를 계정/기기 무관하게 정확히 표시 */
   if(currentUser&&currentUser.uid){_myReadsRef=_db.ref('instrReads');_myReadsRef.on('value',function(s){var all=s.val()||{};_myInstrReads={};Object.keys(all).forEach(function(iid){if(all[iid]&&all[iid][currentUser.uid])_myInstrReads[iid]=true;});renderInstrBoard();},function(){});}}
 function teardownGlobalListeners(){if(_issuesRef){try{_issuesRef.off('value');}catch(e){}_issuesRef=null;}if(_eventsRef){try{_eventsRef.off('value');}catch(e){}_eventsRef=null;}if(_instrRef){try{_instrRef.off('value');}catch(e){}_instrRef=null;}if(_myReadsRef){try{_myReadsRef.off('value');}catch(e){}_myReadsRef=null;}_myInstrReads={};}
@@ -1336,7 +1336,7 @@ function renderCal(){
     var isTd=today.getFullYear()===calY&&today.getMonth()===calM&&today.getDate()===dd;
     var ds=calY+'-'+pad(calM+1)+'-'+pad(dd);
     var gcEs=GCD.filter(function(e){return e.d===ds;});
-    var dbEs=events.filter(function(e){return e.date===ds;});
+    var dbEs=events.filter(function(e){return e.date===ds&&canSeeEvent(e);});
     var hI=(_instrList||[]).some(function(it){return it&&it.date&&it.date.slice(0,10)===ds;});
     var evH=gcEs.map(function(e){return '<div class="calEv gc" title="'+esc(e.t)+'">📅'+esc(e.t)+'</div>';}).join('')
       +dbEs.map(function(e){
@@ -1352,9 +1352,10 @@ function renderCal(){
   grid.innerHTML=html;
 }
 function selDay(ds){
+  window._selDayDs=ds;
   var panel=document.getElementById('dayEvts');
   var gcEs=GCD.filter(function(e){return e.d===ds;});
-  var dbEs=events.filter(function(e){return e.date===ds;});
+  var dbEs=events.filter(function(e){return e.date===ds&&canSeeEvent(e);});
   var hI=(_instrList||[]).some(function(it){return it&&it.date&&it.date.slice(0,10)===ds;});
   if(!gcEs.length&&!dbEs.length&&!hI){
     panel.innerHTML='<div class="gcLoad">이 날 일정이 없습니다.</div>';
@@ -1533,6 +1534,13 @@ function canEditEvent(e){
   if(currentUser.type==='admin')return true;
   return e.authorUid===currentUser.uid||e.author===currentUser.name;
 }
+/* 수동 등록 일정 가시성: 관리자=전체, 그 외=같은 부서(부서정보 없는 레거시는 전체 공개) */
+function canSeeEvent(e){
+  if(!currentUser)return true;
+  if(currentUser.type==='admin')return true;
+  if(!e.dept)return true;
+  return e.dept===currentUser.dept;
+}
 function editEvent(id){
   var e=events.find(function(x){return x.id===id;});if(!e)return;
   if(!canEditEvent(e)){alert('수정 권한이 없습니다.');return;}
@@ -1581,8 +1589,10 @@ function saveEvent(){
     type:'mt',
     time:tm,
     author:currentUser?currentUser.name:'알수없음',
-    authorUid:currentUser?currentUser.uid:''
+    authorUid:currentUser?currentUser.uid:'',
+    dept:currentUser?currentUser.dept:''
   };
+  if(_editEventId){var _o=events.find(function(x){return x.id===_editEventId;});if(_o&&_o.dept)data.dept=_o.dept;}
   if(_editEventId){
     var original=events.find(function(x){return x.id===_editEventId;});
     if(original){
@@ -1626,6 +1636,7 @@ function deleteEvent(id){
       renderCal();
       saveLS();
     }
+    if(window._selDayDs)selDay(window._selDayDs);
   });
 }
 
