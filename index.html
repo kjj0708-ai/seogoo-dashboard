@@ -1332,8 +1332,9 @@ function selDay(ds){
 }
 function renderGcalSide(){var el=document.getElementById('gcalList');if(!el)return;var now=new Date();var up=GCD.filter(function(e){return new Date(e.d)>=now;}).sort(function(a,b){return new Date(a.d)-new Date(b.d);}).slice(0,12);if(!up.length){el.innerHTML='<div class="gcLoad">예정된 일정이 없습니다.</div>';return;}el.innerHTML=up.map(function(e){return '<div class="gcItem"><div class="gcItemT">📅 '+esc(e.t)+'</div><div class="gcItemTime">'+e.d+' '+esc(e.tm||'종일')+'</div></div>';}).join('');}
 
-function fetchGCal(){
+function fetchGCal(_retry){
   if(window._gcalFetching)return;
+  _retry=_retry||0;
   var listEl=document.getElementById('gcalList');
   if(!GCAL_API_KEY){
     var isAdmin=currentUser&&currentUser.type==='admin';
@@ -1346,7 +1347,8 @@ function fetchGCal(){
   }
   if(!GCAL_CAL_ID){setGCalSt('캘린더 ID 없음');return;}
   window._gcalFetching=true;
-  if(listEl)listEl.innerHTML='<div class="gcLoad">⏳ 캘린더 로딩 중...</div>';
+  /* 첫 로딩(데이터 없음)일 때만 로딩 표시. 갱신 중이면 기존 일정 유지 */
+  if(listEl&&(!GCD||!GCD.length))listEl.innerHTML='<div class="gcLoad">⏳ 캘린더 로딩 중...</div>';
   var now=new Date(),tMin=new Date(now.getFullYear(),now.getMonth()-1,1).toISOString(),tMax=new Date(now.getFullYear(),now.getMonth()+3,1).toISOString();
   var url='https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(GCAL_CAL_ID)+'/events?key='+GCAL_API_KEY+'&timeMin='+encodeURIComponent(tMin)+'&timeMax='+encodeURIComponent(tMax)+'&singleEvents=true&orderBy=startTime&maxResults=500';
   fetch(url).then(function(r){
@@ -1382,9 +1384,21 @@ function fetchGCal(){
     var sl=document.getElementById('gcalLastSync');if(sl){var nd=new Date();sl.textContent='🔄 '+pad(nd.getHours())+':'+pad(nd.getMinutes())+' 업데이트';}
     renderCal();renderGcalSide();
   }).catch(function(e){
-    setGCalSt('❌ 네트워크 오류');
     window._gcalFetching=false;
-    if(listEl)listEl.innerHTML='<div class="gcLoad" style="color:#b91c1c;">🌐 네트워크 오류 — 인터넷 연결을 확인해 주세요.</div>';
+    /* 일시적 네트워크 오류 → 최대 2회 자동 재시도 (1.5초 간격) */
+    if(_retry<2){
+      setGCalSt('⏳ 재시도 중... ('+(_retry+1)+'/2)');
+      setTimeout(function(){fetchGCal(_retry+1);},1500);
+      return;
+    }
+    setGCalSt('❌ 네트워크 오류');
+    /* 이미 불러온 일정이 있으면 화면을 지우지 않고 유지 */
+    if(GCD&&GCD.length){
+      renderCal();renderGcalSide();
+      var sl2=document.getElementById('gcalLastSync');if(sl2)sl2.textContent='⚠️ 갱신 실패 — 이전 일정 표시 중';
+    }else if(listEl){
+      listEl.innerHTML='<div class="gcLoad" style="color:#b91c1c;line-height:1.6;">🌐 일시적 네트워크 오류<br><button onclick="fetchGCal()" style="margin-top:8px;background:var(--pl);color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:12px;">🔄 다시 시도</button></div>';
+    }
   });
 }
 function setGCalSt(msg){var el=document.getElementById('gcalStatus');if(el)el.textContent=msg;}
