@@ -1408,7 +1408,7 @@ function deleteCurrentProj(){
   });
 }
 
-/* 워드 저장 */
+/* 워드 저장 - 행안부 AI친화 행정문서 가이드라인 적용 */
 function downloadProjDetailWord(){
   var id=window._currentProjDetailId;
   var p=projects.find(function(x){return x.id===id;});if(!p)return;
@@ -1416,35 +1416,50 @@ function downloadProjDetailWord(){
   var links=p.links?Object.values(p.links):[];
   var imgCount=p.images?Object.keys(p.images).length:0;
   var dt=p.updatedAt?fmtD(new Date(p.updatedAt)):'';
-  /* HTML 리치텍스트 → Word 안전 HTML 변환 (줄바꿈 보존) */
+  /* 행안부 가이드라인: ①셀병합금지 ②표준번호체계(1.,2.,3.) ③꾸미기제거 */
   function cleanForWord(s){
     if(!s)return'';
-    /* HTML 콘텐츠인지 확인 */
-    if(/<[ph3divulolibr]/i.test(s)){
-      /* 리치 HTML → 위험 태그만 제거, 구조 태그는 보존 */
+    if(/<[^>]+>/.test(s)){
       var div=document.createElement('div');
       div.innerHTML=s;
-      /* script/style 제거 */
-      div.querySelectorAll('script,style,iframe').forEach(function(el){el.remove();});
-      /* img 태그 제거 (Word에서 base64 이미지 깨짐) */
-      div.querySelectorAll('img').forEach(function(el){el.remove();});
+      div.querySelectorAll('script,style,iframe,img').forEach(function(el){el.remove();});
+      var sn=0;
+      div.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(function(h){
+        sn++;var txt=h.textContent.trim();
+        var np=document.createElement('p');
+        np.style.cssText='font-weight:700;margin:8pt 0 3pt;';
+        np.textContent=sn+'. '+txt;
+        h.parentNode.replaceChild(np,h);
+      });
+      div.querySelectorAll('[style]').forEach(function(el){
+        var sv=el.getAttribute('style');
+        el.setAttribute('style',/font-weight\s*:\s*(bold|700)/i.test(sv)?'font-weight:700;':'');
+      });
+      div.querySelectorAll('td,th').forEach(function(el){
+        el.removeAttribute('colspan');el.removeAttribute('rowspan');
+        el.style.cssText='border:1px solid #999;padding:3px 6px;vertical-align:top;';
+      });
+      div.querySelectorAll('table').forEach(function(t){t.style.cssText='border-collapse:collapse;width:100%;margin:4pt 0;';});
       return div.innerHTML;
     }
-    /* 일반 텍스트 → 줄바꿈을 <br>로 변환 */
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   }
-  var thS='border:1px solid #999;padding:5px 8px;background:#DCE6F1;font-weight:700;font-size:10pt;font-family:\'맑은 고딕\',sans-serif;text-align:center;vertical-align:middle;';
-  var tdS='border:1px solid #999;padding:4px 6px;font-size:9pt;font-family:\'맑은 고딕\',sans-serif;vertical-align:top;line-height:1.0;word-break:break-word;';
-  var linksHtml=links.length?'<p style="font-size:9pt;margin:4pt 0 0;line-height:1.0;"><b>■ 링크</b><br>'+links.map(function(l){return esc(l.label||l.url)+' : '+l.url;}).join('<br>')+'</p>':'';
-  var imgNote=imgCount?'<p style="font-size:8pt;color:#666;margin:2pt 0 0;line-height:1.0;">※ 이미지 '+imgCount+'장 첨부됨</p>':'';
-  var html="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='UTF-8'><style>@page{size:A4 portrait;margin:1.27cm;}body{font-family:'맑은 고딕',sans-serif;font-size:9pt;line-height:1.0;}p{margin:1pt 0;line-height:1.0;}h1,h2,h3,h4,h5,h6{margin:2pt 0;line-height:1.0;}ul,ol{margin:1pt 0;padding-left:16pt;}li{margin:0;line-height:1.0;}table{border-collapse:collapse;width:100%;}</style></head><body>"
-    +"<p style='font-size:14pt;font-weight:700;margin:0 0 2pt;line-height:1.0;'>"+esc(p.name)+"</p>"
-    +"<p style='font-size:9pt;color:#555;margin:0 0 4pt;line-height:1.0;'>"+esc((p.dept||'')+(p.team?' '+p.team:'')+(p.author?' | '+p.author:'')+(dt?' | 수정일: '+dt:''))+"</p>"
-    +"<table><tbody><tr><td style='"+tdS+"'>"+cleanForWord(content)+"</td></tr></tbody></table>"
+  var linksHtml='';
+  if(links.length){var li2=links.map(function(l,i){return'<p style="margin:1pt 0 1pt 16pt;font-size:10pt;">'+String.fromCharCode(9312+Math.min(i,9))+' '+esc(l.label||l.url)+' ('+l.url+')</p>';}).join('');linksHtml='<p style="font-weight:700;margin:8pt 0 2pt;font-size:10pt;">붙임. 관련 링크</p>'+li2;}
+  var imgNote=imgCount?'<p style="margin:4pt 0 0;font-size:9pt;">&#8251; 이미지 '+imgCount+'장은 시스템에서 확인 가능</p>':'';
+  var css='@page{size:A4 portrait;margin:2.5cm 2cm 2cm 2.5cm;}body{font-family:맑은 고딕,sans-serif;font-size:10pt;line-height:1.6;}p{margin:2pt 0;}table{border-collapse:collapse;width:100%;}';
+  var meta=esc((p.dept||'')+(p.team?'  '+p.team:'')+(p.author?'  |  '+p.author:'')+(dt?'  |  수정일: '+dt:''));
+  var html="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='UTF-8'><style>"+css+"</style></head><body>"
+    +"<p style='font-size:16pt;font-weight:700;margin:0 0 4pt;text-align:center;'>"+esc(p.name)+"</p>"
+    +"<p style='font-size:9pt;color:#444;margin:0 0 8pt;text-align:center;'>"+meta+"</p>"
+    +"<hr style='border:none;border-top:1.5px solid #333;margin:0 0 10pt;'>"
+    +"<table style='border-collapse:collapse;width:100%;'><tr>"
+    +"<th style='border:1px solid #999;padding:5px 8px;background:#f5f5f5;font-weight:700;font-size:10pt;width:18%;text-align:center;vertical-align:middle;'>업무 현황</th>"
+    +"<td style='border:1px solid #999;padding:6px 10px;font-size:10pt;vertical-align:top;line-height:1.6;'>"+cleanForWord(content)+"</td></tr></table>"
     +linksHtml+imgNote+"</body></html>";
-  var blob=new Blob(['\ufeff'+html],{type:'application/msword;charset=utf-8'});
+  var blob=new Blob(['﻿'+html],{type:'application/msword;charset=utf-8'});
   var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;a.download=p.name+'_업무현황_'+fmtD(new Date())+'.doc';
+  var a=document.createElement('a');a.href=url;a.download=p.name+'_업무현황_'+fmtD(new Date())+'_행안부.doc';
   document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
 }
 
