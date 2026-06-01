@@ -677,6 +677,8 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
     <div class="mB" style="padding-bottom:0;">
       <div style="font-size:12px;color:var(--tx3);margin-bottom:10px;" id="instrDetailMeta"></div>
       <div class="instrDetailContent" id="instrDetailContent"></div>
+      <div id="instrDetailImgs" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
+      <div id="instrDetailLinks" class="pdLinkList" style="margin-bottom:8px;"></div>
       <!-- 열람 현황 -->
       <div class="instrReadBar" id="instrReadBar">
         <span id="instrReadStatText" style="color:var(--tx2);">열람 현황 로딩 중...</span>
@@ -702,6 +704,18 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
     <div class="mB">
       <div class="fg"><label>제목</label><input type="text" id="instrWTitle" placeholder="지시사항 제목을 입력하세요"></div>
       <div class="fg"><label>내용</label><textarea id="instrWContent" style="width:100%;padding:10px;border:1.5px solid var(--bdr);border-radius:7px;font-family:'Noto Sans KR',sans-serif;font-size:14px;resize:vertical;min-height:120px;box-sizing:border-box;" placeholder="지시사항 내용을 입력하세요..."></textarea></div>
+      <div class="fg">
+        <label>이미지 첨부 <span style="font-size:11px;color:var(--tx3);font-weight:400;">(최대 5장)</span></label>
+        <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--bg);border:1.5px dashed var(--bdr);border-radius:8px;cursor:pointer;font-size:13px;color:var(--tx2);">
+          📷 이미지 선택 <input type="file" id="instrWImgFile" accept="image/*" multiple style="display:none" onchange="onInstrImgSelected(this)">
+        </label>
+        <div id="instrWImgPrev" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
+      </div>
+      <div class="fg">
+        <label>링크 추가</label>
+        <div id="instrWLinkList"></div>
+        <button class="btn btnG sm" onclick="addInstrLinkRow()" style="margin-top:4px;">+ 링크 추가</button>
+      </div>
     </div>
     <div class="mF">
       <button class="btn btnG" onclick="closeInstrWrite()">취소</button>
@@ -795,6 +809,7 @@ function openInstrDetail(id){
   document.getElementById('instrDetailModalTitle').textContent=instr.title||'지시사항';
   document.getElementById('instrDetailMeta').textContent=(instr.author||'')+(instr.date?' · '+fmtDT(new Date(instr.date)):'');
   document.getElementById('instrDetailContent').textContent=instr.content||instr.text||'';
+  _renderInstrDetailMedia(instr);
   document.getElementById('instrDetailEditBtn').style.display=isAdmin?'':'none';
   document.getElementById('instrDetailDelBtn').style.display=isAdmin?'':'none';
   document.getElementById('instrDetailModal').style.display='flex';
@@ -853,9 +868,16 @@ function toggleInstrUnreadPanel(){
 function openInstrWrite(id){
   var isEdit=!!id;
   document.getElementById('instrWriteModalTitle').textContent=isEdit?'지시사항 수정':'지시사항 등록';
+  /* 이미지/링크 초기화 */
+  _instrWImgs=[];_instrWLinks=[];_renderInstrWImgPrev();_renderInstrWLinks();
   if(isEdit){
     var instr=_instrList.find(function(i){return i.id===id;});
-    if(instr){document.getElementById('instrWTitle').value=instr.title||'';document.getElementById('instrWContent').value=instr.content||instr.text||'';}
+    if(instr){
+      document.getElementById('instrWTitle').value=instr.title||'';
+      document.getElementById('instrWContent').value=instr.content||instr.text||'';
+      if(instr.images){_instrWImgs=Object.values(instr.images).map(function(img){return Object.assign({},img);});_renderInstrWImgPrev();}
+      if(instr.links){_instrWLinks=Object.values(instr.links).map(function(lk){return Object.assign({},lk);});_renderInstrWLinks();}
+    }
     document.getElementById('instrWriteModal').dataset.editId=id;
   }else{
     document.getElementById('instrWTitle').value='';document.getElementById('instrWContent').value='';
@@ -874,9 +896,15 @@ function saveInstrWrite(){
   var editId=document.getElementById('instrWriteModal').dataset.editId;
   var _db=db||window._origDb;
   var now=new Date().toISOString();
-  var data={title:title,content:content,date:now,author:currentUser?currentUser.name:'',authorUid:currentUser?currentUser.uid:''};
+  /* 이미지/링크 데이터 */
+  var imagesData=null;
+  if(_instrWImgs.length){imagesData={};_instrWImgs.forEach(function(img,i){imagesData['img'+i+'_'+Date.now()]={data:img.data,name:img.name||'',uploadedAt:img.uploadedAt||now};});}
+  var linksData=null;
+  var validLinks=_instrWLinks.filter(function(l){return (l.url||'').trim();});
+  if(validLinks.length){linksData={};validLinks.forEach(function(lk,i){linksData['lnk'+i+'_'+Date.now()]={url:(lk.url||'').trim(),label:(lk.label||'').trim()||(lk.url||'').trim()};});}
+  var data={title:title,content:content,date:now,author:currentUser?currentUser.name:'',authorUid:currentUser?currentUser.uid:'',images:imagesData,links:linksData};
   if(editId){
-    data.date=(_instrList.find(function(i){return i.id===editId;})||{date:now}).date; /* 수정 시 원본 날짜 유지 */
+    data.date=(_instrList.find(function(i){return i.id===editId;})||{date:now}).date;
     data.updatedAt=now;
     if(_db){_db.ref('instructions/'+editId).update(data);}
   }else{
@@ -950,6 +978,70 @@ function submitInstrReply(cid){
 }
 function deleteInstrComment(cid){showConf('댓글을 삭제하시겠습니까?',function(){var _db=db||window._origDb;if(_db&&_currentInstrId)_db.ref('instructions/'+_currentInstrId+'/comments/'+cid).remove();});}
 function deleteInstrReply(cid,rid){showConf('답글을 삭제하시겠습니까?',function(){var _db=db||window._origDb;if(_db&&_currentInstrId)_db.ref('instructions/'+_currentInstrId+'/comments/'+cid+'/replies/'+rid).remove();});}
+/* ── 지시사항 이미지/링크 ── */
+var _instrWImgs=[], _instrWLinks=[];
+function onInstrImgSelected(input){
+  var files=Array.from(input.files||[]);
+  if(_instrWImgs.length+files.length>5){alert('이미지는 최대 5장까지 첨부할 수 있습니다.');return;}
+  files.forEach(function(file){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      _instrWImgs.push({data:e.target.result,name:file.name,uploadedAt:new Date().toISOString()});
+      _renderInstrWImgPrev();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value='';
+}
+function _renderInstrWImgPrev(){
+  var el=document.getElementById('instrWImgPrev');if(!el)return;
+  el.innerHTML=_instrWImgs.map(function(img,i){
+    return '<div style="position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--bdr);">'
+      +'<img src="'+img.data+'" style="width:100%;height:100%;object-fit:cover;">'
+      +'<button onclick="removeInstrWImg('+i+')" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;line-height:1;">✕</button>'
+      +'</div>';
+  }).join('');
+}
+function removeInstrWImg(i){_instrWImgs.splice(i,1);_renderInstrWImgPrev();}
+function addInstrLinkRow(){
+  _instrWLinks.push({url:'',label:''});
+  _renderInstrWLinks();
+  setTimeout(function(){var rows=document.querySelectorAll('#instrWLinkList .iLinkRow');if(rows.length){var inp=rows[rows.length-1].querySelector('input');if(inp)inp.focus();}},50);
+}
+function removeInstrLinkRow(i){_instrWLinks.splice(i,1);_renderInstrWLinks();}
+function _renderInstrWLinks(){
+  var el=document.getElementById('instrWLinkList');if(!el)return;
+  el.innerHTML=_instrWLinks.map(function(lk,i){
+    return '<div class="iLinkRow" style="display:flex;gap:6px;margin-bottom:6px;align-items:center;">'
+      +'<input type="url" value="'+esc(lk.url)+'" placeholder="https://..." style="flex:2;padding:6px 8px;border:1.5px solid var(--bdr);border-radius:6px;font-size:13px;" oninput="_instrWLinks['+i+'].url=this.value">'
+      +'<input type="text" value="'+esc(lk.label)+'" placeholder="표시 이름 (선택)" style="flex:1;padding:6px 8px;border:1.5px solid var(--bdr);border-radius:6px;font-size:13px;" oninput="_instrWLinks['+i+'].label=this.value">'
+      +'<button class="btn btnD sm" onclick="removeInstrLinkRow('+i+')" style="flex-shrink:0;">✕</button>'
+      +'</div>';
+  }).join('');
+}
+function _renderInstrDetailMedia(instr){
+  /* 이미지 */
+  var imgEl=document.getElementById('instrDetailImgs');
+  if(imgEl){
+    var imgs=instr.images?Object.values(instr.images):[];
+    imgEl.innerHTML=imgs.map(function(img){
+      return '<div class="pdImgItem" style="border-radius:8px;overflow:hidden;border:1px solid var(--bdr);">'
+        +'<img src="'+img.data+'" alt="'+esc(img.name||'')+'" style="display:block;max-height:160px;max-width:240px;object-fit:contain;cursor:zoom-in;background:#f4f4f4;" onclick="openImgZoom(this.src)">'
+        +'</div>';
+    }).join('');
+    imgEl.style.display=imgs.length?'flex':'none';
+  }
+  /* 링크 */
+  var lnkEl=document.getElementById('instrDetailLinks');
+  if(lnkEl){
+    var links=instr.links?Object.values(instr.links):[];
+    lnkEl.innerHTML=links.map(function(lk){
+      var url=(lk.url||'').startsWith('http')?lk.url:'https://'+(lk.url||'');
+      return '<div class="pdLinkItem"><span>🔗</span><a href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(lk.label||lk.url||url)+'</a></div>';
+    }).join('');
+    lnkEl.style.display=links.length?'block':'none';
+  }
+}
 /* 하위 호환: 기존 코드에서 호출하는 경우 대비 */
 function newInstr(){openInstrWrite(null);}
 function editInstr(){if(_currentInstrId)openInstrWrite(_currentInstrId);}
