@@ -903,12 +903,13 @@ function saveInstrWrite(){
   var validLinks=_instrWLinks.filter(function(l){return (l.url||'').trim();});
   if(validLinks.length){linksData={};validLinks.forEach(function(lk,i){linksData['lnk'+i+'_'+Date.now()]={url:(lk.url||'').trim(),label:(lk.label||'').trim()||(lk.url||'').trim()};});}
   var data={title:title,content:content,date:now,author:currentUser?currentUser.name:'',authorUid:currentUser?currentUser.uid:'',images:imagesData,links:linksData};
+  function _instrErr(e){alert('저장 실패: '+(e&&e.message?e.message:'권한이 없거나 네트워크 오류입니다.')+'\n\n관리자 권한 또는 Firebase 규칙을 확인하세요.');}
   if(editId){
     data.date=(_instrList.find(function(i){return i.id===editId;})||{date:now}).date;
     data.updatedAt=now;
-    if(_db){_db.ref('instructions/'+editId).update(data);}
+    if(_db){_db.ref('instructions/'+editId).update(data).then(closeInstrWrite).catch(_instrErr);return;}
   }else{
-    if(_db){_db.ref('instructions').push(data);}
+    if(_db){_db.ref('instructions').push(data).then(closeInstrWrite).catch(_instrErr);return;}
     else{data.id=Date.now().toString();_instrList.unshift(data);renderInstrBoard();}
   }
   closeInstrWrite();
