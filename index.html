@@ -210,13 +210,17 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .mbrCardH{font-size:14px;font-weight:700;color:var(--primary);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
 .mbrSearch{width:100%;padding:9px 14px;border:1.5px solid var(--bdr);border-radius:8px;font-size:13px;font-family:'Noto Sans KR',sans-serif;margin-bottom:12px;box-sizing:border-box;}
 .mbrSearch:focus{outline:none;border-color:var(--pl);}
-.mbrDeptLabel{font-size:11px;font-weight:700;color:var(--primary);background:#eff6ff;border-radius:10px;padding:2px 10px;display:inline-block;margin:10px 0 2px;}
-.mbrTeamLabel{font-size:12px;font-weight:600;color:var(--tx2);padding:5px 4px 3px;border-bottom:1px solid var(--bg);margin-bottom:2px;}
-.mbrRow{display:flex;align-items:center;padding:9px 4px;border-bottom:1px solid var(--bg);gap:8px;}
+.mbrDeptLabel{font-size:13px;font-weight:700;color:#fff;background:var(--primary);border-radius:8px;padding:5px 14px;display:block;margin:14px 0 8px;}
+.mbrDeptGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:4px;}
+.mbrTeamCard{background:#f8fafc;border:1px solid var(--bdr);border-radius:8px;overflow:hidden;}
+.mbrTeamLabel{font-size:12px;font-weight:700;color:var(--primary);padding:6px 10px;background:#eff6ff;border-bottom:1px solid var(--bdr);}
+.mbrRow{display:flex;align-items:center;padding:7px 10px;border-bottom:1px solid var(--bg);gap:6px;}
 .mbrRow:last-child{border-bottom:none;}
 .mbrInfo{flex:1;min-width:0;}
-.mbrName{font-size:14px;font-weight:600;}
-.mbrMeta{font-size:12px;color:var(--tx3);margin-top:2px;}
+.mbrName{font-size:12px;font-weight:600;}
+.mbrMeta{font-size:11px;color:var(--tx3);margin-top:1px;}
+@media(max-width:900px){.mbrDeptGrid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:600px){.mbrDeptGrid{grid-template-columns:repeat(2,1fr);}}
 .orgGwajangBlock{border-bottom:3px solid #1a3a5c;}
 .orgMember.isGwajang{background:linear-gradient(135deg,#1a3a5c,#1e4d7a);color:#fff;}
 .orgMember.isGwajang .orgMemberInfo{color:#f5e17a;}
@@ -1842,24 +1846,49 @@ function renderMemberList(){
       +'</div>';
     return;
   }
-  var html='';var lastDept='',lastTeam='';
+  /* 과 → 팀 → 구성원 그룹핑 */
+  var deptMap={};
+  var deptOrder=Object.keys(ORG);
   members.forEach(function(m){
-    if(m.dept!==lastDept){html+='<div class="mbrDeptLabel">📂 '+esc(m.dept||'(소속 미지정)')+'</div>';lastDept=m.dept;lastTeam='';}
-    if(m.team!==lastTeam){html+='<div class="mbrTeamLabel">'+esc(m.team||'(팀 미지정)')+'</div>';lastTeam=m.team;}
-    var tel=m.phone?m.phone.replace(/[^0-9+]/g,''):'';
-    var bc=m.role==='과장'?'orgRoleGwajang':m.role==='팀장'?'orgRoleTeamjang':'orgRoleStaff';
-    var isPending=m.status==='pending';
-    html+='<div class="mbrRow"'+(isPending?' style="opacity:.7;background:#fffbeb;"':'')+'>'
-      +'<div class="mbrInfo">'
-        +'<div class="mbrName">'+esc(m.name||'(이름없음)')+(m.isAdmin?' 👑':'')
-          +'<span class="orgRoleBadge '+bc+'">'+esc(m.role||'주무관')+'</span>'
-          +(isPending?'<span style="font-size:10px;background:#fef3c7;color:#92400e;border-radius:8px;padding:1px 6px;margin-left:4px;">⏳승인대기</span>':'')
-        +'</div>'
-        +(m.phone?'<div class="mbrMeta">📱 '+esc(m.phone)+'</div>':'<div class="mbrMeta" style="color:#f87171;">연락처 미등록</div>')
-      +'</div>'
-      +(tel?'<a class="orgCallBtn" href="tel:'+tel+'">📞 전화</a>':'<span class="orgCallBtn noPhone">📵 미등록</span>')
-      +(currentUser&&currentUser.isAdmin&&isPending?'<button class="btn btnP" style="font-size:11px;padding:4px 10px;flex-shrink:0;" onclick="approveUser(\''+m.uid+'\')">승인</button>':'')
-      +'</div>';
+    var d=m.dept||'(소속 미지정)';
+    var t=m.team||'(팀 미지정)';
+    if(!deptMap[d])deptMap[d]={};
+    if(!deptMap[d][t])deptMap[d][t]=[];
+    deptMap[d][t].push(m);
+  });
+  /* 과 순서 정렬 */
+  var depts=Object.keys(deptMap).sort(function(a,b){var ia=deptOrder.indexOf(a),ib=deptOrder.indexOf(b);return(ia<0?999:ia)-(ib<0?999:ib);});
+  var html='';
+  depts.forEach(function(dept){
+    html+='<div class="mbrDeptLabel">📂 '+esc(dept)+'</div>';
+    html+='<div class="mbrDeptGrid">';
+    var teamMap=deptMap[dept];
+    var teamOrder=ORG[dept]||[];
+    var teams=Object.keys(teamMap).sort(function(a,b){var ia=teamOrder.indexOf(a),ib=teamOrder.indexOf(b);return(ia<0?999:ia)-(ib<0?999:ib);});
+    teams.forEach(function(team){
+      var tMembers=teamMap[team];
+      var roleOrd2={'과장':0,'팀장':1,'주무관':2};
+      tMembers.sort(function(a,b){return(roleOrd2[a.role]||9)-(roleOrd2[b.role]||9);});
+      html+='<div class="mbrTeamCard"><div class="mbrTeamLabel">'+esc(team)+' <span class="tCnt">'+tMembers.length+'명</span></div>';
+      tMembers.forEach(function(m){
+        var tel=m.phone?m.phone.replace(/[^0-9+]/g,''):'';
+        var bc=m.role==='과장'?'orgRoleGwajang':m.role==='팀장'?'orgRoleTeamjang':'orgRoleStaff';
+        var isPending=m.status==='pending';
+        html+='<div class="mbrRow"'+(isPending?' style="background:#fffbeb;"':'')+'>'
+          +'<div class="mbrInfo">'
+            +'<div class="mbrName">'+esc(m.name||'(이름없음)')+(m.isAdmin?' 👑':'')
+              +'<span class="orgRoleBadge '+bc+'">'+esc(m.role||'주무관')+'</span>'
+              +(isPending?'<span style="font-size:10px;background:#fef3c7;color:#92400e;border-radius:8px;padding:1px 5px;margin-left:3px;">⏳</span>':'')
+            +'</div>'
+            +(m.phone?'<div class="mbrMeta">📱 '+esc(m.phone)+'</div>':'<div class="mbrMeta" style="color:#f87171;">미등록</div>')
+          +'</div>'
+          +(tel?'<a class="orgCallBtn" href="tel:'+tel+'" style="font-size:11px;padding:3px 7px;">📞</a>':'')
+          +(currentUser&&currentUser.isAdmin&&isPending?'<button class="btn btnP" style="font-size:10px;padding:3px 7px;flex-shrink:0;" onclick="approveUser(\''+m.uid+'\')">승인</button>':'')
+          +'</div>';
+      });
+      html+='</div>';
+    });
+    html+='</div>';
   });
   el.innerHTML=html;
 }
