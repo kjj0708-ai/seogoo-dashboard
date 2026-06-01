@@ -166,9 +166,9 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .instrReadBtn{background:#f0f4f8;border:1px solid var(--bdr);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--tx2);transition:background .15s;}
 .instrReadBtn:hover{background:#e2e8f0;}
 .instrUnreadPanel{background:#fff9ec;border:1px solid #fcd34d;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:12px;color:#92400e;display:none;}
-.instrReadStatPanel{margin-top:8px;max-height:340px;overflow-y:auto;border:1px solid var(--bdr);border-radius:8px;padding:6px;background:#fafbfc;}
-.irsDept{font-size:12px;font-weight:700;color:#fff;background:var(--primary);border-radius:6px;padding:4px 10px;margin:8px 0 4px;}
-.irsDept:first-child{margin-top:0;}
+.instrReadStatPanel{margin-top:8px;max-height:400px;overflow-y:auto;border:1px solid var(--bdr);border-radius:8px;padding:8px;background:#fafbfc;display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;align-items:start;}
+.irsDeptBlock{min-width:0;}
+.irsDept{font-size:12px;font-weight:700;color:#fff;background:var(--primary);border-radius:6px;padding:4px 10px;margin:0 0 4px;}
 .irsTeam{font-size:11px;font-weight:700;color:var(--primary);padding:4px 8px 2px;}
 .irsRow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 10px;border-bottom:1px solid #eef2f6;font-size:12px;}
 .irsRow:last-child{border-bottom:none;}
@@ -904,20 +904,21 @@ function _renderInstrReadPanel(id){
   var depts=Object.keys(byDept).sort(function(a,b){var ia=deptOrder.indexOf(a),ib=deptOrder.indexOf(b);return(ia<0?999:ia)-(ib<0?999:ib);});
   var html='';
   depts.forEach(function(dept){
-    html+='<div class="irsDept">📂 '+esc(dept)+'</div>';
+    var block='<div class="irsDept">📂 '+esc(dept)+'</div>';
     var teamOrder=ORG[dept]||[];
     var teams=Object.keys(byDept[dept]).sort(function(a,b){var ia=teamOrder.indexOf(a),ib=teamOrder.indexOf(b);return(ia<0?999:ia)-(ib<0?999:ib);});
     teams.forEach(function(team){
       var members=byDept[dept][team];
       members.sort(function(a,b){return (roleOrd[a.role]==null?9:roleOrd[a.role])-(roleOrd[b.role]==null?9:roleOrd[b.role]);});
-      html+='<div class="irsTeam">▸ '+esc(team)+'</div>';
+      block+='<div class="irsTeam">▸ '+esc(team)+'</div>';
       members.forEach(function(m){
         var tm=fmtReadTime(m.read&&m.read.readAt);
-        html+='<div class="irsRow"><span class="irsName">'+esc(m.name)+(m.role?' <span style="font-weight:400;color:var(--tx3);font-size:10px;">'+esc(m.role)+'</span>':'')+'</span>'
+        block+='<div class="irsRow"><span class="irsName">'+esc(m.name)+(m.role?' <span style="font-weight:400;color:var(--tx3);font-size:10px;">'+esc(m.role)+'</span>':'')+'</span>'
           +(tm?'<span class="irsTime">✓ '+tm+'</span>':'<span class="irsUnread">미열람</span>')
           +'</div>';
       });
     });
+    html+='<div class="irsDeptBlock">'+block+'</div>';
   });
   if(!html)html='<div style="padding:8px;color:var(--tx3);font-size:12px;">승인된 회원이 없습니다.</div>';
   panel.innerHTML=html;

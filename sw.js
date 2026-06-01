@@ -1,5 +1,5 @@
 // 서구 도시주택국 대시보드 - Service Worker
-const CACHE_NAME = 'bureau-dashboard-v53';
+const CACHE_NAME = 'bureau-dashboard-v54';
 const ASSETS = [
   './',
   './index.html',
