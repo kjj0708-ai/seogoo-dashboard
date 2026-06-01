@@ -166,6 +166,15 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .instrReadBtn{background:#f0f4f8;border:1px solid var(--bdr);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--tx2);transition:background .15s;}
 .instrReadBtn:hover{background:#e2e8f0;}
 .instrUnreadPanel{background:#fff9ec;border:1px solid #fcd34d;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:12px;color:#92400e;display:none;}
+.instrReadStatPanel{margin-top:8px;max-height:340px;overflow-y:auto;border:1px solid var(--bdr);border-radius:8px;padding:6px;background:#fafbfc;}
+.irsDept{font-size:12px;font-weight:700;color:#fff;background:var(--primary);border-radius:6px;padding:4px 10px;margin:8px 0 4px;}
+.irsDept:first-child{margin-top:0;}
+.irsTeam{font-size:11px;font-weight:700;color:var(--primary);padding:4px 8px 2px;}
+.irsRow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 10px;border-bottom:1px solid #eef2f6;font-size:12px;}
+.irsRow:last-child{border-bottom:none;}
+.irsName{font-weight:600;color:var(--tx);}
+.irsTime{font-size:11px;color:#16a34a;font-weight:600;white-space:nowrap;}
+.irsUnread{font-size:11px;color:#dc2626;font-weight:600;white-space:nowrap;}
 /* 지시사항 댓글 */
 .instrCmtSection{border-top:1px solid var(--bg);padding-top:12px;margin-top:4px;}
 .instrCmtTitle{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:10px;}
@@ -682,9 +691,9 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
       <!-- 열람 현황 -->
       <div class="instrReadBar" id="instrReadBar">
         <span id="instrReadStatText" style="color:var(--tx2);">열람 현황 로딩 중...</span>
-        <button class="instrReadBtn" id="instrUnreadToggleBtn" onclick="toggleInstrUnreadPanel()" style="display:none;">미열람 회원 보기 ▼</button>
+        <button class="instrReadBtn" id="instrUnreadToggleBtn" onclick="toggleInstrReadPanel()" style="display:none;">열람 현황 보기 ▼</button>
       </div>
-      <div class="instrUnreadPanel" id="instrUnreadPanel"></div>
+      <div class="instrReadStatPanel" id="instrUnreadPanel" style="display:none;"></div>
       <!-- 댓글 -->
       <div class="instrCmtSection">
         <div class="instrCmtTitle">💬 댓글</div>
@@ -844,26 +853,67 @@ function _loadInstrReadStat(id){
     var approvedUids=Object.entries(allUsers).filter(function(e){return e[1]&&e[1].status==='approved';}).map(function(e){return e[0];});
     var readUids=Object.keys(reads);
     var unreadUids=approvedUids.filter(function(uid){return!reads[uid];});
-    statEl.innerHTML='<span style="color:var(--tx2);">열람 <b>'+readUids.length+'</b>명</span>'
-      +(unreadUids.length>0?'  /  <span style="color:#dc2626;">미열람 <b>'+unreadUids.length+'</b>명</span>':'  /  <span style="color:#16a34a;">✅ 전원 열람</span>');
-    if(unreadUids.length>0&&toggleBtn){
-      toggleBtn.style.display='';
-      _instrReadsCache[id]={reads:reads,unreadUids:unreadUids,allUsers:allUsers};
-    }else{if(toggleBtn)toggleBtn.style.display='none';}
+    statEl.innerHTML='<span style="color:var(--tx2);">열람 <b>'+readUids.length+'</b> / '+approvedUids.length+'명</span>'
+      +(unreadUids.length===0?'  <span style="color:#16a34a;">✅ 전원 열람</span>':'  <span style="color:#dc2626;">미열람 '+unreadUids.length+'명</span>');
+    _instrReadsCache[id]={reads:reads,unreadUids:unreadUids,allUsers:allUsers};
+    if(toggleBtn)toggleBtn.style.display=approvedUids.length>0?'':'none';
+    /* 패널이 열려 있으면 갱신 */
+    var panel=document.getElementById('instrUnreadPanel');
+    if(panel&&panel.style.display==='block')_renderInstrReadPanel(id);
   }).catch(function(){statEl.textContent='열람 현황 조회 불가';});
 }
-function toggleInstrUnreadPanel(){
+function toggleInstrReadPanel(){
   var panel=document.getElementById('instrUnreadPanel');
   if(!panel)return;
+  var btn=document.getElementById('instrUnreadToggleBtn');
   var open=panel.style.display==='block';
-  if(open){panel.style.display='none';document.getElementById('instrUnreadToggleBtn').textContent='미열람 회원 보기 ▼';return;}
-  var id=_currentInstrId;
-  var cache=_instrReadsCache[id];
-  if(!cache){panel.style.display='block';panel.textContent='데이터 없음';return;}
-  var names=cache.unreadUids.map(function(uid){var u=cache.allUsers[uid];return u?esc(u.name||uid)+'('+esc(u.dept||'')+(u.team?' '+esc(u.team):'')+')':(uid);});
-  panel.innerHTML='<b>미열람 회원 ('+names.length+'명)</b><br>'+names.join('  ·  ');
+  if(open){panel.style.display='none';if(btn)btn.textContent='열람 현황 보기 ▼';return;}
   panel.style.display='block';
-  document.getElementById('instrUnreadToggleBtn').textContent='미열람 회원 닫기 ▲';
+  if(btn)btn.textContent='열람 현황 닫기 ▲';
+  _renderInstrReadPanel(_currentInstrId);
+}
+function _renderInstrReadPanel(id){
+  var panel=document.getElementById('instrUnreadPanel');if(!panel)return;
+  var cache=_instrReadsCache[id];
+  if(!cache){panel.innerHTML='<div style="padding:8px;color:var(--tx3);font-size:12px;">데이터 로딩 중...</div>';return;}
+  var reads=cache.reads,allUsers=cache.allUsers;
+  /* 승인 회원을 과→팀으로 그룹핑 */
+  var byDept={};
+  Object.entries(allUsers).forEach(function(e){
+    var uid=e[0],u=e[1];
+    if(!u||u.status!=='approved')return;
+    var d=u.dept||'(소속없음)',t=u.team||'(팀없음)';
+    if(!byDept[d])byDept[d]={};
+    if(!byDept[d][t])byDept[d][t]=[];
+    byDept[d][t].push({uid:uid,name:u.name||'',role:u.role||'',read:reads[uid]||null});
+  });
+  function fmtReadTime(iso){
+    if(!iso)return null;
+    var dt=new Date(iso);if(isNaN(dt))return null;
+    return (dt.getMonth()+1)+'/'+dt.getDate()+' '+pad(dt.getHours())+':'+pad(dt.getMinutes());
+  }
+  var roleOrd={'과장':0,'팀장':1,'주무관':2};
+  var deptOrder=Object.keys(ORG);
+  var depts=Object.keys(byDept).sort(function(a,b){var ia=deptOrder.indexOf(a),ib=deptOrder.indexOf(b);return(ia<0?999:ia)-(ib<0?999:ib);});
+  var html='';
+  depts.forEach(function(dept){
+    html+='<div class="irsDept">📂 '+esc(dept)+'</div>';
+    var teamOrder=ORG[dept]||[];
+    var teams=Object.keys(byDept[dept]).sort(function(a,b){var ia=teamOrder.indexOf(a),ib=teamOrder.indexOf(b);return(ia<0?999:ia)-(ib<0?999:ib);});
+    teams.forEach(function(team){
+      var members=byDept[dept][team];
+      members.sort(function(a,b){return (roleOrd[a.role]==null?9:roleOrd[a.role])-(roleOrd[b.role]==null?9:roleOrd[b.role]);});
+      html+='<div class="irsTeam">▸ '+esc(team)+'</div>';
+      members.forEach(function(m){
+        var tm=fmtReadTime(m.read&&m.read.readAt);
+        html+='<div class="irsRow"><span class="irsName">'+esc(m.name)+(m.role?' <span style="font-weight:400;color:var(--tx3);font-size:10px;">'+esc(m.role)+'</span>':'')+'</span>'
+          +(tm?'<span class="irsTime">✓ '+tm+'</span>':'<span class="irsUnread">미열람</span>')
+          +'</div>';
+      });
+    });
+  });
+  if(!html)html='<div style="padding:8px;color:var(--tx3);font-size:12px;">승인된 회원이 없습니다.</div>';
+  panel.innerHTML=html;
 }
 function openInstrWrite(id){
   var isEdit=!!id;
