@@ -15,12 +15,13 @@
 <link rel="icon" type="image/png" sizes="512x512" href="public/icon-512b.png?v=15">
 <link rel="apple-touch-icon" href="public/icon-512b.png?v=15">
 <link rel="shortcut icon" href="public/icon-512b.png?v=15">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<!-- OCR용(스캔 기능 전용) - 비차단 로드: 행정망에서 이 CDN이 막혀도 본 앱 로딩을 방해하지 않음 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
 <style>
 :root{--primary:#1a3a5c;--pl:#2563a8;--accent:#e8a020;--bg:#f0f4f8;--sur:#fff;--bdr:#d1dbe8;--tx:#1e2d3d;--tx2:#4a6080;--tx3:#8a9baf;--red:#dc2626;--sh:0 2px 8px rgba(26,58,92,.10);--shl:0 8px 24px rgba(26,58,92,.15);--r:10px;}
 *{box-sizing:border-box;margin:0;padding:0;}
