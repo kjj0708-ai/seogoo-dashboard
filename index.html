@@ -1396,9 +1396,9 @@ function renderCal(){
     var gcEs=GCD.filter(function(e){return e.d===ds;});
     var dbEs=events.filter(function(e){return e.date===ds&&canSeeEvent(e);});
     var hI=(_instrList||[]).some(function(it){return it&&it.date&&it.date.slice(0,10)===ds;});
-    var evH=gcEs.map(function(e){return '<div class="calEv gc" title="'+esc(e.t)+'">📅'+esc(e.t)+'</div>';}).join('')
+    var evH=gcEs.map(function(e){var st=_startT(e.tm);return '<div class="calEv gc" title="'+esc(e.t)+'">'+(st?esc(st)+' ':'📅')+esc(e.t)+'</div>';}).join('')
       +dbEs.map(function(e){
-        var tLabel=e.time ? '['+e.time+'] ' : '';
+        var tLabel=e.time ? esc(_startT(e.time))+' ' : '';
         return '<div class="calEv '+(e.type||'mt')+'" title="' + esc(e.title) + '">' + tLabel + esc(e.title) + '</div>';
       }).join('')
       +(hI?'<div class="calEv instr">📢지시</div>':'');
@@ -1421,11 +1421,11 @@ function selDay(ds){
     var gcHtml=gcEs.map(function(e){
       return '<div class="gcItem" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;">'
         +'<div class="gcItemT">📅 '+esc(e.t)+'</div>'
-        +'<div class="gcItemTime" style="margin-left:auto;font-size:12px;color:var(--tx3);">'+esc(e.tm||'종일')+'</div>'
+        +'<div class="gcItemTime" style="margin-left:auto;font-size:12px;color:var(--tx3);">'+esc(_startT(e.tm)||'종일')+'</div>'
         +'</div>';
     }).join('');
     var dbHtml=dbEs.map(function(e){
-      var timeStr=e.time ? '<span style="font-weight:600;color:var(--primary);margin-right:6px;">['+e.time+']</span>' : '';
+      var timeStr=e.time ? '<span style="font-weight:600;color:var(--primary);margin-right:6px;">'+esc(_startT(e.time))+'</span>' : '';
       var authorStr=e.author ? '<span style="font-size:11px;color:var(--tx3);margin-left:6px;">('+esc(e.author)+')</span>' : '';
       var actionBtns='';
       if(canEditEvent(e)){
@@ -1446,7 +1446,8 @@ function selDay(ds){
   }
   if(currentUser)document.getElementById('evDate').value=ds;
 }
-function renderGcalSide(){var el=document.getElementById('gcalList');if(!el)return;var now=new Date();var up=GCD.filter(function(e){return new Date(e.d)>=now;}).sort(function(a,b){return new Date(a.d)-new Date(b.d);}).slice(0,12);if(!up.length){el.innerHTML='<div class="gcLoad">예정된 일정이 없습니다.</div>';return;}el.innerHTML=up.map(function(e){return '<div class="gcItem"><div class="gcItemT">📅 '+esc(e.t)+'</div><div class="gcItemTime">'+e.d+' '+esc(e.tm||'종일')+'</div></div>';}).join('');}
+function renderGcalSide(){var el=document.getElementById('gcalList');if(!el)return;var now=new Date();var up=GCD.filter(function(e){return new Date(e.d)>=now;}).sort(function(a,b){return new Date(a.d)-new Date(b.d);}).slice(0,12);if(!up.length){el.innerHTML='<div class="gcLoad">예정된 일정이 없습니다.</div>';return;}el.innerHTML=up.map(function(e){return '<div class="gcItem"><div class="gcItemT">📅 '+esc(e.t)+'</div><div class="gcItemTime">'+e.d+' '+esc(_startT(e.tm)||'종일')+'</div></div>';}).join('');}
+function _startT(s){return s?String(s).split('~')[0]:'';}
 
 function fetchGCal(_retry){
   if(window._gcalFetching)return;
