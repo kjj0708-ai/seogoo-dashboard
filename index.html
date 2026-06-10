@@ -52,6 +52,26 @@ header{background:var(--primary);color:#fff;padding:0 24px;display:flex;align-it
 .tabsBar{background:#fff;border-bottom:2px solid var(--bdr);display:flex;padding:0 24px;}
 .tBtn{padding:16px 20px;border:none;background:none;cursor:pointer;font-size:15px;font-weight:500;color:var(--tx2);font-family:'Noto Sans KR',sans-serif;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;}
 .tBtn.active{color:var(--primary);border-bottom-color:var(--pl);}.tPanel{display:none;}.tPanel.active{display:block;}
+.archTbl{background:#fff;border:1px solid var(--bdr);border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,.04);}
+.archHd,.archRow{display:grid;grid-template-columns:120px 140px 1fr 110px;align-items:center;gap:10px;padding:11px 16px;font-size:13px;}
+.archTbl.adm .archHd,.archTbl.adm .archRow{grid-template-columns:120px 140px 1fr 110px 84px;}
+.archHd{background:#f1f5f9;color:var(--tx2);font-size:12px;font-weight:700;letter-spacing:.02em;border-bottom:1px solid var(--bdr);}
+.archRow{border-bottom:1px solid #f1f5f9;cursor:pointer;transition:background .15s;}
+.archRow:last-child{border-bottom:none;}
+.archRow:hover{background:#f8fafc;}
+.archCol{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.archDate{color:var(--tx3);font-variant-numeric:tabular-nums;}
+.archDept{color:#1e40af;font-weight:600;}
+.archTitle{font-weight:600;color:var(--tx1);}
+.archAuthor{color:var(--tx3);}
+.archEmpty{text-align:center;color:var(--tx3);padding:48px 16px;background:#fff;border:1px dashed var(--bdr);border-radius:10px;}
+.archRestoreBtn{padding:4px 10px;font-size:11px;border:1px solid #cbd5e1;background:#fff;border-radius:6px;cursor:pointer;color:#475569;font-family:inherit;}
+.archRestoreBtn:hover{background:#f1f5f9;border-color:#94a3b8;}
+@media (max-width:768px){
+  .archHd,.archRow{grid-template-columns:74px 1fr 70px;padding:10px 12px;font-size:12px;gap:8px;}
+  .archTbl.adm .archHd,.archTbl.adm .archRow{grid-template-columns:74px 1fr 70px 64px;}
+  .archDept{display:none;}
+}
 main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .btn{padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:500;font-family:'Noto Sans KR',sans-serif;display:inline-flex;align-items:center;gap:6px;transition:all .15s;}
 .btnP{background:var(--pl);color:#fff;}.btnP:hover{background:var(--primary);}
@@ -445,6 +465,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
         <button class="btn btnG sm" id="fAll" onclick="setFilter('')">전체</button>
         <button class="btn sm" style="background:#dbeafe;color:#1d4ed8;border:1px solid #3b82f6" onclick="setFilter('proc')">진행중</button>
         <button class="btn sm" style="background:#dcfce7;color:#166534;border:1px solid #22c55e" onclick="setFilter('done')">완료</button>
+        <button class="btn sm" id="fArch" style="background:#f3e8ff;color:#6b21a8;border:1px solid #a855f7" onclick="setFilter('archive')" title="완료 후 7일 경과 시 자동 이동">📦 저장목록</button>
         <select class="fg" style="margin:0;padding:7px 12px;border:1.5px solid var(--bdr);border-radius:6px;font-size:13px;background:#fff;font-family:'Noto Sans KR',sans-serif" id="filterDept" onchange="renderIssues()">
           <option value="">전체 부서</option><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>도시재생경관과</option>
         </select>
@@ -594,7 +615,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
       </div>
       <div class="lerr" id="peErr" style="display:none"></div>
     </div>
-    <div class="mF"><button class="btn btnG" onclick="closeProfileEdit()">취소</button><button class="btn btnP" onclick="saveProfileEdit()">저장</button></div>
+    <div class="mF" style="justify-content:space-between;"><button class="btn btnD" onclick="deleteMyAccount()" style="font-size:12px;">🚪 탈퇴하기</button><div style="display:flex;gap:8px;"><button class="btn btnG" onclick="closeProfileEdit()">취소</button><button class="btn btnP" onclick="saveProfileEdit()">저장</button></div></div>
   </div>
 </div>
 <div class="mOverlay" id="projModal" style="display:none" onclick="if(event.target===this)closeProjModal()">
@@ -816,7 +837,7 @@ function showPendingScreen(reason){document.getElementById('loginScreen').style.
 function doReapply(){var user=window._pendingGoogleUser||(currentUser?{uid:currentUser.uid,displayName:currentUser.name,email:currentUser.email}:null);if(!user)return;/* Firebase에서 거절 상태 제거 후 프로필 설정 화면으로 */var _db=db||window._origDb;function goSetup(){document.getElementById('pendingScreen').style.display='none';showProfileSetup(user);}if(_db&&user.uid){_db.ref('users/'+user.uid+'/status').set('reapplying').then(goSetup).catch(goSetup);}else{goSetup();}}
 function setupStatusListener(uid){var _db=db||window._origDb;if(!_db)return;if(_statusRef){_statusRef.off('value');_statusRef=null;}_statusRef=_db.ref('users/'+uid+'/status');_statusRef.on('value',function(s){var status=s.val();if(status==='approved'){if(_statusRef){_statusRef.off('value');_statusRef=null;}var _db2=db||window._origDb;if(_db2)_db2.ref('users/'+uid).once('value').then(function(snap){var p=snap.val();if(p){setCurrentUserFromProfile({uid:uid,displayName:p.name,email:p.email||''},p);enterApp();}});} else if(status==='rejected'){showPendingScreen('rejected');}});}
 function setupUsersListener(){var _db=db||window._origDb;console.log('[Users] setupUsersListener called, db=',!!db,'_origDb=',!!window._origDb,'type=',currentUser&&currentUser.type);if(!_db){console.warn('[Users] no db available');window._allUsers={};renderMemberList();return;}if(_usersRef){_usersRef.off('value');_usersRef=null;}_usersRef=_db.ref('users');_usersRef.on('value',function(s){var data=s.val();console.log('[Users] listener got data:',data?Object.keys(data).length+'명':'null');window._allUsers=data||{};renderUserMgmt(data);renderMemberList();_updatePendingBadge(data);},function(err){console.error('[Users] listener FAILED:',err.code,err.message);var list=document.getElementById('pendingUserList');if(list&&currentUser&&currentUser.type==='admin'){list.innerHTML='<div style="padding:12px;color:#b91c1c;font-size:13px;line-height:1.7;">❌ <b>사용자 목록 읽기 실패</b><br>Firebase 보안 규칙에서 <code>users</code> 노드의 읽기가 제한되어 있습니다.<br><br><b>해결:</b> Firebase 콘솔 → Realtime Database → Rules에서:<br><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">{"rules":{".read":"auth != null",".write":"auth != null"}}</code><br>또는 users 노드에 읽기 권한을 추가하세요.</div>';}var el=document.getElementById('memberListBody');if(el){el.innerHTML='<div style="padding:16px;color:#b91c1c;font-size:13px;">❌ 사용자 데이터 읽기 권한이 없습니다.<br>오류: '+esc(err.message||err.code||'')+'</div>';}setTimeout(function(){var _db2=db||window._origDb;if(_db2){console.log('[Users] retrying with once...');_db2.ref('users').once('value').then(function(s2){var d2=s2.val();console.log('[Users] retry got:',d2?Object.keys(d2).length+'명':'null');window._allUsers=d2||{};renderUserMgmt(d2);renderMemberList();_updatePendingBadge(d2);}).catch(function(e2){console.error('[Users] retry also failed:',e2);});}},3000);});if(currentUser&&currentUser.type==='admin'){_db.ref('users').once('value').then(function(s){var data=s.val();console.log('[Users] admin once got:',data?Object.keys(data).length+'명':'null');window._allUsers=data||{};renderUserMgmt(data);renderMemberList();_updatePendingBadge(data);}).catch(function(e){console.error('[Users] admin once FAILED:',e.code,e.message);});}}
-function setupGlobalListeners(){var _db=db||window._origDb;console.log('[Global] setupGlobalListeners called, db=',!!_db);if(!_db){loadLS();return;}teardownGlobalListeners();var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);loadLS();if(currentUser){renderIssues();renderProjectsGrid();renderCal();renderInstrBoard();}}_issuesRef=_db.ref('issues');_issuesRef.on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderIssues();},_fbErr);_eventsRef=_db.ref('events');_eventsRef.on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();if(window._selDayDs)selDay(window._selDayDs);},_fbErr);_instrRef=_db.ref('instructions');_instrRef.on('value',function(s){_instrList=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);}):[];renderInstrBoard();},_fbErr);
+function setupGlobalListeners(){var _db=db||window._origDb;console.log('[Global] setupGlobalListeners called, db=',!!_db);if(!_db){loadLS();return;}teardownGlobalListeners();var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);loadLS();if(currentUser){renderIssues();renderProjectsGrid();renderCal();renderInstrBoard();}}_issuesRef=_db.ref('issues');_issuesRef.on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];processArchive();renderIssues();},_fbErr);_eventsRef=_db.ref('events');_eventsRef.on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();if(window._selDayDs)selDay(window._selDayDs);},_fbErr);_instrRef=_db.ref('instructions');_instrRef.on('value',function(s){_instrList=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);}):[];renderInstrBoard();},_fbErr);
   /* 본인 열람기록(Firebase) 실시간 반영 → 배지를 계정/기기 무관하게 정확히 표시 */
   if(currentUser&&currentUser.uid){_myReadsRef=_db.ref('instrReads');_myReadsRef.on('value',function(s){var all=s.val()||{};_myInstrReads={};Object.keys(all).forEach(function(iid){if(all[iid]&&all[iid][currentUser.uid])_myInstrReads[iid]=true;});renderInstrBoard();},function(){});}}
 function teardownGlobalListeners(){if(_issuesRef){try{_issuesRef.off('value');}catch(e){}_issuesRef=null;}if(_eventsRef){try{_eventsRef.off('value');}catch(e){}_eventsRef=null;}if(_instrRef){try{_instrRef.off('value');}catch(e){}_instrRef=null;}if(_myReadsRef){try{_myReadsRef.off('value');}catch(e){}_myReadsRef=null;}_myInstrReads={};}
@@ -824,6 +845,56 @@ function _updatePendingBadge(data){var mt=document.getElementById('memberTab');i
 function renderUserMgmt(usersData){var list=document.getElementById('pendingUserList');var cnt=document.getElementById('pendingCnt');if(!list)return;if(!usersData){list.innerHTML='<div style="font-size:13px;color:var(--tx3);">대기 중인 신청이 없습니다.</div>';if(cnt)cnt.textContent='';return;}var pending=Object.entries(usersData).filter(function(e){return e[1]&&e[1].status==='pending';});console.log('[Users] pending count:',pending.length,pending.map(function(e){return e[1].name;}));if(cnt)cnt.textContent=pending.length>0?pending.length:'';if(pending.length===0){list.innerHTML='<div style="font-size:13px;color:var(--tx3);">대기 중인 신청이 없습니다.</div>';return;}list.innerHTML=pending.map(function(e){var uid=e[0];var u=e[1];return '<div class="uRow"><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">'+esc(u.name||'')+(u.role?' <span style="font-size:11px;font-weight:400;color:var(--tx3);">('+esc(u.role)+')</span>':'')+'</div><div style="font-size:12px;color:var(--tx3)">'+esc(u.dept||'')+' '+esc(u.team||'')+' · '+esc(u.email||'')+'</div></div><div style="display:flex;gap:6px"><button class="btn btnP" style="padding:5px 12px;font-size:12px" onclick="approveUser(\''+uid+'\')">승인</button><button class="btn btnD" style="padding:5px 12px;font-size:12px" onclick="rejectUser(\''+uid+'\')">거절</button></div></div>'}).join('');}
 function approveUser(uid){var _db=db||window._origDb;if(!_db)return;_db.ref('users/'+uid+'/status').set('approved');}
 function rejectUser(uid){var _db=db||window._origDb;if(!_db)return;showConf('이 사용자의 가입을 거절하시겠습니까?',function(){_db.ref('users/'+uid+'/status').set('rejected');});}
+/* 관리자 — 회원 영구 삭제 (관리자/일반 회원 모두 가능, 본인 제외) */
+function deleteUser(uid){
+  var _db=db||window._origDb;if(!_db)return;
+  if(!currentUser||!currentUser.isAdmin){alert('관리자만 회원을 삭제할 수 있습니다.');return;}
+  if(currentUser.uid===uid){alert('본인 계정은 회원관리에서 삭제할 수 없습니다. "내 프로필 → 탈퇴하기"를 이용하세요.');return;}
+  var all=window._allUsers||{};var target=all[uid]||{};
+  var label=(target.name||'(이름없음)')+' · '+(target.dept||'-')+' '+(target.team||'')+(target.isAdmin?' 👑관리자':'');
+  showConf('정말로 다음 회원을 삭제하시겠습니까?\n\n'+label+'\n\n※ Realtime Database의 users 레코드만 삭제됩니다. 해당 사용자가 다시 Google 로그인하면 신규 가입 대기 상태가 됩니다.',function(){
+    _db.ref('users/'+uid).remove().then(function(){
+      if(window._allUsers&&window._allUsers[uid])delete window._allUsers[uid];
+      renderMemberList();renderUserMgmt(window._allUsers||{});_updatePendingBadge(window._allUsers||{});
+    }).catch(function(e){alert('삭제 실패: '+(e&&e.message||e));});
+  });
+}
+/* 회원 본인 — 탈퇴하기 */
+function deleteMyAccount(){
+  var _db=db||window._origDb;
+  if(!currentUser||!currentUser.uid){alert('로그인 상태에서만 탈퇴할 수 있습니다.');return;}
+  var uid=currentUser.uid;
+  showConf('정말 탈퇴하시겠습니까?\n\n· 프로필 정보가 영구 삭제됩니다.\n· 작성하신 이슈/사업 데이터는 보존됩니다.\n· 다시 가입하려면 Google 로그인 후 관리자 승인이 필요합니다.',function(){
+    function finish(){
+      try{teardownGlobalListeners();}catch(_){}
+      if(_usersRef){try{_usersRef.off('value');}catch(_){}_usersRef=null;}
+      if(_statusRef){try{_statusRef.off('value');}catch(_){}_statusRef=null;}
+      currentUser=null;
+      var au=auth||(window.firebase&&window.firebase.auth&&window.firebase.auth());
+      var user=au&&au.currentUser;
+      function done(){
+        try{if(au)au.signOut();}catch(_){}
+        alert('탈퇴 처리되었습니다.');
+        location.reload();
+      }
+      /* Auth 계정 자체 삭제 시도 — recent login 필요. 실패해도 RTDB는 이미 삭제됨 */
+      if(user&&user.delete){
+        user.delete().then(done).catch(function(err){
+          /* requires-recent-login 등 → 로그아웃만 */
+          console.warn('[탈퇴] auth.delete 실패:',err&&err.code);
+          done();
+        });
+      }else{done();}
+    }
+    if(_db){
+      _db.ref('users/'+uid).remove().then(finish).catch(function(e){
+        alert('탈퇴 실패: '+(e&&e.message||e));
+      });
+    }else{
+      finish();
+    }
+  });
+}
 function setSyncOK(ok){var d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;if(ok){d.classList.remove('off');t.textContent='실시간 연결';}else{d.classList.add('off');t.textContent='오프라인(로컬)';}}
 function switchTab(t,btn){document.querySelectorAll('.tBtn').forEach(function(b){b.classList.remove('active');});document.querySelectorAll('.tPanel').forEach(function(p){p.classList.remove('active');});btn.classList.add('active');document.getElementById('panel-'+t).classList.add('active');if(t==='calendar'){renderCal();fetchGCal();}if(t==='orgchart'){loadAndRenderMembers();}}
 /* ── 국장 지시사항 게시판 ──────────────────── */
@@ -1146,13 +1217,79 @@ document.addEventListener('input',function(e){if(e.target&&e.target.id==='issPro
 function setFilter(s){statusFilter=s;renderIssues();}
 function openIssModal(id){editIssId=id||null;pendingPhoto=null;document.getElementById('photoPrev').innerHTML='';if(id){var iss=issues.find(function(i){return i.id===id;});document.getElementById('issModalT').textContent='이슈 수정';document.getElementById('issTitle').value=iss.title||'';document.getElementById('issContent').value=iss.content||'';document.getElementById('issStatus').value=iss.status||'proc';document.getElementById('issDept').value=iss.dept||'도로과';var prog=parseInt(iss.progress)||0;document.getElementById('issProgress').value=prog;document.getElementById('issProgressVal').textContent=prog+'%';document.getElementById('issProgressBar').style.width=prog+'%';document.getElementById('progressRow').style.display=(iss.status==='proc')?'block':'none';if(iss.photo){document.getElementById('photoPrev').innerHTML='<img src="'+iss.photo+'" style="max-width:100%;border-radius:6px">';pendingPhoto=iss.photo;}}else{document.getElementById('issModalT').textContent='이슈 등록';document.getElementById('issTitle').value='';document.getElementById('issContent').value='';document.getElementById('issStatus').value='proc';document.getElementById('issProgress').value=0;document.getElementById('issProgressVal').textContent='0%';document.getElementById('issProgressBar').style.width='0%';document.getElementById('progressRow').style.display='block';if(currentUser&&currentUser.type==='staff')document.getElementById('issDept').value=currentUser.dept;}document.getElementById('issModal').style.display='flex';}
 function closeIssModal(){document.getElementById('issModal').style.display='none';}
-function saveIssue(){var title=document.getElementById('issTitle').value.trim();if(!title){alert('제목을 입력하세요.');return;}var dept=document.getElementById('issDept').value;if(currentUser&&currentUser.type==='staff'&&dept!==currentUser.dept){alert('본인 소속 과만 등록 가능합니다.');return;}var st=document.getElementById('issStatus').value;var prog=parseInt(document.getElementById('issProgress').value)||0;if(prog===100)st='done';var data={title:title,content:document.getElementById('issContent').value.trim(),status:st,progress:prog,dept:dept,photo:pendingPhoto||null,date:new Date().toISOString(),author:currentUser?currentUser.name:''};if(editIssId){dbSet('issues/'+editIssId,Object.assign({},data,{id:editIssId}));if(!db){issues=issues.map(function(i){return i.id===editIssId?Object.assign({},data,{id:editIssId}):i;});renderIssues();saveLS();}}else{dbPush('issues',data);if(!db){data.id=Date.now().toString();issues.push(data);renderIssues();saveLS();}}closeIssModal();}
-function chgStatus(id,st){var prog=st==='done'?100:(st==='proc'?50:0);dbSet('issues/'+id+'/status',st);dbSet('issues/'+id+'/progress',prog);if(!db){issues=issues.map(function(i){return i.id===id?Object.assign({},i,{status:st,progress:prog}):i;});renderIssues();saveLS();}}
+function saveIssue(){var title=document.getElementById('issTitle').value.trim();if(!title){alert('제목을 입력하세요.');return;}var dept=document.getElementById('issDept').value;if(currentUser&&currentUser.type==='staff'&&dept!==currentUser.dept){alert('본인 소속 과만 등록 가능합니다.');return;}var st=document.getElementById('issStatus').value;var prog=parseInt(document.getElementById('issProgress').value)||0;if(prog===100)st='done';var nowIso=new Date().toISOString();var data={title:title,content:document.getElementById('issContent').value.trim(),status:st,progress:prog,dept:dept,photo:pendingPhoto||null,date:nowIso,author:currentUser?currentUser.name:''};if(st==='done'){var existing=editIssId?issues.find(function(i){return i.id===editIssId;}):null;data.doneAt=(existing&&existing.doneAt)?existing.doneAt:nowIso;}else{data.doneAt=null;data.archived=null;}if(editIssId){dbSet('issues/'+editIssId,Object.assign({},data,{id:editIssId}));if(!db){issues=issues.map(function(i){return i.id===editIssId?Object.assign({},data,{id:editIssId}):i;});renderIssues();saveLS();}}else{dbPush('issues',data);if(!db){data.id=Date.now().toString();issues.push(data);renderIssues();saveLS();}}closeIssModal();}
+/* ── 저장목록 자동 이동 ──────────────────
+   완료(done) 후 ARCHIVE_DAYS 경과 시 archived:true 로 표기 →
+   메인 목록에서 빠지고 저장목록 탭에 노출 */
+var ARCHIVE_DAYS=7;
+function processArchive(){
+  if(!Array.isArray(issues)||!issues.length) return;
+  var cutoff=Date.now()-ARCHIVE_DAYS*24*60*60*1000;
+  var updates={},changed=false;
+  for(var k=0;k<issues.length;k++){
+    var i=issues[k];
+    if(i&&i.status==='done'&&!i.archived){
+      var ts=i.doneAt?new Date(i.doneAt).getTime():(i.date?new Date(i.date).getTime():0);
+      if(ts&&ts<cutoff){
+        updates['issues/'+i.id+'/archived']=true;
+        if(!i.doneAt&&i.date){updates['issues/'+i.id+'/doneAt']=i.date;i.doneAt=i.date;}
+        i.archived=true;
+        changed=true;
+      }
+    }
+  }
+  if(!changed) return;
+  var _db=db||window._origDb;
+  if(_db){try{_db.ref().update(updates);}catch(e){}}else{saveLS();}
+}
+function renderArchive(){/* 저장목록은 현안이슈 필터로 통합됨 — renderIssues 가 처리 */ if(statusFilter==='archive')renderIssues();}
+function restoreArchive(id){
+  showConf('이 이슈를 현안목록으로 복원하시겠습니까?',function(){
+    dbSet('issues/'+id+'/archived',null);
+    if(!db){issues=issues.map(function(i){if(i.id!==id)return i;var n=Object.assign({},i);delete n.archived;return n;});renderIssues();saveLS();}
+  });
+}
+function chgStatus(id,st){var prog=st==='done'?100:(st==='proc'?50:0);var nowIso=new Date().toISOString();dbSet('issues/'+id+'/status',st);dbSet('issues/'+id+'/progress',prog);if(st==='done'){dbSet('issues/'+id+'/doneAt',nowIso);}else{dbSet('issues/'+id+'/doneAt',null);dbSet('issues/'+id+'/archived',null);}if(!db){issues=issues.map(function(i){if(i.id!==id)return i;var n=Object.assign({},i,{status:st,progress:prog});if(st==='done'){n.doneAt=nowIso;}else{delete n.doneAt;delete n.archived;}return n;});renderIssues();saveLS();}}
 function deleteIssue(id){showConf('이 이슈를 삭제하시겠습니까?',function(){dbRemove('issues/'+id);if(!db){issues=issues.filter(function(i){return i.id!==id;});renderIssues();saveLS();}});}
 function canEditIss(iss){if(!currentUser)return false;if(currentUser.type==='admin')return true;return currentUser.dept===iss.dept;}
 function renderIssues(){
   var sa=document.getElementById('statAll'),sp=document.getElementById('statProc'),sd=document.getElementById('statDone'),sap=document.getElementById('statAvgProg');
-  var baseIssues=(currentUser&&currentUser.type!=='admin')?issues.filter(function(i){return i.dept===currentUser.dept;}):issues;
+  var baseIssues=(currentUser&&currentUser.type!=='admin')?issues.filter(function(i){return i.dept===currentUser.dept;}):issues.slice();
+  /* 저장목록 모드: 통계카드는 그대로(현재 활성 이슈 기준), issueList 영역에 archived 이슈를 테이블로 렌더 */
+  if(statusFilter==='archive'){
+    var activeBase=baseIssues.filter(function(i){return !i.archived;});
+    if(sa){sa.textContent=activeBase.length;
+      sp.textContent=activeBase.filter(function(i){return i.status==='proc';}).length;
+      sd.textContent=activeBase.filter(function(i){return i.status==='done';}).length;
+      var ap=activeBase.map(function(i){return parseInt(i.progress)||0;});
+      var avg=activeBase.length?Math.round(ap.reduce(function(a,b){return a+b;},0)/activeBase.length):0;
+      if(sap)sap.textContent=avg+'%';}
+    var dFA=document.getElementById('filterDept')?document.getElementById('filterDept').value:'';
+    var archRows=baseIssues.filter(function(i){return i&&i.archived&&i.status==='done';});
+    if(dFA)archRows=archRows.filter(function(i){return i.dept===dFA;});
+    archRows.sort(function(a,b){var ta=new Date(a.doneAt||a.date||0).getTime()||0;var tb=new Date(b.doneAt||b.date||0).getTime()||0;return tb-ta;});
+    var listA=document.getElementById('issueList');if(!listA)return;
+    var isAdminA=currentUser&&currentUser.type==='admin';
+    if(!archRows.length){listA.innerHTML='<div class="archEmpty">📭 저장된 이슈가 없습니다.<br><span style="font-size:12px">완료 후 7일이 지난 이슈가 자동으로 이동됩니다.</span></div>';return;}
+    var htmlA='<div class="archTbl'+(isAdminA?' adm':'')+'">'
+      +'<div class="archHd"><span>완료일</span><span>부서명</span><span>제목</span><span>작성자</span>'+(isAdminA?'<span style="text-align:center">관리</span>':'')+'</div>';
+    htmlA+=archRows.map(function(i){
+      var dt=new Date(i.doneAt||i.date||0);
+      var dstr=isNaN(dt.getTime())?'-':fmtD(dt);
+      var safeId=String(i.id).replace(/'/g,"\\'");
+      return '<div class="archRow" onclick="openIssDetail(\''+safeId+'\')">'
+        +'<span class="archCol archDate">'+esc(dstr)+'</span>'
+        +'<span class="archCol archDept">'+esc(i.dept||'-')+'</span>'
+        +'<span class="archCol archTitle" title="'+esc(i.title||'')+'">'+esc(i.title||'(제목없음)')+'</span>'
+        +'<span class="archCol archAuthor">'+esc(i.author||'-')+'</span>'
+        +(isAdminA?'<span class="archCol" style="text-align:center"><button class="archRestoreBtn" onclick="event.stopPropagation();restoreArchive(\''+safeId+'\')" title="현안목록으로 복원">↩ 복원</button></span>':'')
+        +'</div>';
+    }).join('');
+    htmlA+='</div>';
+    listA.innerHTML=htmlA;
+    return;
+  }
+  baseIssues=baseIssues.filter(function(i){return !i.archived;});
   var procList=baseIssues.filter(function(i){return i.status==='proc';});
   var doneList=baseIssues.filter(function(i){return i.status==='done';});
   if(sa){sa.textContent=baseIssues.length;sp.textContent=procList.length;sd.textContent=doneList.length;
@@ -2353,6 +2490,7 @@ function renderMemberList(){
           +'</div>'
           +(tel?'<a class="orgCallBtn" href="tel:'+tel+'" style="font-size:11px;padding:3px 7px;">📞</a>':'')
           +(currentUser&&currentUser.isAdmin&&isPending?'<button class="btn btnP" style="font-size:10px;padding:3px 7px;flex-shrink:0;" onclick="approveUser(\''+m.uid+'\')">승인</button>':'')
+          +(currentUser&&currentUser.isAdmin&&currentUser.uid!==m.uid?'<button class="btn btnD" style="font-size:10px;padding:3px 7px;flex-shrink:0;" onclick="deleteUser(\''+m.uid+'\')" title="회원 삭제">🗑</button>':'')
           +'</div>';
       });
       html+='</div>';
