@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "서구 도시주택국 현안이슈 알림",
+  "short_name": "현안이슈 알림",
+  "version": "1.0.0",
+  "description": "신규 현안이슈를 빨간 배지로 실시간 표시하는 총괄관리자용 확장프로그램",
+  "permissions": ["storage", "alarms", "notifications"],
+  "host_permissions": [
+    "https://dashboard.choshg.com/*",
+    "https://kjj0708-ai.github.io/*",
+    "https://bureau-dashboard-default-rtdb.firebaseio.com/*",
+    "https://*.firebaseio.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "현안이슈 알림",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://dashboard.choshg.com/*",
+        "https://kjj0708-ai.github.io/seogoo-dashboard/*"
+      ],
+      "js": ["page-bridge.js"],
+      "world": "MAIN",
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://dashboard.choshg.com/*",
+        "https://kjj0708-ai.github.io/seogoo-dashboard/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}
