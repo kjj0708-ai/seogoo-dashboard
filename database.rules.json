@@ -52,6 +52,14 @@
         ".read": "auth != null && (root.child('users').child(auth.uid).child('status').val() === 'approved' || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
         ".write": "auth != null && root.child('users').child(auth.uid).child('isAdmin').val() === true"
       }
+    },
+    "weeklyAgenda": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('status').val() === 'approved' || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
+      "$week": {
+        "$dept": {
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('isAdmin').val() === true || (root.child('users').child(auth.uid).child('status').val() === 'approved' && root.child('users').child(auth.uid).child('dept').val() === $dept))"
+        }
+      }
     }
   }
 }

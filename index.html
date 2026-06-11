@@ -66,6 +66,56 @@ header{background:var(--primary);color:#fff;padding:0 24px;display:flex;align-it
 .archTitle{font-weight:600;color:var(--tx1);}
 .archAuthor{color:var(--tx3);}
 .archEmpty{text-align:center;color:var(--tx3);padding:48px 16px;background:#fff;border:1px dashed var(--bdr);border-radius:10px;}
+/* ── 주간회의 안건 배너 ── */
+.waPanel:empty{display:none;}
+.waPanel{margin-bottom:16px;background:linear-gradient(135deg,#fefce8 0%,#fff7ed 100%);border:1.5px solid #fde68a;border-radius:12px;padding:14px 16px;box-shadow:0 2px 4px rgba(245,158,11,.06);}
+.waHd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap;}
+.waT{font-size:14px;font-weight:700;color:#78350f;}
+.waRange{font-size:11px;color:#92400e;font-weight:500;margin-left:4px;}
+.waPhase{font-size:11px;padding:3px 10px;border-radius:10px;font-weight:600;}
+.waPhase.phase-update{background:#e0e7ff;color:#3730a3;}
+.waPhase.phase-candidate{background:#fef3c7;color:#92400e;}
+.waPhase.phase-select{background:#fce7f3;color:#9d174d;}
+.waPhase.phase-confirmed{background:#dcfce7;color:#166534;}
+.waGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.waCard{background:#fff;border:1px solid #fde68a;border-radius:8px;padding:10px 11px;display:flex;flex-direction:column;min-height:90px;}
+.waCardH{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:4px;}
+.waDept{font-size:12px;font-weight:700;color:#0f172a;}
+.waCnt{font-size:10px;background:#dcfce7;color:#166534;padding:1px 6px;border-radius:8px;font-weight:600;}
+.waMiss{font-size:10px;background:#fee2e2;color:#991b1b;padding:1px 6px;border-radius:8px;font-weight:600;}
+.waWait{font-size:10px;background:#fce7f3;color:#9d174d;padding:1px 6px;border-radius:8px;}
+.waCand{font-size:10px;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:8px;}
+.waUpd{font-size:10px;background:#e0e7ff;color:#3730a3;padding:1px 6px;border-radius:8px;}
+.waList{display:flex;flex-direction:column;gap:4px;flex:1;}
+.waItem{background:#fffbeb;border-left:3px solid #f59e0b;padding:6px 8px;border-radius:4px;font-size:11px;line-height:1.4;cursor:pointer;transition:background .15s;}
+.waItem:hover{background:#fef3c7;}
+.waItemT{font-weight:600;color:#0f172a;display:flex;gap:4px;align-items:flex-start;}
+.waType{display:inline-block;font-size:9px;padding:1px 4px;border-radius:3px;font-weight:700;flex-shrink:0;}
+.waType-decide{background:#fee2e2;color:#991b1b;}
+.waType-help{background:#fef3c7;color:#92400e;}
+.waType-info{background:#e0e7ff;color:#3730a3;}
+.waReason{color:#78350f;margin-top:2px;font-size:10px;font-style:italic;}
+.waBy{font-size:9px;color:#94a3b8;margin-top:2px;}
+.waEmpty{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;color:#a16207;padding:8px 4px;line-height:1.4;}
+.waActs{margin-top:8px;display:flex;}
+.waActs .btn{flex:1;font-size:11px;padding:4px 8px;}
+@media (max-width:1024px){.waGrid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:520px){.waGrid{grid-template-columns:1fr;}}
+/* 안건 선택 모달 */
+.agendaPick{border:1.5px solid var(--bdr);border-radius:8px;padding:12px;margin-bottom:10px;background:#f8fafc;}
+.apHead{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;}
+.apChk{width:16px;height:16px;cursor:pointer;}
+.apName{font-weight:700;color:var(--tx1);flex:1;}
+.apTeam{font-size:11px;color:#1e40af;background:#dbeafe;padding:2px 7px;border-radius:8px;}
+.apReasons{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;}
+.apTag{font-size:10px;background:#fef3c7;color:#92400e;padding:2px 7px;border-radius:8px;font-weight:600;}
+.apLast{font-size:11px;color:var(--tx3);margin-top:6px;padding:6px 8px;background:#fff;border-radius:4px;line-height:1.4;}
+.apForm{margin-top:10px;padding-top:10px;border-top:1px dashed var(--bdr);}
+.apFr{margin-bottom:8px;font-size:12px;}
+.apFr label{display:inline-block;color:var(--tx2);font-weight:600;margin-right:6px;margin-bottom:3px;}
+.apFr input[type="text"]{width:100%;padding:6px 9px;border:1.5px solid var(--bdr);border-radius:5px;font-size:12px;font-family:inherit;box-sizing:border-box;}
+.apRad{font-size:12px;margin-right:8px;cursor:pointer;color:var(--tx2);}
+.apRad input{margin-right:2px;}
 .archRestoreBtn{padding:4px 10px;font-size:11px;border:1px solid #cbd5e1;background:#fff;border-radius:6px;cursor:pointer;color:#475569;font-family:inherit;}
 .archRestoreBtn:hover{background:#f1f5f9;border-color:#94a3b8;}
 @media (max-width:768px){
@@ -453,6 +503,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
   </div>
   <main>
     <div class="tPanel active" id="panel-issues">
+      <div id="weeklyAgendaPanel" class="waPanel"></div>
       <div id="instrDisplay"></div>
       <div id="adminInstrPnl" style="display:none;"></div>
       <div class="statRow">
@@ -618,6 +669,9 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
     </div>
     <div class="mF" style="justify-content:space-between;"><button class="btn btnD" onclick="deleteMyAccount()" style="font-size:12px;">🚪 탈퇴하기</button><div style="display:flex;gap:8px;"><button class="btn btnG" onclick="closeProfileEdit()">취소</button><button class="btn btnP" onclick="saveProfileEdit()">저장</button></div></div>
   </div>
+</div>
+<div class="mOverlay" id="agendaPickerModal" style="display:none" onclick="if(event.target===this)closeAgendaPicker()">
+  <div class="modal" style="max-width:640px;"></div>
 </div>
 <div class="mOverlay" id="projModal" style="display:none" onclick="if(event.target===this)closeProjModal()">
   <div class="modal">
@@ -831,14 +885,14 @@ function showLErr(m){var e=document.getElementById('lerr');e.textContent=m;e.sty
 function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('pendingScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';
 if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';var _mt=document.getElementById('memberTab');if(_mt)_mt.style.display='';}document.getElementById('adminCalPnl').style.display='block';initTimeDropdown();var _db=db||window._origDb;setupGlobalListeners();setupUsersListener();var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstrBoard();renderIssues();if(_db)setupProjectsListener();else renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var _ka0=document.getElementById('gcalApiKey');if(_ka0)_ka0.value=GCAL_API_KEY;var _ki0=document.getElementById('gcalCalId');if(_ki0)_ki0.value=GCAL_CAL_ID;setGCalSt(GCAL_API_KEY?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!_db){loadLS();fetchGCal();}else{if(GCAL_API_KEY)fetchGCal();if(_gcalRef){_gcalRef.off('value');}_gcalRef=_db.ref('settings/gcal');_gcalRef.on('value',function(snap){var s=snap.val();var prevKey=GCAL_API_KEY;if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser&&currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;setGCalSt(s&&s.apiKey?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!prevKey||prevKey!==GCAL_API_KEY)fetchGCal();});}if(window._gcalTimer)clearInterval(window._gcalTimer);window._gcalTimer=setInterval(function(){if(currentUser)fetchGCal();},10*60*1000);history.pushState({inApp:true},'');}
 function teardownProjectsListener(){if(_projRef){_projRef.off('value');_projRef=null;}}
-function setupProjectsListener(){teardownProjectsListener();var _db=db||window._origDb;if(!_db||!currentUser)return;if(currentUser.type==='admin'){_projRef=_db.ref('projects');_projRef.on('value',function(s){projects=[];if(s.val()){Object.entries(s.val()).forEach(function(de){var dept=de[0];if(de[1]&&typeof de[1]==='object'){Object.entries(de[1]).forEach(function(pe){projects.push(Object.assign({id:pe[0],dept:dept},pe[1]));});}});}renderProjectsGrid();});}else{_projRef=_db.ref('projects/'+currentUser.dept);_projRef.on('value',function(s){var dept=currentUser.dept;projects=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0],dept:dept},e[1]);}):[];renderProjectsGrid();});}}
+function setupProjectsListener(){teardownProjectsListener();var _db=db||window._origDb;if(!_db||!currentUser)return;if(currentUser.type==='admin'){_projRef=_db.ref('projects');_projRef.on('value',function(s){projects=[];if(s.val()){Object.entries(s.val()).forEach(function(de){var dept=de[0];if(de[1]&&typeof de[1]==='object'){Object.entries(de[1]).forEach(function(pe){projects.push(Object.assign({id:pe[0],dept:dept},pe[1]));});}});}renderProjectsGrid();renderWeeklyAgenda();});}else{_projRef=_db.ref('projects/'+currentUser.dept);_projRef.on('value',function(s){var dept=currentUser.dept;projects=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0],dept:dept},e[1]);}):[];renderProjectsGrid();renderWeeklyAgenda();});}setupWeeklyAgendaListener();}
 function projPath(id){var p=projects.find(function(x){return x.id===id;});return p?'projects/'+p.dept+'/'+id:null;}
-function doLogout(){if(window._gcalTimer){clearInterval(window._gcalTimer);window._gcalTimer=null;}teardownProjectsListener();teardownGlobalListeners();if(_gcalRef){_gcalRef.off('value');_gcalRef=null;}if(_statusRef){_statusRef.off('value');_statusRef=null;}if(_usersRef){_usersRef.off('value');_usersRef=null;}localStorage.removeItem('bu_profile');if(auth)auth.signOut();currentUser=null;document.getElementById('app').style.display='none';document.getElementById('pendingScreen').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('loginLoading').style.display='block';var btn=document.getElementById('btnGoogleLogin');if(btn){btn.style.display='none';btn.disabled=false;btn.style.opacity='1';}document.getElementById('adminInstrPnl').style.display='none';document.getElementById('adminCalPnl').style.display='none';document.getElementById('adminGcalPnl').style.display='none';document.getElementById('adminUserMgmt').style.display='none';var _mt2=document.getElementById('memberTab');if(_mt2)_mt2.style.display='none';document.getElementById('lerr').style.display='none';}
+function doLogout(){if(window._gcalTimer){clearInterval(window._gcalTimer);window._gcalTimer=null;}teardownProjectsListener();teardownGlobalListeners();teardownWeeklyAgendaListener();if(_gcalRef){_gcalRef.off('value');_gcalRef=null;}if(_statusRef){_statusRef.off('value');_statusRef=null;}if(_usersRef){_usersRef.off('value');_usersRef=null;}localStorage.removeItem('bu_profile');if(auth)auth.signOut();currentUser=null;document.getElementById('app').style.display='none';document.getElementById('pendingScreen').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('loginLoading').style.display='block';var btn=document.getElementById('btnGoogleLogin');if(btn){btn.style.display='none';btn.disabled=false;btn.style.opacity='1';}document.getElementById('adminInstrPnl').style.display='none';document.getElementById('adminCalPnl').style.display='none';document.getElementById('adminGcalPnl').style.display='none';document.getElementById('adminUserMgmt').style.display='none';var _mt2=document.getElementById('memberTab');if(_mt2)_mt2.style.display='none';document.getElementById('lerr').style.display='none';}
 function showPendingScreen(reason){document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='none';var ps=document.getElementById('pendingScreen');ps.style.display='flex';var ico=document.getElementById('pendingIco');var title=document.getElementById('pendingTitle');var msg=document.getElementById('pendingMsg');var info=document.getElementById('pendingInfo');var reBtn=document.getElementById('btnReapply');if(reason==='rejected'){ico.textContent='❌';title.textContent='승인 거절됨';msg.innerHTML='관리자가 가입 요청을 거절했습니다.<br>정보를 수정해 다시 신청할 수 있습니다.';if(reBtn)reBtn.style.display='block';}else{ico.textContent='⏳';title.textContent='승인 대기 중';msg.innerHTML='관리자의 승인을 기다리고 있습니다.<br>승인 후 자동으로 접속됩니다.';if(reBtn)reBtn.style.display='none';}if(currentUser){info.textContent=currentUser.name+' · '+currentUser.dept+' '+currentUser.team;}}
 function doReapply(){var user=window._pendingGoogleUser||(currentUser?{uid:currentUser.uid,displayName:currentUser.name,email:currentUser.email}:null);if(!user)return;/* Firebase에서 거절 상태 제거 후 프로필 설정 화면으로 */var _db=db||window._origDb;function goSetup(){document.getElementById('pendingScreen').style.display='none';showProfileSetup(user);}if(_db&&user.uid){_db.ref('users/'+user.uid+'/status').set('reapplying').then(goSetup).catch(goSetup);}else{goSetup();}}
 function setupStatusListener(uid){var _db=db||window._origDb;if(!_db)return;if(_statusRef){_statusRef.off('value');_statusRef=null;}_statusRef=_db.ref('users/'+uid+'/status');_statusRef.on('value',function(s){var status=s.val();if(status==='approved'){if(_statusRef){_statusRef.off('value');_statusRef=null;}var _db2=db||window._origDb;if(_db2)_db2.ref('users/'+uid).once('value').then(function(snap){var p=snap.val();if(p){setCurrentUserFromProfile({uid:uid,displayName:p.name,email:p.email||''},p);enterApp();}});} else if(status==='rejected'){showPendingScreen('rejected');}});}
 function setupUsersListener(){var _db=db||window._origDb;console.log('[Users] setupUsersListener called, db=',!!db,'_origDb=',!!window._origDb,'type=',currentUser&&currentUser.type);if(!_db){console.warn('[Users] no db available');window._allUsers={};renderMemberList();return;}if(_usersRef){_usersRef.off('value');_usersRef=null;}_usersRef=_db.ref('users');_usersRef.on('value',function(s){var data=s.val();console.log('[Users] listener got data:',data?Object.keys(data).length+'명':'null');window._allUsers=data||{};renderUserMgmt(data);renderMemberList();_updatePendingBadge(data);},function(err){console.error('[Users] listener FAILED:',err.code,err.message);var list=document.getElementById('pendingUserList');if(list&&currentUser&&currentUser.type==='admin'){list.innerHTML='<div style="padding:12px;color:#b91c1c;font-size:13px;line-height:1.7;">❌ <b>사용자 목록 읽기 실패</b><br>Firebase 보안 규칙에서 <code>users</code> 노드의 읽기가 제한되어 있습니다.<br><br><b>해결:</b> Firebase 콘솔 → Realtime Database → Rules에서:<br><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">{"rules":{".read":"auth != null",".write":"auth != null"}}</code><br>또는 users 노드에 읽기 권한을 추가하세요.</div>';}var el=document.getElementById('memberListBody');if(el){el.innerHTML='<div style="padding:16px;color:#b91c1c;font-size:13px;">❌ 사용자 데이터 읽기 권한이 없습니다.<br>오류: '+esc(err.message||err.code||'')+'</div>';}setTimeout(function(){var _db2=db||window._origDb;if(_db2){console.log('[Users] retrying with once...');_db2.ref('users').once('value').then(function(s2){var d2=s2.val();console.log('[Users] retry got:',d2?Object.keys(d2).length+'명':'null');window._allUsers=d2||{};renderUserMgmt(d2);renderMemberList();_updatePendingBadge(d2);}).catch(function(e2){console.error('[Users] retry also failed:',e2);});}},3000);});if(currentUser&&currentUser.type==='admin'){_db.ref('users').once('value').then(function(s){var data=s.val();console.log('[Users] admin once got:',data?Object.keys(data).length+'명':'null');window._allUsers=data||{};renderUserMgmt(data);renderMemberList();_updatePendingBadge(data);}).catch(function(e){console.error('[Users] admin once FAILED:',e.code,e.message);});}}
-function setupGlobalListeners(){var _db=db||window._origDb;console.log('[Global] setupGlobalListeners called, db=',!!_db);if(!_db){loadLS();return;}teardownGlobalListeners();var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);loadLS();if(currentUser){renderIssues();renderProjectsGrid();renderCal();renderInstrBoard();}}_issuesRef=_db.ref('issues');_issuesRef.on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];processArchive();renderIssues();},_fbErr);_eventsRef=_db.ref('events');_eventsRef.on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();if(window._selDayDs)selDay(window._selDayDs);},_fbErr);_instrRef=_db.ref('instructions');_instrRef.on('value',function(s){_instrList=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);}):[];renderInstrBoard();},_fbErr);
+function setupGlobalListeners(){var _db=db||window._origDb;console.log('[Global] setupGlobalListeners called, db=',!!_db);if(!_db){loadLS();return;}teardownGlobalListeners();var _fbOK=false;function _fbErr(e){if(_fbOK)return;_fbOK=true;console.warn('FB err',e);setSyncOK(false);loadLS();if(currentUser){renderIssues();renderProjectsGrid();renderCal();renderInstrBoard();}}_issuesRef=_db.ref('issues');_issuesRef.on('value',function(s){if(!_fbOK){_fbOK=true;setSyncOK(true);}issues=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];processArchive();renderIssues();renderWeeklyAgenda();},_fbErr);_eventsRef=_db.ref('events');_eventsRef.on('value',function(s){events=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];renderCal();if(window._selDayDs)selDay(window._selDayDs);},_fbErr);_instrRef=_db.ref('instructions');_instrRef.on('value',function(s){_instrList=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);}):[];renderInstrBoard();},_fbErr);
   /* 본인 열람기록(Firebase) 실시간 반영 → 배지를 계정/기기 무관하게 정확히 표시 */
   if(currentUser&&currentUser.uid){_myReadsRef=_db.ref('instrReads');_myReadsRef.on('value',function(s){var all=s.val()||{};_myInstrReads={};Object.keys(all).forEach(function(iid){if(all[iid]&&all[iid][currentUser.uid])_myInstrReads[iid]=true;});renderInstrBoard();},function(){});}}
 function teardownGlobalListeners(){if(_issuesRef){try{_issuesRef.off('value');}catch(e){}_issuesRef=null;}if(_eventsRef){try{_eventsRef.off('value');}catch(e){}_eventsRef=null;}if(_instrRef){try{_instrRef.off('value');}catch(e){}_instrRef=null;}if(_myReadsRef){try{_myReadsRef.off('value');}catch(e){}_myReadsRef=null;}_myInstrReads={};}
@@ -1684,6 +1738,213 @@ function fmtDT(d){if(!(d instanceof Date)||isNaN(d))return '';return fmtD(d)+' '
 function pad(n){return (''+n).padStart(2,'0');}
 function getISOWeek(date){var d=new Date(date);d.setHours(0,0,0,0);var day=d.getDay()||7;d.setDate(d.getDate()+4-day);var y=new Date(d.getFullYear(),0,1);var wk=Math.ceil(((d-y)/86400000+1)/7);return d.getFullYear()+'-W'+(''+wk).padStart(2,'0');}
 function thisWeek(){return getISOWeek(new Date());}
+/* ── 주간회의 안건 ───────────────────────────────────────
+   금요일~월요일: 직원들이 업데이트 받는 기간
+   화요일 18:00 이후: 후보 자동 추천 노출
+   수요일 오전: 부서장이 1~2건 확정 선택
+   수요일 12:00 이후 ~ 다음주 월요일: 확정 안건 표시 */
+var WEEKLY_DEPTS=['도로과','도시계획과','건축과','주택과','도시재생경관과'];
+var _weeklyAgendaRef=null,_weeklyAgendaData={};
+function weeklyMondayOf(d){var dt=new Date(d||new Date());dt.setHours(0,0,0,0);var day=dt.getDay()||7;dt.setDate(dt.getDate()-(day-1));return dt;}
+function weeklyPhase(d){
+  /* phase 반환: 'update' | 'candidate' | 'select' | 'confirmed' */
+  var now=d||new Date();var day=now.getDay();var hr=now.getHours();
+  /* 일(0)·월(1)·화(2) 18시 이전 → 업데이트 */
+  if(day===0||day===1)return 'update';
+  if(day===2)return hr<18?'update':'candidate';
+  /* 수요일(3) 12시 이전 → 부서장 선택, 이후 → 확정 */
+  if(day===3)return hr<12?'select':'confirmed';
+  /* 목·금·토 → 확정 */
+  return 'confirmed';
+}
+function weeklyPhaseLabel(p){
+  return ({update:'⏳ 사업 업데이트 중',candidate:'💡 후보 자동 추천',select:'🌟 부서장 선택 대기',confirmed:'📌 안건 확정'})[p]||'';
+}
+function isDeptHead(u){
+  /* 부서장: admin 또는 과장. 운영 안정화 후 팀장도 허용 가능. */
+  if(!u)return false;
+  if(u.type==='admin'||u.isAdmin)return true;
+  return u.role==='과장';
+}
+/* 후보 자동 추천 — 부서별 상위 3건 */
+function generateWeeklyCandidates(dept){
+  var weekKey=thisWeek();
+  var deptProjs=projects.filter(function(p){return p.dept===dept;});
+  if(!deptProjs.length)return [];
+  /* 이번주 월요일 00시 기준 */
+  var monMs=weeklyMondayOf().getTime();
+  var twoWeeksAgo=Date.now()-14*24*60*60*1000;
+  /* 최근 14일 지시사항 텍스트 */
+  var recentInstrText=(_instrList||[]).filter(function(x){
+    var t=new Date(x.date||0).getTime();return t&&t>=twoWeeksAgo;
+  }).map(function(x){return (x.title||'')+' '+(x.text||'');}).join(' ');
+  /* 부서 활성 현안이슈 */
+  var deptIssues=(issues||[]).filter(function(i){return i.dept===dept&&!i.archived&&i.status!=='done';});
+  var scored=deptProjs.map(function(p){
+    var hist=p.history?Object.entries(p.history).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];
+    hist.sort(function(a,b){return new Date(b.updatedAt||0)-new Date(a.updatedAt||0);});
+    var last=hist[0];
+    var lastMs=last?new Date(last.updatedAt||0).getTime():0;
+    var score=0,reasons=[];
+    /* (1) 이번주 진척 업데이트 */
+    if(lastMs&&lastMs>=monMs){score+=3;reasons.push('이번주 실적 업데이트');}
+    /* (2) 14일 이상 정체 */
+    else if(lastMs&&lastMs<twoWeeksAgo){score+=2;reasons.push((Math.floor((Date.now()-lastMs)/(24*60*60*1000)))+'일째 정체');}
+    /* (3) 완료/마감 임박 */
+    var planTxt=(last&&last.plan||'')+'';
+    if(/완료|마무리|마감|준공|개통|개관/.test(planTxt)){score+=2;reasons.push('완료 임박');}
+    /* (4) 국장 지시사항에 사업명 언급 */
+    if(p.name&&recentInstrText&&recentInstrText.indexOf(p.name)>=0){score+=2;reasons.push('국장 지시 후속');}
+    /* (5) 부서 현안이슈와 키워드 매칭 */
+    var hit=deptIssues.find(function(iss){var t=(iss.title||'');return t&&p.name&&(t.indexOf(p.name)>=0||p.name.indexOf(t.split(' ')[0])>=0);});
+    if(hit){score+=1;reasons.push('현안이슈 연계: '+(hit.title||'').slice(0,20));}
+    return {projId:p.id,name:p.name,team:p.team,score:score,reasons:reasons,lastUpdatedAt:lastMs,lastAchieve:last&&last.achieve||'',lastPlan:planTxt};
+  });
+  scored=scored.filter(function(s){return s.score>0;});
+  scored.sort(function(a,b){return b.score-a.score||b.lastUpdatedAt-a.lastUpdatedAt;});
+  return scored.slice(0,3);
+}
+function setupWeeklyAgendaListener(){
+  var _db=db||window._origDb;if(!_db)return;
+  if(_weeklyAgendaRef){try{_weeklyAgendaRef.off('value');}catch(_){}_weeklyAgendaRef=null;}
+  var wk=thisWeek();
+  _weeklyAgendaRef=_db.ref('weeklyAgenda/'+wk);
+  _weeklyAgendaRef.on('value',function(s){_weeklyAgendaData=s.val()||{};renderWeeklyAgenda();},function(){});
+}
+function teardownWeeklyAgendaListener(){if(_weeklyAgendaRef){try{_weeklyAgendaRef.off('value');}catch(_){}_weeklyAgendaRef=null;}_weeklyAgendaData={};}
+function fmtWeekRange(){
+  var mon=weeklyMondayOf();var fri=new Date(mon);fri.setDate(mon.getDate()+4);
+  function s(d){return (d.getMonth()+1)+'.'+d.getDate();}
+  return s(mon)+'~'+s(fri);
+}
+function renderWeeklyAgenda(){
+  var box=document.getElementById('weeklyAgendaPanel');if(!box)return;
+  var phase=weeklyPhase();
+  var rangeTxt=fmtWeekRange();
+  var html='<div class="waHd">'
+    +'<div class="waT">📌 이번 주 주간회의 안건 <span class="waRange">('+rangeTxt+')</span></div>'
+    +'<div class="waPhase phase-'+phase+'">'+weeklyPhaseLabel(phase)+'</div>'
+    +'</div>';
+  html+='<div class="waGrid">';
+  WEEKLY_DEPTS.forEach(function(dept){
+    var deptAgenda=_weeklyAgendaData[dept]||{};
+    var confirmed=Object.keys(deptAgenda);
+    var canEdit=currentUser&&isDeptHead(currentUser)&&(currentUser.type==='admin'||currentUser.dept===dept);
+    var safeDept=dept.replace(/'/g,"\\'");
+    html+='<div class="waCard">';
+    html+='<div class="waCardH"><span class="waDept">'+esc(dept)+'</span>';
+    if(confirmed.length){html+='<span class="waCnt">'+confirmed.length+'건 확정</span>';}
+    else if(phase==='confirmed'){html+='<span class="waMiss">⚠️ 미선정</span>';}
+    else if(phase==='select'){html+='<span class="waWait">선택 대기</span>';}
+    else if(phase==='candidate'){html+='<span class="waCand">후보 검토</span>';}
+    else {html+='<span class="waUpd">업데이트 중</span>';}
+    html+='</div>';
+    if(confirmed.length){
+      html+='<div class="waList">';
+      confirmed.forEach(function(pid){
+        var a=deptAgenda[pid]||{};
+        var p=projects.find(function(x){return x.id===pid;})||{};
+        var typeLabel=({decide:'결정',help:'협조',info:'공유'})[a.type]||'';
+        html+='<div class="waItem" onclick="openProjDetail(\''+String(pid).replace(/'/g,"\\\\\\'")+'\')">'
+          +'<div class="waItemT"><span class="waType waType-'+(a.type||'info')+'">'+typeLabel+'</span> '+esc(p.name||'(삭제된 사업)')+'</div>'
+          +(a.reason?'<div class="waReason">"'+esc(a.reason)+'"</div>':'')
+          +'<div class="waBy">'+esc(a.by||'')+(a.at?' · '+fmtD(new Date(a.at)):'')+'</div>'
+          +'</div>';
+      });
+      html+='</div>';
+    } else {
+      html+='<div class="waEmpty">'+(phase==='update'?'사업 업데이트 후 화요일 18시부터 후보가 표시됩니다.':phase==='confirmed'?'이번 주 안건이 선정되지 않았습니다.':'')+'</div>';
+    }
+    if(canEdit&&(phase==='candidate'||phase==='select'||phase==='confirmed')){
+      html+='<div class="waActs"><button class="btn btnP sm" onclick="openAgendaPicker(\''+safeDept+'\')">'+(confirmed.length?'✏️ 변경':'🌟 안건 선택')+'</button></div>';
+    }
+    html+='</div>';
+  });
+  html+='</div>';
+  box.innerHTML=html;
+}
+/* 안건 선택 모달 */
+function openAgendaPicker(dept){
+  if(!currentUser||!isDeptHead(currentUser)){alert('부서장(과장 또는 관리자)만 안건을 선택할 수 있습니다.');return;}
+  if(currentUser.type!=='admin'&&currentUser.dept!==dept){alert('본인 부서의 안건만 선택할 수 있습니다.');return;}
+  var phase=weeklyPhase();
+  if(phase==='update'){if(!confirm('아직 사업 업데이트 기간입니다. 그래도 안건을 미리 선택하시겠습니까?'))return;}
+  var cands=generateWeeklyCandidates(dept);
+  /* 이미 확정된 항목도 후보 목록에 포함 (체크상태 유지) */
+  var existing=_weeklyAgendaData[dept]||{};
+  Object.keys(existing).forEach(function(pid){
+    if(!cands.find(function(c){return c.projId===pid;})){
+      var p=projects.find(function(x){return x.id===pid;});
+      if(p){
+        var hist=p.history?Object.entries(p.history).map(function(e){return Object.assign({id:e[0]},e[1]);}):[];
+        hist.sort(function(a,b){return new Date(b.updatedAt||0)-new Date(a.updatedAt||0);});
+        var last=hist[0]||{};
+        cands.push({projId:p.id,name:p.name,team:p.team,score:0,reasons:['이전 선택'],lastUpdatedAt:last.updatedAt?new Date(last.updatedAt).getTime():0,lastAchieve:last.achieve||'',lastPlan:last.plan||''});
+      }
+    }
+  });
+  if(!cands.length){
+    alert('해당 부서의 추천 후보가 없습니다. 사업 업데이트(실적/계획) 후 다시 시도하세요.');
+    return;
+  }
+  window._agendaPickerDept=dept;
+  var html='<div class="mH"><span class="mT">🌟 '+esc(dept)+' 주간회의 안건 선택 <span style="font-size:11px;color:var(--tx3);font-weight:400;">(최대 2건)</span></span><button class="mClose" onclick="closeAgendaPicker()">✕</button></div>'
+    +'<div class="mB"><div id="agendaPickList">';
+  cands.forEach(function(c){
+    var ex=existing[c.projId]||{};
+    var checked=!!existing[c.projId];
+    var safePid=String(c.projId).replace(/"/g,'&quot;');
+    html+='<div class="agendaPick" data-pid="'+safePid+'">'
+      +'<label class="apHead"><input type="checkbox" class="apChk" '+(checked?'checked':'')+' onchange="_apToggle(this)"> '
+      +'<span class="apName">'+esc(c.name||'(이름없음)')+'</span>'
+      +'<span class="apTeam">'+esc(c.team||'')+'</span>'
+      +'</label>'
+      +'<div class="apReasons">'+c.reasons.map(function(r){return '<span class="apTag">'+esc(r)+'</span>';}).join('')+'</div>'
+      +(c.lastAchieve?'<div class="apLast"><b>최근 실적:</b> '+esc(c.lastAchieve.slice(0,120))+(c.lastAchieve.length>120?'…':'')+'</div>':'')
+      +'<div class="apForm" style="display:'+(checked?'block':'none')+';">'
+      +'<div class="apFr"><label>보고 사유 (필수)</label><input type="text" class="apReason" placeholder="예: 청장님 결정 필요, 자재 수급 협조 요청 등" value="'+esc(ex.reason||'').replace(/"/g,'&quot;')+'"></div>'
+      +'<div class="apFr"><label>보고 유형</label>'
+      +'<label class="apRad"><input type="radio" name="apType_'+safePid+'" value="decide" '+(ex.type==='decide'?'checked':'')+'> 결정요청</label>'
+      +'<label class="apRad"><input type="radio" name="apType_'+safePid+'" value="help" '+(ex.type==='help'?'checked':'')+'> 협조요청</label>'
+      +'<label class="apRad"><input type="radio" name="apType_'+safePid+'" value="info" '+(ex.type==='info'||!ex.type?'checked':'')+'> 단순공유</label>'
+      +'</div></div></div>';
+  });
+  html+='</div></div>'
+    +'<div class="mF"><button class="btn btnG" onclick="closeAgendaPicker()">취소</button><button class="btn btnP" onclick="saveAgendaPick()">저장</button></div>';
+  var modal=document.getElementById('agendaPickerModal');
+  modal.querySelector('.modal').innerHTML=html;
+  modal.style.display='flex';
+}
+function closeAgendaPicker(){var m=document.getElementById('agendaPickerModal');if(m)m.style.display='none';window._agendaPickerDept=null;}
+function _apToggle(chk){
+  var row=chk.closest('.agendaPick');if(!row)return;
+  var form=row.querySelector('.apForm');if(form)form.style.display=chk.checked?'block':'none';
+  /* 2건 초과 방지 */
+  var checked=document.querySelectorAll('#agendaPickList .apChk:checked');
+  if(checked.length>2){chk.checked=false;if(form)form.style.display='none';alert('안건은 최대 2건까지 선택 가능합니다.');}
+}
+function saveAgendaPick(){
+  var dept=window._agendaPickerDept;if(!dept){closeAgendaPicker();return;}
+  var rows=document.querySelectorAll('#agendaPickList .agendaPick');
+  var picked={};var err='';
+  rows.forEach(function(row){
+    var chk=row.querySelector('.apChk');if(!chk||!chk.checked)return;
+    var pid=row.getAttribute('data-pid');
+    var reason=(row.querySelector('.apReason')||{}).value||'';reason=reason.trim();
+    var typeEl=row.querySelector('input[name^="apType_"]:checked');
+    var type=typeEl?typeEl.value:'info';
+    if(!reason){err='보고 사유를 모두 입력해주세요.';return;}
+    picked[pid]={reason:reason,type:type,by:currentUser?currentUser.name:'',byUid:currentUser?currentUser.uid:'',at:new Date().toISOString()};
+  });
+  if(err){alert(err);return;}
+  var wk=thisWeek();var path='weeklyAgenda/'+wk+'/'+dept;
+  var _db=db||window._origDb;
+  if(_db){
+    _db.ref(path).set(Object.keys(picked).length?picked:null).then(function(){closeAgendaPicker();}).catch(function(e){alert('저장 실패: '+(e&&e.message||e));});
+  }else{
+    _weeklyAgendaData[dept]=picked;closeAgendaPicker();renderWeeklyAgenda();
+  }
+}
 function isThisReportWeek(dateStr){
   if(!dateStr)return false;
   var d=new Date(dateStr);
