@@ -99,6 +99,7 @@ header{background:var(--primary);color:#fff;padding:0 24px;display:flex;align-it
 .waEmpty{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;color:#a16207;padding:8px 4px;line-height:1.4;}
 .waActs{margin-top:8px;display:flex;}
 .waActs .btn{flex:1;font-size:11px;padding:4px 8px;}
+.waHint{margin-top:8px;text-align:center;font-size:10px;color:#94a3b8;padding:4px 6px;background:#f8fafc;border-radius:4px;cursor:help;}
 @media (max-width:1024px){.waGrid{grid-template-columns:repeat(2,1fr);}}
 @media (max-width:520px){.waGrid{grid-template-columns:1fr;}}
 /* 안건 선택 모달 */
@@ -1761,10 +1762,14 @@ function weeklyPhaseLabel(p){
   return ({update:'⏳ 사업 업데이트 중',candidate:'💡 후보 자동 추천',select:'🌟 부서장 선택 대기',confirmed:'📌 안건 확정'})[p]||'';
 }
 function isDeptHead(u){
-  /* 부서장: admin 또는 과장. 운영 안정화 후 팀장도 허용 가능. */
+  /* 부서장 = 안건 선택 권한자
+     - admin (관리자)
+     - 과장 (정상 케이스)
+     - 팀장 (과장 부재 시 대리 — 운영 유연성)
+     - role 미설정자는 안건 선택 불가. 본인 프로필에서 회원유형 선택 필요. */
   if(!u)return false;
   if(u.type==='admin'||u.isAdmin)return true;
-  return u.role==='과장';
+  return u.role==='과장'||u.role==='팀장';
 }
 /* 후보 자동 추천 — 부서별 상위 3건 */
 function generateWeeklyCandidates(dept){
@@ -1857,6 +1862,9 @@ function renderWeeklyAgenda(){
     }
     if(canEdit&&(phase==='candidate'||phase==='select'||phase==='confirmed')){
       html+='<div class="waActs"><button class="btn btnP sm" onclick="openAgendaPicker(\''+safeDept+'\')">'+(confirmed.length?'✏️ 변경':'🌟 안건 선택')+'</button></div>';
+    } else if(currentUser&&currentUser.dept===dept&&(phase==='candidate'||phase==='select'||phase==='confirmed')&&!isDeptHead(currentUser)){
+      /* 본인 부서지만 부서장 아님 — 왜 못 누르는지 안내 */
+      html+='<div class="waHint" title="과장·팀장만 선택 가능. 내 프로필에서 회원유형 확인">🔒 부서장만 선택 가능</div>';
     }
     html+='</div>';
   });
@@ -1865,8 +1873,14 @@ function renderWeeklyAgenda(){
 }
 /* 안건 선택 모달 */
 function openAgendaPicker(dept){
-  if(!currentUser||!isDeptHead(currentUser)){alert('부서장(과장 또는 관리자)만 안건을 선택할 수 있습니다.');return;}
-  if(currentUser.type!=='admin'&&currentUser.dept!==dept){alert('본인 부서의 안건만 선택할 수 있습니다.');return;}
+  if(!currentUser){alert('로그인이 필요합니다.');return;}
+  if(!isDeptHead(currentUser)){
+    var who=currentUser.name||'';
+    var rolePart=currentUser.role?('회원유형: '+currentUser.role):'회원유형 미설정';
+    alert('부서장(과장·팀장·관리자)만 안건을 선택할 수 있습니다.\n\n현재 로그인: '+who+'\n'+rolePart+'\n\n과장/팀장이신데 안 보이면:\n① 우측 상단 "내 프로필" 클릭\n② 회원유형을 "과장" 또는 "팀장"으로 변경 후 저장\n③ 화면 새로고침 (Ctrl+Shift+R)');
+    return;
+  }
+  if(currentUser.type!=='admin'&&currentUser.dept!==dept){alert('본인 부서('+(currentUser.dept||'미지정')+')의 안건만 선택할 수 있습니다.\n선택하려는 부서: '+dept);return;}
   var phase=weeklyPhase();
   if(phase==='update'){if(!confirm('아직 사업 업데이트 기간입니다. 그래도 안건을 미리 선택하시겠습니까?'))return;}
   var cands=generateWeeklyCandidates(dept);
