@@ -1230,9 +1230,21 @@ function saveInstrWrite(){
   if(editId){
     data.date=(_instrList.find(function(i){return i.id===editId;})||{date:now}).date;
     data.updatedAt=now;
-    if(_db){_db.ref('instructions/'+editId).update(data).then(closeInstrWrite).catch(_instrErr);return;}
+    if(_db){
+      _db.ref('instructions/'+editId).update(data).then(function(){
+        publishInstructionNotification(title, '[수정] ' + content);
+        closeInstrWrite();
+      }).catch(_instrErr);
+      return;
+    }
   }else{
-    if(_db){_db.ref('instructions').push(data).then(closeInstrWrite).catch(_instrErr);return;}
+    if(_db){
+      _db.ref('instructions').push(data).then(function(){
+        publishInstructionNotification(title, content);
+        closeInstrWrite();
+      }).catch(_instrErr);
+      return;
+    }
     else{data.id=Date.now().toString();_instrList.unshift(data);renderInstrBoard();}
   }
   closeInstrWrite();
@@ -3524,6 +3536,34 @@ function publishWeeklyReportNotification(dept, projName, isManual) {
     }
   }).catch(function(e) {
     console.error('Failed to send ntfy push notification:', e);
+  });
+}
+
+function publishInstructionNotification(title, content) {
+  var senderName = currentUser ? currentUser.name : '시스템';
+  var senderUid = currentUser ? currentUser.uid : 'system';
+  var notifTitle = '[국장 지시사항] ' + title;
+  var body = content;
+  if(body.length > 100) {
+    body = body.substring(0, 100) + '...';
+  }
+  body += '\n\n작성자: ' + senderName;
+  body += ' [by:' + senderUid + ']';
+
+  fetch('https://ntfy.sh', {
+    method: 'POST',
+    body: JSON.stringify({
+      topic: _ntfyTopic,
+      message: body,
+      title: notifTitle,
+      priority: 4,
+      click: 'https://bureau-dashboard.web.app'
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).catch(function(e) {
+    console.error('Failed to send ntfy instruction notification:', e);
   });
 }
 
