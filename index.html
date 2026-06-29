@@ -726,8 +726,14 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
     <div class="mH"><span class="mT" id="weeklyReportModalT">주간보고 추가</span><button class="mClose" onclick="closeWeeklyReportModal()">✕</button></div>
     <div class="mB">
       <div class="fr"><label>제목 *</label><input type="text" id="weeklyReportTitle" placeholder="보고 제목 입력"></div>
-      <div class="fr"><label>내용</label><textarea id="weeklyReportContent" placeholder="주간보고 내용을 입력하세요..." style="min-height:160px"></textarea></div>
-      <div class="fr"><label>과</label><select id="weeklyReportDept"><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>도시재생경관과</option></select></div>
+      <div class="fr">
+        <label>내용</label>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+          <label class="scanUpload"><input type="file" id="weeklyReportScanFile" accept="image/*" multiple style="display:none" onchange="addWeeklyReportImages(this)">📷 이미지 선택 (최대 10장)</label>
+        </div>
+        <div id="weeklyReportScanPreviews" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;"></div>
+        <textarea id="weeklyReportContent" placeholder="주간보고 내용을 입력하세요..." style="min-height:120px"></textarea>
+      </div>
     </div>
     <div class="mF"><button class="btn btnG" onclick="closeWeeklyReportModal()">취소</button><button class="btn btnP" onclick="saveWeeklyReportManual()">저장</button></div>
   </div>
@@ -2121,9 +2127,20 @@ function renderWeeklyReport(){
       keys.forEach(function(key){
         var it=items[key]||{};
         if(it.manual){
+          var imgs=it.images?Object.entries(it.images):[];
+          var imgsHtml='';
+          if(imgs.length){
+            imgsHtml='<div class="weeklyImgs" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">'
+              +imgs.map(function(e,i){
+                return '<div class="weeklyImgItem" style="width:72px;height:54px;border-radius:6px;overflow:hidden;border:1px solid #cbd5e1;background:#f8fafc;flex-shrink:0;">'
+                  +'<img src="'+e[1].data+'" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="openImgZoom(this.src)">'
+                  +'</div>';
+              }).join('')
+              +'</div>';
+          }
           html+='<div class="weeklyItem manual"><div class="weeklyItemTop"><div class="weeklyItemTitle"><span class="weeklyBadge manual">직접입력</span>'+esc(it.title||'(제목 없음)')+'</div>'
             +(canEdit?'<div class="weeklyActions"><button class="weeklyMiniBtn" onclick="openWeeklyReportModal(\''+jsq(dept)+'\',\''+jsq(key)+'\')">수정</button><button class="weeklyMiniBtn danger" onclick="deleteWeeklyReportManual(\''+jsq(dept)+'\',\''+jsq(key)+'\')">삭제</button></div>':'')
-            +'</div>'+(it.content?'<div class="weeklyText">'+esc(it.content)+'</div>':'')+'<div class="weeklyMeta">'+esc(it.by||'')+(it.updatedAt?' · '+fmtDT(new Date(it.updatedAt)):(it.at?' · '+fmtDT(new Date(it.at)):''))+'</div></div>';
+            +'</div>'+(it.content?'<div class="weeklyText">'+esc(it.content)+'</div>':'')+imgsHtml+'<div class="weeklyMeta">'+esc(it.by||'')+(it.updatedAt?' · '+fmtDT(new Date(it.updatedAt)):(it.at?' · '+fmtDT(new Date(it.at)):''))+'</div></div>';
         }else{
           var p=projects.find(function(x){return x.id===key;});
           var txt=weeklyTextFromProject(p);
@@ -2144,25 +2161,39 @@ function openWeeklyReportModal(dept,key){
   window._weeklyEditDept=d;window._weeklyEditKey=key||null;
   var item=key&&_weeklyAgendaData[d]?(_weeklyAgendaData[d][key]||{}):{};
   document.getElementById('weeklyReportModalT').textContent=key?'주간보고 수정':'주간보고 추가';
-  document.getElementById('weeklyReportTitle').value=item.title||'';
+  document.getElementById('weeklyReportTitle').value=item.title||'주간보고';
   document.getElementById('weeklyReportContent').value=item.content||'';
-  var sel=document.getElementById('weeklyReportDept');sel.value=d;sel.disabled=currentUser.type!=='admin'||!!key;
+  window._weeklyReportEditImgs=item.images?Object.entries(item.images).map(function(e){return Object.assign({key:e[0]},e[1]);}):[];
+  renderWeeklyReportEditImgs();
   document.getElementById('weeklyReportModal').style.display='flex';
 }
 function closeWeeklyReportModal(){
   document.getElementById('weeklyReportModal').style.display='none';
   window._weeklyEditDept=null;window._weeklyEditKey=null;
-  var sel=document.getElementById('weeklyReportDept');if(sel)sel.disabled=false;
+  window._weeklyReportEditImgs=[];
+  var sp=document.getElementById('weeklyReportScanPreviews');if(sp)sp.innerHTML='';
+  var sf=document.getElementById('weeklyReportScanFile');if(sf)sf.value='';
 }
 function saveWeeklyReportManual(){
   var title=document.getElementById('weeklyReportTitle').value.trim();
   var content=document.getElementById('weeklyReportContent').value.trim();
-  var dept=document.getElementById('weeklyReportDept').value;
+  var dept=window._weeklyEditDept;
   if(!title){alert('제목을 입력하세요.');return;}
   if(!weeklyCanEditDept(dept)){alert('본인 소속 과의 주간보고만 작성할 수 있습니다.');return;}
   var now=new Date().toISOString();
   var key=window._weeklyEditKey||('manual_'+Date.now());
-  var data={manual:true,title:title,content:content,dept:dept,type:'info',by:currentUser?currentUser.name:'',byUid:currentUser?currentUser.uid:'',at:(window._weeklyEditKey&&_weeklyAgendaData[dept]&&_weeklyAgendaData[dept][key]&&_weeklyAgendaData[dept][key].at)||now,updatedAt:now};
+  
+  var imagesData=null;
+  var imgs=window._weeklyReportEditImgs||[];
+  if(imgs.length){
+    imagesData={};
+    imgs.forEach(function(img,i){
+      var k=img.key||('img'+Date.now()+'_'+i);
+      imagesData[k]={data:img.data,name:img.name||'',uploadedAt:img.uploadedAt||now};
+    });
+  }
+
+  var data={manual:true,title:title,content:content,dept:dept,type:'info',by:currentUser?currentUser.name:'',byUid:currentUser?currentUser.uid:'',at:(window._weeklyEditKey&&_weeklyAgendaData[dept]&&_weeklyAgendaData[dept][key]&&_weeklyAgendaData[dept][key].at)||now,updatedAt:now,images:imagesData};
   var _db=db||window._origDb;
   if(_db){
     _db.ref(weeklyItemPath(dept,key)).set(data).then(function(){closeWeeklyReportModal();}).catch(function(e){alert('저장 실패: '+(e&&e.message||e));});
@@ -2177,6 +2208,44 @@ function deleteWeeklyReportManual(dept,key){
     if(_db)_db.ref(weeklyItemPath(dept,key)).remove();
     else{if(_weeklyAgendaData[dept])delete _weeklyAgendaData[dept][key];renderWeeklyAgenda();renderWeeklyReport();}
   });
+}
+function addWeeklyReportImages(input){
+  if(!window._weeklyReportEditImgs)window._weeklyReportEditImgs=[];
+  var remain=10-window._weeklyReportEditImgs.length;
+  if(remain<=0){alert('이미지는 최대 10장까지 첨부할 수 있습니다.');input.value='';return;}
+  var selected=Array.from(input.files);if(!selected.length)return;
+  var files=selected.slice(0,remain);
+  if(selected.length>remain)alert('이미지는 최대 10장까지 첨부할 수 있어 '+remain+'장만 추가합니다.');
+  var now=new Date().toISOString(),done=0,total=files.length;
+  files.forEach(function(file){
+    var r=new FileReader();
+    r.onload=function(ev){
+      var im=new Image();
+      im.onload=function(){
+        var c=document.createElement('canvas'),w=im.width,h=im.height,M=1400;
+        if(w>M||h>M){if(w>h){h=Math.round(h*M/w);w=M;}else{w=Math.round(w*M/h);h=M;}}
+        c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);
+        var q=0.85,d;do{d=c.toDataURL('image/jpeg',q);q-=0.05;}while(d.length>300*1024&&q>0.3);
+        window._weeklyReportEditImgs.push({data:d,name:file.name,uploadedAt:now});
+        if(++done===total)renderWeeklyReportEditImgs();
+      };im.src=ev.target.result;
+    };
+    r.readAsDataURL(file);
+  });
+  input.value='';
+}
+function renderWeeklyReportEditImgs(){
+  var row=document.getElementById('weeklyReportScanPreviews');if(!row)return;
+  row.innerHTML=(window._weeklyReportEditImgs||[]).map(function(img,i){
+    return '<div style="position:relative;width:80px;height:60px;border-radius:6px;overflow:hidden;border:1.5px solid var(--bdr);background:#f0f4f8;display:inline-block;margin-right:8px;margin-bottom:8px;">'
+      +'<img src="'+img.data+'" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="openImgZoom(this.src)">'
+      +'<button class="btn btnD sm" onclick="removeWeeklyReportImg('+i+')" style="position:absolute;top:2px;right:2px;padding:1px 4px;font-size:10px;line-height:1;border-radius:3px;">✕</button>'
+      +'</div>';
+  }).join('');
+}
+function removeWeeklyReportImg(i){
+  (window._weeklyReportEditImgs||[]).splice(i,1);
+  renderWeeklyReportEditImgs();
 }
 /* 주간 보고 사이클: 매주 수요일 00시 ~ 다음주 화요일 23:59:59
    (마감일 화요일이므로 새 사이클은 그 다음날 수요일에 시작) */
