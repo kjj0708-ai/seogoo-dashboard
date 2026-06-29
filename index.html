@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -102,6 +102,33 @@ header{background:var(--primary);color:#fff;padding:0 24px;display:flex;align-it
 .waHint{margin-top:8px;text-align:center;font-size:10px;color:#94a3b8;padding:4px 6px;background:#f8fafc;border-radius:4px;cursor:help;}
 @media (max-width:1024px){.waGrid{grid-template-columns:repeat(2,1fr);}}
 @media (max-width:520px){.waGrid{grid-template-columns:1fr;}}
+.wrPick{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#475569;background:#f8fafc;border:1px solid #cbd5e1;border-radius:999px;padding:4px 8px;cursor:pointer;white-space:nowrap;}
+.wrPick input{width:14px;height:14px;margin:0;accent-color:var(--pl);cursor:pointer;}
+.wrPick.on{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd;font-weight:700;}
+.weeklyTools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.weekRangePill{font-size:12px;color:#475569;background:#f8fafc;border:1px solid var(--bdr);border-radius:999px;padding:6px 12px;}
+.weeklyGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+.weeklyDept{background:#fff;border:1px solid var(--bdr);border-radius:10px;box-shadow:var(--sh);overflow:hidden;}
+.weeklyDeptH{background:#f8fafc;border-bottom:1px solid var(--bdr);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.weeklyDeptT{font-weight:800;color:var(--primary);font-size:15px;}
+.weeklyCnt{font-size:11px;color:#64748b;background:#e2e8f0;border-radius:999px;padding:2px 8px;}
+.weeklyBody{padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-height:86px;}
+.weeklyItem{border:1px solid #e2e8f0;border-left:4px solid var(--pl);border-radius:8px;padding:10px 12px;background:#fff;}
+.weeklyItem.manual{border-left-color:#16a34a;background:#f7fef9;}
+.weeklyItemTop{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.weeklyItemTitle{font-size:14px;font-weight:800;color:#0f172a;line-height:1.45;cursor:pointer;}
+.weeklyItemTitle:hover{color:var(--pl);}
+.weeklyBadge{display:inline-flex;font-size:10px;font-weight:800;border-radius:4px;padding:2px 5px;margin-right:5px;vertical-align:1px;}
+.weeklyBadge.project{background:#dbeafe;color:#1d4ed8;}
+.weeklyBadge.manual{background:#dcfce7;color:#166534;}
+.weeklyText{font-size:13px;color:#334155;line-height:1.65;margin-top:6px;white-space:pre-wrap;word-break:break-word;}
+.weeklyMeta{font-size:11px;color:#94a3b8;margin-top:7px;}
+.weeklyActions{display:flex;gap:4px;flex-shrink:0;}
+.weeklyMiniBtn{background:#fff;border:1px solid #cbd5e1;border-radius:5px;color:#475569;cursor:pointer;font-size:11px;padding:4px 7px;font-family:inherit;}
+.weeklyMiniBtn:hover{background:#f1f5f9;}
+.weeklyMiniBtn.danger{color:#b91c1c;border-color:#fecaca;}
+.weeklyEmpty{color:#94a3b8;text-align:center;padding:22px 8px;font-size:13px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;}
+@media(max-width:900px){.weeklyGrid{grid-template-columns:1fr;}}
 /* 안건 선택 모달 */
 .agendaPick{border:1.5px solid var(--bdr);border-radius:8px;padding:12px;margin-bottom:10px;background:#f8fafc;}
 .apHead{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;}
@@ -206,8 +233,8 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .confOverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:center;justify-content:center;}
 .confBox{background:#fff;border-radius:12px;padding:28px 32px;max-width:360px;width:90%;text-align:center;box-shadow:var(--shl);}
 .confBox h3{font-size:17px;font-weight:700;margin-bottom:12px;}.confBox p{font-size:14px;color:var(--tx2);margin-bottom:24px;}.confBtns{display:flex;gap:10px;justify-content:center;}
-.photoModal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:400;display:flex;align-items:center;justify-content:center;}
-.photoModal img{max-width:90vw;max-height:90vh;border-radius:8px;transform-origin:center;transition:transform .15s;touch-action:none;user-select:none;cursor:zoom-in;}
+.photoModal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:400;display:flex;align-items:center;justify-content:center;padding:18px 72px 86px;box-sizing:border-box;}
+.photoModal img{max-width:96vw;max-height:calc(100vh - 120px);border-radius:8px;transform-origin:center;transition:transform .15s;touch-action:none;user-select:none;cursor:zoom-in;box-shadow:0 12px 40px rgba(0,0,0,.35);}
 .photoClose{position:fixed;top:16px;right:16px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);color:#fff;font-size:22px;width:44px;height:44px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:401;line-height:1;}
 .photoClose:hover{background:rgba(255,255,255,.35);}
 .photoZoomBar{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:401;align-items:center;}
@@ -215,6 +242,13 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .pzBtn:hover{background:rgba(255,255,255,.4);}
 .pzReset{font-size:13px;width:54px;border-radius:20px;}
 .pzHint{font-size:11px;color:rgba(255,255,255,.55);background:rgba(0,0,0,.3);border-radius:10px;padding:3px 10px;white-space:nowrap;}
+.photoNav{position:fixed;top:50%;transform:translateY(-50%);z-index:401;width:52px;height:72px;border-radius:12px;border:1px solid rgba(255,255,255,.32);background:rgba(0,0,0,.34);color:#fff;font-size:42px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,opacity .15s;}
+.photoNav:hover{background:rgba(255,255,255,.2);}
+.photoNav:disabled{opacity:.2;cursor:default;}
+.photoPrev{left:16px;}
+.photoNext{right:16px;}
+.photoCounter{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:401;color:#fff;background:rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;letter-spacing:.2px;}
+@media(max-width:768px){.photoModal{padding:56px 12px 96px;}.photoModal img{max-width:100%;max-height:calc(100vh - 160px);}.photoNav{top:auto;bottom:24px;width:44px;height:44px;border-radius:50%;font-size:32px;}.photoPrev{left:14px;}.photoNext{right:14px;}.photoZoomBar{bottom:24px;gap:6px;}.pzHint{display:none;}.pzBtn{width:38px;height:38px;font-size:18px;}.pzReset{width:48px;font-size:12px;}.photoCounter{top:18px;font-size:12px;}}
 .archiveBadge{display:inline-block;background:#fef3c7;color:#92400e;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;margin-left:8px;}
 .mBreak{display:none;}
 .instrActions{position:absolute;top:0;right:0;display:flex;gap:6px;}
@@ -385,9 +419,9 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .pdViewSec{padding:24px;}
 .pdText{font-size:15px;line-height:1.85;color:var(--tx);white-space:pre-wrap;word-break:break-word;min-height:40px;}
 .pdText.tw{color:#1e40af;}
-.pdImgGrid{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;}
-.pdImgItem{border-radius:8px;overflow:hidden;border:1px solid var(--border);}
-.pdImgItem img{display:block;max-height:180px;max-width:280px;object-fit:contain;cursor:zoom-in;background:#f4f4f4;}
+.pdImgGrid{display:flex;flex-direction:column;gap:14px;margin-top:16px;}
+.pdImgItem{border-radius:8px;overflow:hidden;border:1px solid var(--border);background:#f4f4f4;width:100%;}
+.pdImgItem img{display:block;width:100%;max-width:100%;max-height:78vh;object-fit:contain;cursor:zoom-in;background:#f4f4f4;}
 .cmtBadge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:9px;margin-left:5px;vertical-align:middle;line-height:1;box-shadow:0 1px 3px rgba(220,38,38,.4);}
 .pdLinkList{display:flex;flex-direction:column;gap:6px;margin-top:14px;}
 .pdLinkItem{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#eef4ff;border-radius:6px;border-left:3px solid var(--pl);}
@@ -499,6 +533,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
   <div class="tabsBar">
     <button class="tBtn active" onclick="switchTab('issues',this)">📋 현안/이슈</button>
     <button class="tBtn" onclick="switchTab('reports',this)">📊 업무현황</button>
+    <button class="tBtn" onclick="switchTab('weekly',this)">🗂️ 주간보고</button>
     <button class="tBtn" onclick="switchTab('calendar',this)">📅 일정/회의</button>
     <button class="tBtn" id="memberTab" style="display:none" onclick="switchTab('orgchart',this)">👥 회원관리</button>
   </div>
@@ -533,6 +568,18 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
         </div>
       </div>
       <div id="viewAll"><div class="dGrid" id="deptGrid"></div></div>
+    </div>
+    <div class="tPanel" id="panel-weekly">
+      <div class="secH">
+        <div>
+          <div class="secT">🗂️ 주간보고</div>
+          <div class="weekRangePill" id="weeklyReportRange" style="margin-top:8px;"></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btnP" onclick="openWeeklyReportModal()">+ 보고 추가</button>
+        </div>
+      </div>
+      <div id="weeklyReportGrid" class="weeklyGrid"></div>
     </div>
     <div class="tPanel" id="panel-calendar">
       <div class="calLayout">
@@ -674,6 +721,17 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 <div class="mOverlay" id="agendaPickerModal" style="display:none" onclick="if(event.target===this)closeAgendaPicker()">
   <div class="modal" style="max-width:640px;"></div>
 </div>
+<div class="mOverlay" id="weeklyReportModal" style="display:none" onclick="if(event.target===this)closeWeeklyReportModal()">
+  <div class="modal">
+    <div class="mH"><span class="mT" id="weeklyReportModalT">주간보고 추가</span><button class="mClose" onclick="closeWeeklyReportModal()">✕</button></div>
+    <div class="mB">
+      <div class="fr"><label>제목 *</label><input type="text" id="weeklyReportTitle" placeholder="보고 제목 입력"></div>
+      <div class="fr"><label>내용</label><textarea id="weeklyReportContent" placeholder="주간보고 내용을 입력하세요..." style="min-height:160px"></textarea></div>
+      <div class="fr"><label>과</label><select id="weeklyReportDept"><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>도시재생경관과</option></select></div>
+    </div>
+    <div class="mF"><button class="btn btnG" onclick="closeWeeklyReportModal()">취소</button><button class="btn btnP" onclick="saveWeeklyReportManual()">저장</button></div>
+  </div>
+</div>
 <div class="mOverlay" id="projModal" style="display:none" onclick="if(event.target===this)closeProjModal()">
   <div class="modal">
     <div class="mH"><span class="mT" id="projModalT">사업 추가</span><button class="mClose" onclick="closeProjModal()">✕</button></div>
@@ -682,7 +740,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
       <div class="fr">
         <label>사업내용 <span style="font-size:11px;color:var(--tx3);font-weight:400;">수정 시 이력 자동 기록</span></label>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
-          <label class="scanUpload"><input type="file" id="taskScanFile" accept="image/*" multiple style="display:none" onchange="onScanFilesSelected(this)">📷 이미지 선택 (최대 3장)</label>
+          <label class="scanUpload"><input type="file" id="taskScanFile" accept="image/*" multiple style="display:none" onchange="onScanFilesSelected(this)">📷 이미지 선택 (최대 10장)</label>
           <button id="btnScanAnalyze" class="btn btnP sm" onclick="analyzeScannedImages()" style="display:none;padding:8px 14px;">🔍 스캔 분석</button>
         </div>
         <div id="scanPreviews" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;"></div>
@@ -750,7 +808,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
           <div id="projDetailEditor" class="pdEditor" contenteditable="true" data-ph="사업 진행내용을 입력하세요..."></div>
         </div>
         <div>
-          <div class="pdEditLbl">이미지</div>
+          <div class="pdEditLbl">이미지 <span style="font-size:11px;color:var(--tx3);font-weight:400;">(최대 10장)</span></div>
           <div id="pdEditImgRow" class="pdEditImgRow"></div>
           <label class="pdAddBtn" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;">
             <input type="file" accept="image/*" multiple style="display:none" onchange="addPDImages(this)">📷 이미지 추가
@@ -840,7 +898,10 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 </div>
 <div class="photoModal" id="photoModal" style="display:none">
   <button class="photoClose" onclick="closePhotoModal()">✕</button>
+  <button class="photoNav photoPrev" id="photoPrevBtn" onclick="photoSlide(-1)" title="이전 이미지">‹</button>
   <img id="photoModalImg" src="" alt="">
+  <button class="photoNav photoNext" id="photoNextBtn" onclick="photoSlide(1)" title="다음 이미지">›</button>
+  <div class="photoCounter" id="photoCounter"></div>
   <div class="photoZoomBar">
     <button class="pzBtn" onclick="photoZoomBy(0.8)" title="축소 (−)">−</button>
     <button class="pzBtn pzReset" onclick="photoZoomBy(1)" title="원래 크기">1:1</button>
@@ -886,7 +947,7 @@ function showLErr(m){var e=document.getElementById('lerr');e.textContent=m;e.sty
 function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('pendingScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';
 if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';var _mt=document.getElementById('memberTab');if(_mt)_mt.style.display='';}document.getElementById('adminCalPnl').style.display='block';initTimeDropdown();var _db=db||window._origDb;setupGlobalListeners();setupUsersListener();var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstrBoard();renderIssues();if(_db)setupProjectsListener();else renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var _ka0=document.getElementById('gcalApiKey');if(_ka0)_ka0.value=GCAL_API_KEY;var _ki0=document.getElementById('gcalCalId');if(_ki0)_ki0.value=GCAL_CAL_ID;setGCalSt(GCAL_API_KEY?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!_db){loadLS();fetchGCal();}else{if(GCAL_API_KEY)fetchGCal();if(_gcalRef){_gcalRef.off('value');}_gcalRef=_db.ref('settings/gcal');_gcalRef.on('value',function(snap){var s=snap.val();var prevKey=GCAL_API_KEY;if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser&&currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;setGCalSt(s&&s.apiKey?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!prevKey||prevKey!==GCAL_API_KEY)fetchGCal();});}if(window._gcalTimer)clearInterval(window._gcalTimer);window._gcalTimer=setInterval(function(){if(currentUser)fetchGCal();},10*60*1000);history.pushState({inApp:true},'');}
 function teardownProjectsListener(){if(_projRef){_projRef.off('value');_projRef=null;}}
-function setupProjectsListener(){teardownProjectsListener();var _db=db||window._origDb;if(!_db||!currentUser)return;if(currentUser.type==='admin'){_projRef=_db.ref('projects');_projRef.on('value',function(s){projects=[];if(s.val()){Object.entries(s.val()).forEach(function(de){var dept=de[0];if(de[1]&&typeof de[1]==='object'){Object.entries(de[1]).forEach(function(pe){projects.push(Object.assign({id:pe[0],dept:dept},pe[1]));});}});}renderProjectsGrid();renderWeeklyAgenda();});}else{_projRef=_db.ref('projects/'+currentUser.dept);_projRef.on('value',function(s){var dept=currentUser.dept;projects=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0],dept:dept},e[1]);}):[];renderProjectsGrid();renderWeeklyAgenda();});}setupWeeklyAgendaListener();}
+function setupProjectsListener(){teardownProjectsListener();var _db=db||window._origDb;if(!_db||!currentUser)return;if(currentUser.type==='admin'){_projRef=_db.ref('projects');_projRef.on('value',function(s){projects=[];if(s.val()){Object.entries(s.val()).forEach(function(de){var dept=de[0];if(de[1]&&typeof de[1]==='object'){Object.entries(de[1]).forEach(function(pe){projects.push(Object.assign({id:pe[0],dept:dept},pe[1]));});}});}renderProjectsGrid();renderWeeklyAgenda();renderWeeklyReport();});}else{_projRef=_db.ref('projects/'+currentUser.dept);_projRef.on('value',function(s){var dept=currentUser.dept;projects=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0],dept:dept},e[1]);}):[];renderProjectsGrid();renderWeeklyAgenda();renderWeeklyReport();});}setupWeeklyAgendaListener();}
 function projPath(id){var p=projects.find(function(x){return x.id===id;});return p?'projects/'+p.dept+'/'+id:null;}
 function doLogout(){if(window._gcalTimer){clearInterval(window._gcalTimer);window._gcalTimer=null;}teardownProjectsListener();teardownGlobalListeners();teardownWeeklyAgendaListener();if(_gcalRef){_gcalRef.off('value');_gcalRef=null;}if(_statusRef){_statusRef.off('value');_statusRef=null;}if(_usersRef){_usersRef.off('value');_usersRef=null;}localStorage.removeItem('bu_profile');if(auth)auth.signOut();currentUser=null;document.getElementById('app').style.display='none';document.getElementById('pendingScreen').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('loginLoading').style.display='block';var btn=document.getElementById('btnGoogleLogin');if(btn){btn.style.display='none';btn.disabled=false;btn.style.opacity='1';}document.getElementById('adminInstrPnl').style.display='none';document.getElementById('adminCalPnl').style.display='none';document.getElementById('adminGcalPnl').style.display='none';document.getElementById('adminUserMgmt').style.display='none';var _mt2=document.getElementById('memberTab');if(_mt2)_mt2.style.display='none';document.getElementById('lerr').style.display='none';}
 function showPendingScreen(reason){document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='none';var ps=document.getElementById('pendingScreen');ps.style.display='flex';var ico=document.getElementById('pendingIco');var title=document.getElementById('pendingTitle');var msg=document.getElementById('pendingMsg');var info=document.getElementById('pendingInfo');var reBtn=document.getElementById('btnReapply');if(reason==='rejected'){ico.textContent='❌';title.textContent='승인 거절됨';msg.innerHTML='관리자가 가입 요청을 거절했습니다.<br>정보를 수정해 다시 신청할 수 있습니다.';if(reBtn)reBtn.style.display='block';}else{ico.textContent='⏳';title.textContent='승인 대기 중';msg.innerHTML='관리자의 승인을 기다리고 있습니다.<br>승인 후 자동으로 접속됩니다.';if(reBtn)reBtn.style.display='none';}if(currentUser){info.textContent=currentUser.name+' · '+currentUser.dept+' '+currentUser.team;}}
@@ -952,7 +1013,7 @@ function deleteMyAccount(){
   });
 }
 function setSyncOK(ok){var d=document.getElementById('sdot'),t=document.getElementById('stxt');if(!d)return;if(ok){d.classList.remove('off');t.textContent='실시간 연결';}else{d.classList.add('off');t.textContent='오프라인(로컬)';}}
-function switchTab(t,btn){document.querySelectorAll('.tBtn').forEach(function(b){b.classList.remove('active');});document.querySelectorAll('.tPanel').forEach(function(p){p.classList.remove('active');});btn.classList.add('active');document.getElementById('panel-'+t).classList.add('active');if(t==='calendar'){renderCal();fetchGCal();}if(t==='orgchart'){loadAndRenderMembers();}}
+function switchTab(t,btn){document.querySelectorAll('.tBtn').forEach(function(b){b.classList.remove('active');});document.querySelectorAll('.tPanel').forEach(function(p){p.classList.remove('active');});btn.classList.add('active');document.getElementById('panel-'+t).classList.add('active');if(t==='calendar'){renderCal();fetchGCal();}if(t==='orgchart'){loadAndRenderMembers();}if(t==='weekly'){renderWeeklyReport();}}
 /* ── 국장 지시사항 게시판 ──────────────────── */
 function renderInstrBoard(){
   var box=document.getElementById('instrDisplay');if(!box)return;
@@ -1432,6 +1493,7 @@ document.addEventListener('click',function(e){
 var _pmScale=1,_pmTx=0,_pmTy=0;
 var _pmDist=0,_pmT1X=0,_pmT1Y=0;
 var _pmDrag=false,_pmLX=0,_pmLY=0;
+var _photoGallery=[],_photoIndex=0;
 function _pmApply(){
   var img=document.getElementById('photoModalImg');
   if(img)img.style.transform='translate('+_pmTx+'px,'+_pmTy+'px) scale('+_pmScale+')';
@@ -1443,11 +1505,38 @@ function _pmSetCursor(){
 }
 function _pmResetState(){_pmScale=1;_pmTx=0;_pmTy=0;_pmDrag=false;}
 
+function _photoUpdateControls(){
+  var total=_photoGallery.length;
+  var prev=document.getElementById('photoPrevBtn');
+  var next=document.getElementById('photoNextBtn');
+  var cnt=document.getElementById('photoCounter');
+  if(prev){prev.style.display=total>1?'flex':'none';prev.disabled=total<=1;}
+  if(next){next.style.display=total>1?'flex':'none';next.disabled=total<=1;}
+  if(cnt){cnt.style.display=total>1?'block':'none';cnt.textContent=total>1?((_photoIndex+1)+' / '+total):'';}
+}
+function _photoSetIndex(idx){
+  if(!_photoGallery.length)return;
+  _photoIndex=(idx+_photoGallery.length)%_photoGallery.length;
+  var img=document.getElementById('photoModalImg');
+  _pmResetState();
+  img.src=_photoGallery[_photoIndex];
+  img.style.transition='none';
+  _pmApply();_pmSetCursor();_photoUpdateControls();
+}
+function openPhotoGallery(list,index){
+  var arr=(list||[]).filter(function(src){return !!src;});
+  if(!arr.length)return;
+  _photoGallery=arr;
+  _photoSetIndex(index||0);
+  document.getElementById('photoModal').style.display='flex';
+}
+function photoSlide(step){
+  if(_photoGallery.length<=1)return;
+  _photoSetIndex(_photoIndex+step);
+}
 function showPhoto(id){
   var s=window['_ph_'+id];if(!s)return;
-  var img=document.getElementById('photoModalImg');
-  _pmResetState();img.src=s;img.style.transition='none';_pmApply();_pmSetCursor();
-  document.getElementById('photoModal').style.display='flex';
+  openPhotoGallery([s],0);
 }
 function closePhotoModal(){
   document.getElementById('photoModal').style.display='none';
@@ -1537,6 +1626,8 @@ function closePhotoModal(){
       if(e.key==='Escape'){closePhotoModal();}
       else if(e.key==='+'||e.key==='='){_pmScale=Math.min(6,_pmScale*1.2);img.style.transition='transform .15s';_pmApply();_pmSetCursor();}
       else if(e.key==='-'){_pmScale=Math.max(0.3,_pmScale*0.8);if(_pmScale<1.05){_pmTx=0;_pmTy=0;}img.style.transition='transform .15s';_pmApply();_pmSetCursor();}
+      else if(e.key==='ArrowLeft'){photoSlide(-1);}
+      else if(e.key==='ArrowRight'){photoSlide(1);}
     });
   });
 })();
@@ -1551,9 +1642,7 @@ function photoZoomBy(f){
 }
 function openImgZoom(src){
   if(!src||src==='')return;
-  var img=document.getElementById('photoModalImg');
-  _pmResetState();img.src=src;img.style.transition='none';_pmApply();_pmSetCursor();
-  document.getElementById('photoModal').style.display='flex';
+  openPhotoGallery([src],0);
 }
 function handlePhoto(input){var fi=input.files[0];if(!fi)return;var rd=new FileReader();rd.onload=function(e){var img=new Image();img.onload=function(){var c=document.createElement('canvas'),w=img.width,h=img.height,M=1200;if(w>M||h>M){if(w>h){h=Math.round(h*M/w);w=M;}else{w=Math.round(w*M/h);h=M;}}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);var q=0.9,d;do{d=c.toDataURL('image/jpeg',q);q-=0.05;}while(d.length>500*1024&&q>0.3);pendingPhoto=d;document.getElementById('photoPrev').innerHTML='<img src="'+d+'" style="max-width:100%;border-radius:6px">';};img.src=e.target.result;};rd.readAsDataURL(fi);}
 function updateProjTeamSel(){var d=document.getElementById('projDept');var sel=document.getElementById('projTeam');if(!d||!sel)return;sel.innerHTML='<option value="">-- 팀 선택 --</option>'+(ORG[d.value]||[]).map(function(t){return '<option>'+t+'</option>';}).join('');}
@@ -1562,7 +1651,7 @@ function closeProjModal(){document.getElementById('projModal').style.display='no
 function saveProject(){var mode=window._projMode||'new';var name=document.getElementById('projName').value.trim();var content=document.getElementById('projContent').value.trim();var dept=document.getElementById('projDept').value;var team=document.getElementById('projTeam').value;if(!name){alert('사업명을 입력하세요.');return;}var now=new Date().toISOString();var author=currentUser?currentUser.name:'';var tw=thisWeek();if(mode==='edit'&&editProjId){var _ep2=projects.find(function(x){return x.id===editProjId;});if(_ep2&&currentUser&&currentUser.type!=='admin'&&!(currentUser.dept===_ep2.dept&&currentUser.team===_ep2.team)){alert('같은 팀원만 수정할 수 있습니다.');return;}var ep=projPath(editProjId);if(ep){dbSet(ep+'/name',name);if(content)dbSet(ep+'/content',content);dbSet(ep+'/updatedAt',now);dbSet(ep+'/author',author);}projects=projects.map(function(p){if(p.id!==editProjId)return p;return Object.assign({},p,{name:name,content:content||p.content,updatedAt:now,author:author});});if(!db){renderProjectsGrid();saveLS();}}else{if(!dept){alert('과를 선택하세요.');return;}if(!team){alert('팀을 선택하세요.');return;}var data={dept:dept,team:team,name:name,content:content,createdAt:now,updatedAt:now,author:author};if(db){db.ref('projects/'+dept).push(data);}else{data.id=Date.now().toString();projects.push(data);renderProjectsGrid();saveLS();}}closeProjModal();}
 function deleteProject(id){var _dp2=projects.find(function(x){return x.id===id;});if(_dp2&&currentUser&&currentUser.type!=='admin'&&!(currentUser.dept===_dp2.dept&&currentUser.team===_dp2.team)){alert('같은 팀원만 삭제할 수 있습니다.');return;}showConf('이 사업을 삭제하시겠습니까? 이력도 모두 삭제됩니다.',function(){var dp=projPath(id);if(dp)dbRemove(dp);if(!db){projects=projects.filter(function(p){return p.id!==id;});renderProjectsGrid();saveLS();}});}
 function togProjHist(btn){var id=btn.getAttribute('data-id');var entry=btn.closest('.repEntry');if(!entry)return;var hist=entry.querySelector('.proj-hist');if(!hist)return;var open=hist.style.display!=='none';hist.style.display=open?'none':'block';var cnt=hist.querySelectorAll('.hist-item').length;btn.textContent=open?'이력 '+cnt+'건 보기':'이력 접기';}
-function renderProjectsGrid(){var grid=document.getElementById('deptGrid');if(!grid)return;var tw=thisWeek();var _dShow=(currentUser&&currentUser.type==='admin')?Object.keys(ORG):(currentUser?[currentUser.dept]:Object.keys(ORG));grid.innerHTML=_dShow.map(function(dept){var teams=ORG[dept];var deptProjs=projects.filter(function(p){return p.dept===dept;});var canEditDept=currentUser&&(currentUser.type==='admin'||currentUser.dept===dept);return'<div class="dCard"><div class="dCardH" onclick="togDept(this)"><h3>📂 '+dept+'</h3><div style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;opacity:.7">'+deptProjs.length+'개 사업</span>'+'<span class="togIco open">▼</span></div></div><div class="teamList">'+teams.map(function(team){var teamProjs=projects.filter(function(p){return p.dept===dept&&p.team===team;});teamProjs.sort(function(a,b){return new Date(b.updatedAt||0)-new Date(a.updatedAt||0);});var canEdit=currentUser&&(currentUser.type==='admin'||currentUser.dept===dept);return'<div class="teamItem"><div class="teamH" onclick="togTeam(this)"><span class="teamNm">▼ '+team+' <span class="tCnt">'+teamProjs.length+'</span></span>'+(canEdit?'<button class="btn btnP sm" onclick="event.stopPropagation();openProjModal(null,\''+dept+'\',\''+team+'\')" style="font-size:11px;padding:3px 8px;">+ 사업</button>':'')+'</div><div class="teamReps">'+(teamProjs.length?teamProjs.map(function(p){var lastMs=projLastUpdateMs(p);var dt=lastMs?fmtD(new Date(lastMs)):'';var isThisWeek=isProjRecent(p);var canEditProj=currentUser&&(currentUser.type==='admin'||(currentUser.dept===dept&&currentUser.team===team));var titleColor=isThisWeek?'#1d4ed8':'inherit';var dateColor=isThisWeek?'#3b82f6':'var(--tx3)';var borderColor=isThisWeek?'#2563a8':'var(--pl)';return'<div class="repEntry" style="border-left:3px solid '+borderColor+';"><div class="repTop"><div style="flex:1;min-width:0;"><div class="repTitle" style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;"><span class="projNameLink" onclick="event.stopPropagation();openProjDetail(\''+p.id+'\')" style="color:'+titleColor+';">'+esc(p.name)+'</span>'+(function(){var n=projUnread(p);return n>0?'<span class="cmtBadge">'+(n>9?'9+':n)+'</span>':'';})()+' <span style="font-size:11px;font-weight:400;color:'+dateColor+';">'+dt+'</span></div>'+(p.author?'<div style="margin-top:2px;font-size:11px;color:var(--tx3);">'+esc(p.author)+'</div>':'')+'</div>'+(canEditProj?'<div style="display:flex;gap:4px;flex-shrink:0;align-items:center;margin-left:8px;"><button class="btn btnG sm proj-edit" data-id="'+p.id+'" title="제목 수정" style="padding:5px 8px;font-size:14px;line-height:1;">✏️</button><button class="btn btnD sm proj-del" data-id="'+p.id+'" title="삭제" style="padding:5px 8px;font-size:14px;line-height:1;">🗑️</button></div>':'')+'</div></div>';}).join(''):'<div class="noRep">등록된 사업이 없습니다.</div>')+'</div></div>';}).join('')+'</div></div>';}).join('');}
+function renderProjectsGrid(){var grid=document.getElementById('deptGrid');if(!grid)return;var tw=thisWeek();var _dShow=(currentUser&&currentUser.type==='admin')?Object.keys(ORG):(currentUser?[currentUser.dept]:Object.keys(ORG));grid.innerHTML=_dShow.map(function(dept){var teams=ORG[dept];var deptProjs=projects.filter(function(p){return p.dept===dept;});var canEditDept=currentUser&&(currentUser.type==='admin'||currentUser.dept===dept);return'<div class="dCard"><div class="dCardH" onclick="togDept(this)"><h3>📂 '+dept+'</h3><div style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;opacity:.7">'+deptProjs.length+'개 사업</span>'+'<span class="togIco open">▼</span></div></div><div class="teamList">'+teams.map(function(team){var teamProjs=projects.filter(function(p){return p.dept===dept&&p.team===team;});teamProjs.sort(function(a,b){return new Date(b.updatedAt||0)-new Date(a.updatedAt||0);});var canEdit=currentUser&&(currentUser.type==='admin'||currentUser.dept===dept);return'<div class="teamItem"><div class="teamH" onclick="togTeam(this)"><span class="teamNm">▼ '+team+' <span class="tCnt">'+teamProjs.length+'</span></span>'+(canEdit?'<button class="btn btnP sm" onclick="event.stopPropagation();openProjModal(null,\''+dept+'\',\''+team+'\')" style="font-size:11px;padding:3px 8px;">+ 사업</button>':'')+'</div><div class="teamReps">'+(teamProjs.length?teamProjs.map(function(p){var lastMs=projLastUpdateMs(p);var dt=lastMs?fmtD(new Date(lastMs)):'';var isThisWeek=isProjRecent(p);var canEditProj=currentUser&&(currentUser.type==='admin'||(currentUser.dept===dept&&currentUser.team===team));var titleColor=isThisWeek?'#1d4ed8':'inherit';var dateColor=isThisWeek?'#3b82f6':'var(--tx3)';var borderColor=isThisWeek?'#2563a8':'var(--pl)';return'<div class="repEntry" style="border-left:3px solid '+borderColor+';"><div class="repTop"><div style="flex:1;min-width:0;"><div class="repTitle" style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;"><span class="projNameLink" onclick="event.stopPropagation();openProjDetail(\''+p.id+'\')" style="color:'+titleColor+';">'+esc(p.name)+'</span>'+(function(){var n=projUnread(p);return n>0?'<span class="cmtBadge">'+(n>9?'9+':n)+'</span>':'';})()+' <span style="font-size:11px;font-weight:400;color:'+dateColor+';">'+dt+'</span></div>'+(p.author?'<div style="margin-top:2px;font-size:11px;color:var(--tx3);">'+esc(p.author)+'</div>':'')+'</div>'+weeklyCheckHtml(p,canEditDept)+(canEditProj?'<div style="display:flex;gap:4px;flex-shrink:0;align-items:center;margin-left:8px;"><button class="btn btnG sm proj-edit" data-id="'+p.id+'" title="제목 수정" style="padding:5px 8px;font-size:14px;line-height:1;">✏️</button><button class="btn btnD sm proj-del" data-id="'+p.id+'" title="삭제" style="padding:5px 8px;font-size:14px;line-height:1;">🗑️</button></div>':'')+'</div></div>';}).join(''):'<div class="noRep">등록된 사업이 없습니다.</div>')+'</div></div>';}).join('')+'</div></div>';}).join('');}
 function togDept(h){var ico=h.querySelector('.togIco'),list=h.nextElementSibling;var open=list.style.display!=='none';list.style.display=open?'none':'block';ico.classList.toggle('open',!open);}
 function togTeam(h){var reps=h.nextElementSibling;var open=reps.style.display!=='none';reps.style.display=open?'none':'block';var nm=h.querySelector('.teamNm');nm.innerHTML=nm.innerHTML.replace(open?'▼':'▶',open?'▶':'▼');}
 function changeMonth(dir){calM+=dir;if(calM>11){calM=0;calY++;}else if(calM<0){calM=11;calY--;}renderCal();}
@@ -1814,7 +1903,7 @@ function setupWeeklyAgendaListener(){
   if(_weeklyAgendaRef){try{_weeklyAgendaRef.off('value');}catch(_){}_weeklyAgendaRef=null;}
   var wk=thisWeek();
   _weeklyAgendaRef=_db.ref('weeklyAgenda/'+wk);
-  _weeklyAgendaRef.on('value',function(s){_weeklyAgendaData=s.val()||{};renderWeeklyAgenda();},function(){});
+  _weeklyAgendaRef.on('value',function(s){_weeklyAgendaData=s.val()||{};renderWeeklyAgenda();renderWeeklyReport();renderProjectsGrid();},function(){});
 }
 function teardownWeeklyAgendaListener(){if(_weeklyAgendaRef){try{_weeklyAgendaRef.off('value');}catch(_){}_weeklyAgendaRef=null;}_weeklyAgendaData={};}
 function fmtWeekRange(){
@@ -1850,8 +1939,10 @@ function renderWeeklyAgenda(){
         var a=deptAgenda[pid]||{};
         var p=projects.find(function(x){return x.id===pid;})||{};
         var typeLabel=({decide:'결정',help:'협조',info:'공유'})[a.type]||'';
-        html+='<div class="waItem" onclick="openProjDetail(\''+String(pid).replace(/'/g,"\\\\\\'")+'\')">'
-          +'<div class="waItemT"><span class="waType waType-'+(a.type||'info')+'">'+typeLabel+'</span> '+esc(p.name||'(삭제된 사업)')+'</div>'
+        var title=a.manual?a.title:(p.name||'(삭제된 사업)');
+        var click=a.manual?'openWeeklyReportModal(\''+jsq(dept)+'\',\''+jsq(pid)+'\')':'openProjDetail(\''+jsq(pid)+'\')';
+        html+='<div class="waItem" onclick="'+click+'">'
+          +'<div class="waItemT"><span class="waType waType-'+(a.manual?'help':(a.type||'info'))+'">'+(a.manual?'직접':typeLabel)+'</span> '+esc(title)+'</div>'
           +(a.reason?'<div class="waReason">"'+esc(a.reason)+'"</div>':'')
           +'<div class="waBy">'+esc(a.by||'')+(a.at?' · '+fmtD(new Date(a.at)):'')+'</div>'
           +'</div>';
@@ -1951,6 +2042,8 @@ function saveAgendaPick(){
     picked[pid]={reason:reason,type:type,by:currentUser?currentUser.name:'',byUid:currentUser?currentUser.uid:'',at:new Date().toISOString()};
   });
   if(err){alert(err);return;}
+  var existingManual=_weeklyAgendaData[dept]||{};
+  Object.keys(existingManual).forEach(function(k){if(existingManual[k]&&existingManual[k].manual)picked[k]=existingManual[k];});
   var wk=thisWeek();var path='weeklyAgenda/'+wk+'/'+dept;
   var _db=db||window._origDb;
   if(_db){
@@ -1958,6 +2051,132 @@ function saveAgendaPick(){
   }else{
     _weeklyAgendaData[dept]=picked;closeAgendaPicker();renderWeeklyAgenda();
   }
+}
+function jsq(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r?\n/g,'\\n');}
+function weeklyReportDepts(){return (currentUser&&currentUser.type==='admin')?WEEKLY_DEPTS:(currentUser&&currentUser.dept?[currentUser.dept]:WEEKLY_DEPTS);}
+function weeklyItemPath(dept,key){return 'weeklyAgenda/'+thisWeek()+'/'+dept+'/'+key;}
+function weeklyCanEditDept(dept){return currentUser&&(currentUser.type==='admin'||currentUser.dept===dept);}
+function isWeeklyProjectSelected(p){return !!(p&&p.dept&&_weeklyAgendaData[p.dept]&&_weeklyAgendaData[p.dept][p.id]);}
+function weeklyCheckHtml(p,canEdit){
+  if(!p||!canEdit)return '';
+  var checked=isWeeklyProjectSelected(p);
+  return '<label class="wrPick '+(checked?'on':'')+'" onclick="event.stopPropagation()" title="주간보고 탭에 표시">'
+    +'<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleWeeklyProject(\''+jsq(p.id)+'\',this.checked)"> 주간보고</label>';
+}
+function toggleWeeklyProject(id,checked){
+  var p=projects.find(function(x){return x.id===id;});
+  var _db=db||window._origDb;
+  if(!p){
+    if(!checked){
+      var dept=null;
+      Object.keys(_weeklyAgendaData||{}).forEach(function(d){
+        if(_weeklyAgendaData[d]&&_weeklyAgendaData[d][id])dept=d;
+      });
+      if(dept){
+        if(!weeklyCanEditDept(dept)){alert('본인 소속 과의 주간보고 항목만 해제할 수 있습니다.');return;}
+        var path=weeklyItemPath(dept,id);
+        if(_db){
+          _db.ref(path).remove().catch(function(e){alert('삭제 실패: '+(e&&e.message||e));});
+        }else{
+          if(_weeklyAgendaData[dept])delete _weeklyAgendaData[dept][id];
+          renderWeeklyAgenda();renderWeeklyReport();renderProjectsGrid();
+        }
+      }
+    }
+    return;
+  }
+  if(!weeklyCanEditDept(p.dept)){alert('본인 소속 과의 사업만 주간보고에 표시할 수 있습니다.');renderProjectsGrid();return;}
+  var path=weeklyItemPath(p.dept,id);
+  var data={source:'project',type:'info',reason:'',by:currentUser?currentUser.name:'',byUid:currentUser?currentUser.uid:'',at:new Date().toISOString()};
+  if(_db){
+    (checked?_db.ref(path).set(data):_db.ref(path).remove()).catch(function(e){
+      alert('저장 실패: '+(e&&e.message||e));
+      renderProjectsGrid();
+    });
+  }else{
+    if(!_weeklyAgendaData[p.dept])_weeklyAgendaData[p.dept]={};
+    if(checked)_weeklyAgendaData[p.dept][id]=data;else delete _weeklyAgendaData[p.dept][id];
+    renderWeeklyAgenda();renderWeeklyReport();renderProjectsGrid();
+  }
+}
+function weeklyTextFromProject(p){
+  var c=(p&&typeof _pdContent==='function'?_pdContent(p):(p&&p.content)||'')||'';
+  if(/</.test(c)){var d=document.createElement('div');d.innerHTML=c;return (d.textContent||d.innerText||'').trim();}
+  return c.trim();
+}
+function renderWeeklyReport(){
+  var grid=document.getElementById('weeklyReportGrid');if(!grid)return;
+  var range=document.getElementById('weeklyReportRange');if(range)range.textContent='보고 기간 '+fmtWeekRange();
+  var depts=weeklyReportDepts();
+  grid.innerHTML=depts.map(function(dept){
+    var items=_weeklyAgendaData[dept]||{};
+    var keys=Object.keys(items);
+    keys.sort(function(a,b){return new Date(items[b].updatedAt||items[b].at||0)-new Date(items[a].updatedAt||items[a].at||0);});
+    var canEdit=weeklyCanEditDept(dept);
+    var html='<div class="weeklyDept"><div class="weeklyDeptH"><div><span class="weeklyDeptT">'+esc(dept)+'</span> <span class="weeklyCnt">'+keys.length+'건</span></div>'
+      +(canEdit?'<button class="btn btnP sm" onclick="openWeeklyReportModal(\''+jsq(dept)+'\')" style="padding:6px 10px;">+ 추가</button>':'')+'</div><div class="weeklyBody">';
+    if(!keys.length){
+      html+='<div class="weeklyEmpty">업무현황에서 주간보고를 체크하거나 직접 보고를 추가하세요.</div>';
+    }else{
+      keys.forEach(function(key){
+        var it=items[key]||{};
+        if(it.manual){
+          html+='<div class="weeklyItem manual"><div class="weeklyItemTop"><div class="weeklyItemTitle"><span class="weeklyBadge manual">직접입력</span>'+esc(it.title||'(제목 없음)')+'</div>'
+            +(canEdit?'<div class="weeklyActions"><button class="weeklyMiniBtn" onclick="openWeeklyReportModal(\''+jsq(dept)+'\',\''+jsq(key)+'\')">수정</button><button class="weeklyMiniBtn danger" onclick="deleteWeeklyReportManual(\''+jsq(dept)+'\',\''+jsq(key)+'\')">삭제</button></div>':'')
+            +'</div>'+(it.content?'<div class="weeklyText">'+esc(it.content)+'</div>':'')+'<div class="weeklyMeta">'+esc(it.by||'')+(it.updatedAt?' · '+fmtDT(new Date(it.updatedAt)):(it.at?' · '+fmtDT(new Date(it.at)):''))+'</div></div>';
+        }else{
+          var p=projects.find(function(x){return x.id===key;});
+          var txt=weeklyTextFromProject(p);
+          html+='<div class="weeklyItem"><div class="weeklyItemTop"><div class="weeklyItemTitle" onclick="openProjDetail(\''+jsq(key)+'\')"><span class="weeklyBadge project">업무현황</span>'+esc(p&&p.name||'(삭제된 사업)')+'</div>'
+            +(canEdit?'<div class="weeklyActions"><button class="weeklyMiniBtn danger" onclick="toggleWeeklyProject(\''+jsq(key)+'\',false)">해제</button></div>':'')
+            +'</div>'+(txt?'<div class="weeklyText">'+esc(txt.length>260?txt.slice(0,260)+'…':txt)+'</div>':'')+'<div class="weeklyMeta">'+esc((p&&p.team)||'')+(p&&p.updatedAt?' · 최종수정 '+fmtDT(new Date(p.updatedAt)):'')+'</div></div>';
+        }
+      });
+    }
+    html+='</div></div>';
+    return html;
+  }).join('');
+}
+function openWeeklyReportModal(dept,key){
+  if(!currentUser){alert('로그인이 필요합니다.');return;}
+  var d=dept||(currentUser.type==='admin'?WEEKLY_DEPTS[0]:currentUser.dept);
+  if(!weeklyCanEditDept(d)){alert('본인 소속 과의 주간보고만 작성할 수 있습니다.');return;}
+  window._weeklyEditDept=d;window._weeklyEditKey=key||null;
+  var item=key&&_weeklyAgendaData[d]?(_weeklyAgendaData[d][key]||{}):{};
+  document.getElementById('weeklyReportModalT').textContent=key?'주간보고 수정':'주간보고 추가';
+  document.getElementById('weeklyReportTitle').value=item.title||'';
+  document.getElementById('weeklyReportContent').value=item.content||'';
+  var sel=document.getElementById('weeklyReportDept');sel.value=d;sel.disabled=currentUser.type!=='admin'||!!key;
+  document.getElementById('weeklyReportModal').style.display='flex';
+}
+function closeWeeklyReportModal(){
+  document.getElementById('weeklyReportModal').style.display='none';
+  window._weeklyEditDept=null;window._weeklyEditKey=null;
+  var sel=document.getElementById('weeklyReportDept');if(sel)sel.disabled=false;
+}
+function saveWeeklyReportManual(){
+  var title=document.getElementById('weeklyReportTitle').value.trim();
+  var content=document.getElementById('weeklyReportContent').value.trim();
+  var dept=document.getElementById('weeklyReportDept').value;
+  if(!title){alert('제목을 입력하세요.');return;}
+  if(!weeklyCanEditDept(dept)){alert('본인 소속 과의 주간보고만 작성할 수 있습니다.');return;}
+  var now=new Date().toISOString();
+  var key=window._weeklyEditKey||('manual_'+Date.now());
+  var data={manual:true,title:title,content:content,dept:dept,type:'info',by:currentUser?currentUser.name:'',byUid:currentUser?currentUser.uid:'',at:(window._weeklyEditKey&&_weeklyAgendaData[dept]&&_weeklyAgendaData[dept][key]&&_weeklyAgendaData[dept][key].at)||now,updatedAt:now};
+  var _db=db||window._origDb;
+  if(_db){
+    _db.ref(weeklyItemPath(dept,key)).set(data).then(function(){closeWeeklyReportModal();}).catch(function(e){alert('저장 실패: '+(e&&e.message||e));});
+  }else{
+    if(!_weeklyAgendaData[dept])_weeklyAgendaData[dept]={};
+    _weeklyAgendaData[dept][key]=data;closeWeeklyReportModal();renderWeeklyAgenda();renderWeeklyReport();
+  }
+}
+function deleteWeeklyReportManual(dept,key){
+  showConf('이 주간보고 항목을 삭제하시겠습니까?',function(){
+    var _db=db||window._origDb;
+    if(_db)_db.ref(weeklyItemPath(dept,key)).remove();
+    else{if(_weeklyAgendaData[dept])delete _weeklyAgendaData[dept][key];renderWeeklyAgenda();renderWeeklyReport();}
+  });
 }
 /* 주간 보고 사이클: 매주 수요일 00시 ~ 다음주 화요일 23:59:59
    (마감일 화요일이므로 새 사이클은 그 다음날 수요일에 시작) */
@@ -2180,9 +2399,10 @@ function renderPDView(p){
   /* 이미지 */
   var imgs=p.images?Object.entries(p.images):[];
   window._pdImgMap={};
+  window._pdImgList=imgs.map(function(e){return e[1].data;});
   imgs.forEach(function(e){window._pdImgMap[e[0]]=e[1].data;});
   document.getElementById('pdImgGrid').innerHTML=imgs.map(function(e,i){
-    return '<div class="pdImgItem"><img src="'+e[1].data+'" alt="이미지'+(i+1)+'" onclick="showPDImg(\''+e[0]+'\')"></div>';
+    return '<div class="pdImgItem"><img src="'+e[1].data+'" alt="이미지'+(i+1)+'" onclick="showPDImg(\''+e[0]+'\','+i+')"></div>';
   }).join('');
   /* 링크 */
   var links=p.links?Object.values(p.links):[];
@@ -2192,11 +2412,10 @@ function renderPDView(p){
   }).join('');
 }
 
-function showPDImg(key){
+function showPDImg(key,index){
   var src=window._pdImgMap&&window._pdImgMap[key];if(!src)return;
-  var img=document.getElementById('photoModalImg');
-  img.src=src;img.style.transform='scale(1)';
-  document.getElementById('photoModal').style.display='flex';
+  var list=(window._pdImgList&&window._pdImgList.length)?window._pdImgList:[src];
+  openPhotoGallery(list,index||0);
 }
 
 function startProjDetailEdit(){
@@ -2244,8 +2463,12 @@ function renderPDEditImgs(){
   }).join('');
 }
 function addPDImages(input){
-  var files=Array.from(input.files);if(!files.length)return;
   if(!window._pdEditImgs)window._pdEditImgs=[];
+  var remain=10-window._pdEditImgs.length;
+  if(remain<=0){alert('이미지는 최대 10장까지 첨부할 수 있습니다.');input.value='';return;}
+  var selected=Array.from(input.files);if(!selected.length)return;
+  var files=selected.slice(0,remain);
+  if(selected.length>remain)alert('이미지는 최대 10장까지 첨부할 수 있어 '+remain+'장만 추가합니다.');
   var now=new Date().toISOString(),done=0,total=files.length;
   files.forEach(function(file){
     var r=new FileReader();
@@ -2255,7 +2478,7 @@ function addPDImages(input){
         var c=document.createElement('canvas'),w=im.width,h=im.height,M=1400;
         if(w>M||h>M){if(w>h){h=Math.round(h*M/w);w=M;}else{w=Math.round(w*M/h);h=M;}}
         c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);
-        var q=0.85,d;do{d=c.toDataURL('image/jpeg',q);q-=0.05;}while(d.length>500*1024&&q>0.3);
+        var q=0.85,d;do{d=c.toDataURL('image/jpeg',q);q-=0.05;}while(d.length>300*1024&&q>0.3);
         window._pdEditImgs.push({data:d,name:file.name,uploadedAt:now});
         if(++done===total)renderPDEditImgs();
       };im.src=ev.target.result;
@@ -2557,12 +2780,14 @@ function deletePDReply(cid,rid){
 /* ── OCR / 이미지스캔 (다중) ──────────────── */
 window._scanFiles=[];
 function onScanFilesSelected(input){
-  var files=Array.from(input.files).slice(0,3);
+  var selected=Array.from(input.files);
+  var files=selected.slice(0,10);
   window._scanFiles=files;
   var prev=document.getElementById('scanPreviews');
   var btn=document.getElementById('btnScanAnalyze');
   var st=document.getElementById('taskOcrStatus');
   if(!files.length){if(prev)prev.innerHTML='';if(btn)btn.style.display='none';return;}
+  if(selected.length>10)alert('이미지는 최대 10장까지 선택할 수 있어 10장만 사용합니다.');
   /* 썸네일 미리보기 */
   if(prev){
     prev.innerHTML=files.map(function(f,i){

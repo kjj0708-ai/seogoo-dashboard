@@ -1,8 +1,22 @@
 {
   "hosting": {
+    "site": "bureau-dashboard",
     "public": ".",
     "ignore": [
       "firebase.json",
+      ".firebaserc",
+      ".firebase",
+      ".firebase/**",
+      ".firebase-config",
+      ".firebase-config/**",
+      ".npm-cache",
+      ".npm-cache/**",
+      ".claude",
+      ".claude/**",
+      ".netlify",
+      ".netlify/**",
+      ".git",
+      ".git/**",
       "**/.*"
     ]
   },
