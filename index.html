@@ -2106,8 +2106,14 @@ function toggleWeeklyProject(id,checked){
   }
 }
 function weeklyTextFromProject(p){
+  if(!p||!isProjRecent(p))return '';
   var c=(p&&typeof _pdContent==='function'?_pdContent(p):(p&&p.content)||'')||'';
-  if(/</.test(c)){var d=document.createElement('div');d.innerHTML=c;return (d.textContent||d.innerText||'').trim();}
+  if(/</.test(c)){
+    var temp=c.replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n').replace(/<\/div>/gi,'\n');
+    var d=document.createElement('div');d.innerHTML=temp;
+    var txt=(d.textContent||d.innerText||'');
+    return txt.replace(/\n{3,}/g,'\n\n').trim();
+  }
   return c.trim();
 }
 function renderWeeklyReport(){
