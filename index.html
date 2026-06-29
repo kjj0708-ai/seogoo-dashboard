@@ -531,17 +531,15 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
     <div class="hR"><span class="ubadge" id="ubadge"></span><button class="btnOut" onclick="openProfileEdit()" style="margin-right:6px;" title="내 프로필">👤<span class="btnText"> 내 프로필</span></button><button class="btnOut" onclick="doLogout()" title="로그아웃">🚪<span class="btnText"> 로그아웃</span></button></div>
   </header>
   <div class="tabsBar">
-    <button class="tBtn active" onclick="switchTab('issues',this)">📋 현안/이슈</button>
+    <button class="tBtn active" onclick="switchTab('weekly',this)">🗂️ 주간보고</button>
     <button class="tBtn" onclick="switchTab('reports',this)">📊 업무현황</button>
-    <button class="tBtn" onclick="switchTab('weekly',this)">🗂️ 주간보고</button>
     <button class="tBtn" onclick="switchTab('calendar',this)">📅 일정/회의</button>
+    <button class="tBtn" id="issuesTab" style="display:none" onclick="switchTab('issues',this)">📋 현안/이슈</button>
     <button class="tBtn" id="memberTab" style="display:none" onclick="switchTab('orgchart',this)">👥 회원관리</button>
   </div>
   <main>
-    <div class="tPanel active" id="panel-issues">
+    <div class="tPanel" id="panel-issues">
       <div id="weeklyAgendaPanel" class="waPanel"></div>
-      <div id="instrDisplay"></div>
-      <div id="adminInstrPnl" style="display:none;"></div>
       <div class="statRow">
         <div class="statCard all"><div class="statNum" id="statAll">0</div><div class="statLabel">전체 이슈</div></div>
         <div class="statCard proc"><div class="statNum" id="statProc">0</div><div class="statLabel">진행중</div></div>
@@ -569,7 +567,9 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
       </div>
       <div id="viewAll"><div class="dGrid" id="deptGrid"></div></div>
     </div>
-    <div class="tPanel" id="panel-weekly">
+    <div class="tPanel active" id="panel-weekly">
+      <div id="instrDisplay"></div>
+      <div id="adminInstrPnl" style="display:none; margin-bottom: 20px;"></div>
       <div class="secH">
         <div>
           <div class="secT">🗂️ 주간보고</div>
