@@ -494,13 +494,14 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
     <div class="fg"><label>소속 과</label>
       <select id="psDept" onchange="updatePsTeam()">
         <option value="">-- 소속 과 선택 --</option>
-        <option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>도시재생경관과</option>
+        <option>도시주택국</option><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>도시재생경관과</option>
       </select>
     </div>
     <div class="fg"><label>소속 팀</label><select id="psTeam"><option value="">-- 팀 선택 --</option></select></div>
     <div class="fg"><label>회원유형</label>
       <select id="psRole">
         <option value="">-- 선택 --</option>
+        <option value="국장">국장</option>
         <option value="과장">과장</option>
         <option value="팀장">팀장</option>
         <option value="주무관">주무관</option>
@@ -708,11 +709,11 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
       <div class="fr"><label>이메일</label><input type="text" id="peEmail" disabled style="background:#f1f5f9;color:var(--tx3)"></div>
       <div class="fr"><label>이름 *</label><input type="text" id="peName" placeholder="이름을 입력하세요"></div>
       <div class="grid2">
-        <div class="fr"><label>소속 과</label><select id="peDept" onchange="updatePeTeam()"><option value="">-- 선택 --</option><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>도시재생경관과</option></select></div>
+        <div class="fr"><label>소속 과</label><select id="peDept" onchange="updatePeTeam()"><option value="">-- 선택 --</option><option>도시주택국</option><option>도로과</option><option>도시계획과</option><option>건축과</option><option>주택과</option><option>도시재생경관과</option></select></div>
         <div class="fr"><label>소속 팀</label><select id="peTeam"><option value="">-- 팀 선택 --</option></select></div>
       </div>
       <div class="grid2">
-        <div class="fr"><label>회원유형</label><select id="peRole"><option value="">-- 선택 --</option><option value="과장">과장</option><option value="팀장">팀장</option><option value="주무관">주무관</option></select></div>
+        <div class="fr"><label>회원유형</label><select id="peRole"><option value="">-- 선택 --</option><option value="국장">국장</option><option value="과장">과장</option><option value="팀장">팀장</option><option value="주무관">주무관</option></select></div>
         <div class="fr"><label>휴대폰 <span style="font-size:11px;color:#dc2626;font-weight:400;">* 필수</span></label><input type="tel" id="pePhone" placeholder="01012345678 (숫자만)" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       </div>
       <div class="lerr" id="peErr" style="display:none"></div>
@@ -959,7 +960,7 @@ var ORG={'도로과':['건설행정팀','도로팀','보도관리팀','자전거
 var GCD=[];var GCAL_API_KEY=localStorage.getItem('gcal_key')||'AIzaSyDU0y_Jg9YW-ybmlRSXMFNi6PJnaUe1ROc';var GCAL_CAL_ID=localStorage.getItem('gcal_calid')||'fb33c71c30a02987ef34e18cb2f4d9f1bd2c108c618c4b23594025b09c34cf0f@group.calendar.google.com';
 var currentUser=null,db=null,auth=null,issues=[],projects=[],events=[],instruction=null,_instrList=[],_instrReadsCache={},_myInstrReads={},_myReadsRef=null,_instrCmtRef=null,_currentInstrId=null,_projRef=null,_statusRef=null,_usersRef=null,_gcalRef=null,_issuesRef=null,_eventsRef=null,_instrRef=null;
 var calY,calM,editIssId=null,editProjId=null,pendingPhoto=null,confCb=null,statusFilter='';
-(function(){try{firebase.initializeApp(FB);db=firebase.database();window._origDb=db;auth=firebase.auth();auth.onAuthStateChanged(function(user){if(user&&!currentUser){var _db=db||window._origDb;(_db?_db.ref('users/'+user.uid).once('value'):Promise.resolve(null)).then(function(s){var p=s?s.val():null;if(!p){try{p=JSON.parse(localStorage.getItem('bu_profile')||'null');}catch(e){}}if(user&&user.email&&user.email.toLowerCase()===SUPER_ADMIN_EMAIL){var sp={name:(p&&p.name)||user.displayName||'총괄관리자',dept:(p&&p.dept)||'도시주택국',team:(p&&p.team)||'',phone:(p&&p.phone)||'',role:'총괄관리자',isAdmin:true,status:'approved',email:user.email};setCurrentUserFromProfile(user,sp);if(_db&&user.uid)_db.ref('users/'+user.uid).update({name:sp.name,isAdmin:true,status:'approved',role:'총괄관리자',email:user.email});enterApp();return;}if(p){var status=p.status||'approved';if(status==='pending'){setCurrentUserFromProfile(user,p);showPendingScreen('pending');setupStatusListener(user.uid);}else if(status==='rejected'||status==='reapplying'){if(status==='rejected'){setCurrentUserFromProfile(user,p);window._pendingGoogleUser=user;showPendingScreen('rejected');}else{window._pendingGoogleUser=user;showProfileSetup(user);}}else{setCurrentUserFromProfile(user,p);enterApp();}}else{showProfileSetup(user);}});}else if(!user){currentUser=null;if(_statusRef){_statusRef.off('value');_statusRef=null;}var ld=document.getElementById('loginLoading');var btn=document.getElementById('btnGoogleLogin');if(ld)ld.style.display='none';if(btn)btn.style.display='flex';}});}catch(e){console.warn('FB init 실패',e);var ld0=document.getElementById('loginLoading');if(ld0)ld0.innerHTML='⚠️ 인증 서비스 연결에 실패했습니다.<br><button onclick="location.reload()" style="margin-top:10px;background:#fff;color:#1a3a5c;border:none;border-radius:8px;padding:8px 18px;font-weight:600;cursor:pointer;">🔄 새로고침</button>';}})();
+(function(){try{firebase.initializeApp(FB);db=firebase.database();window._origDb=db;auth=firebase.auth();auth.onAuthStateChanged(function(user){if(user&&!currentUser){var _db=db||window._origDb;(_db?_db.ref('users/'+user.uid).once('value'):Promise.resolve(null)).then(function(s){var p=s?s.val():null;if(!p){try{p=JSON.parse(localStorage.getItem('bu_profile')||'null');}catch(e){}}if(user&&user.email&&user.email.toLowerCase()===SUPER_ADMIN_EMAIL){var sp={name:(p&&p.name)||user.displayName||'총괄관리자',dept:(p&&p.dept)||'도시주택국',team:(p&&p.team)||'',phone:(p&&p.phone)||'',role:'총괄관리자',isAdmin:true,status:'approved',email:user.email};setCurrentUserFromProfile(user,sp);if(_db&&user.uid)_db.ref('users/'+user.uid).update({name:sp.name,isAdmin:true,status:'approved',role:'총괄관리자',email:user.email});enterApp();return;}if(p){if((p.name==='정인영'||p.name==='박소희')&&!p.isSubAdmin){p.isSubAdmin=true;if(_db&&user.uid)_db.ref('users/'+user.uid).update({isSubAdmin:true});}var status=p.status||'approved';if(status==='pending'){setCurrentUserFromProfile(user,p);showPendingScreen('pending');setupStatusListener(user.uid);}else if(status==='rejected'||status==='reapplying'){if(status==='rejected'){setCurrentUserFromProfile(user,p);window._pendingGoogleUser=user;showPendingScreen('rejected');}else{window._pendingGoogleUser=user;showProfileSetup(user);}}else{setCurrentUserFromProfile(user,p);enterApp();}}else{showProfileSetup(user);}});}else if(!user){currentUser=null;if(_statusRef){_statusRef.off('value');_statusRef=null;}var ld=document.getElementById('loginLoading');var btn=document.getElementById('btnGoogleLogin');if(ld)ld.style.display='none';if(btn)btn.style.display='flex';}});}catch(e){console.warn('FB init 실패',e);var ld0=document.getElementById('loginLoading');if(ld0)ld0.innerHTML='⚠️ 인증 서비스 연결에 실패했습니다.<br><button onclick="location.reload()" style="margin-top:10px;background:#fff;color:#1a3a5c;border:none;border-radius:8px;padding:8px 18px;font-weight:600;cursor:pointer;">🔄 새로고침</button>';}})();
 /* failsafe: 8초 내 인증이 안 끝나면 로그인 버튼/새로고침 노출 (무한 로딩 방지) */
 setTimeout(function(){
   var app=document.getElementById('app'),ls=document.getElementById('loginScreen'),ld=document.getElementById('loginLoading'),btn=document.getElementById('btnGoogleLogin');
@@ -976,10 +977,10 @@ function dbSet(p,d){var _db=db||window._origDb;if(_db)_db.ref(p).set(d);else sav
 function dbPush(p,d){var _db=db||window._origDb;if(_db)return _db.ref(p).push(d).then(function(r){return r.key;});var id=Date.now().toString();d.id=id;saveLS();return Promise.resolve(id);}
 function dbRemove(p){var _db=db||window._origDb;if(_db)_db.ref(p).remove();else saveLS();}
 function doGoogleLogin(){if(!auth){showLErr('인증 서비스를 사용할 수 없습니다.');return;}var btn=document.getElementById('btnGoogleLogin');if(btn){btn.disabled=true;btn.style.opacity='0.6';}var provider=new firebase.auth.GoogleAuthProvider();auth.signInWithPopup(provider).catch(function(err){var msg=err.code==='auth/popup-closed-by-user'?'로그인을 취소했습니다.':err.message;showLErr(msg);if(btn){btn.disabled=false;btn.style.opacity='1';}});}
-function setCurrentUserFromProfile(user,p){currentUser={type:p.isAdmin?'admin':'staff',name:p.name||user.displayName||user.email,dept:p.dept||'',team:p.team||'',phone:p.phone||'',role:p.role||'',uid:user.uid,email:user.email,isAdmin:!!p.isAdmin,status:p.status||'approved'};localStorage.setItem('bu_profile',JSON.stringify({name:currentUser.name,dept:currentUser.dept,team:currentUser.team,phone:currentUser.phone,role:currentUser.role,isAdmin:currentUser.isAdmin,status:currentUser.status}));}
+function setCurrentUserFromProfile(user,p){var isSub=p.isSubAdmin||p.name==='정인영'||p.name==='박소희';currentUser={type:(p.isAdmin||isSub)?'admin':'staff',name:p.name||user.displayName||user.email,dept:p.dept||'',team:p.team||'',phone:p.phone||'',role:p.role||'',uid:user.uid,email:user.email,isAdmin:!!p.isAdmin,isSubAdmin:isSub,status:p.status||'approved'};localStorage.setItem('bu_profile',JSON.stringify({name:currentUser.name,dept:currentUser.dept,team:currentUser.team,phone:currentUser.phone,role:currentUser.role,isAdmin:currentUser.isAdmin,isSubAdmin:currentUser.isSubAdmin,status:currentUser.status}));}
 function showProfileSetup(googleUser){window._pendingGoogleUser=googleUser;document.getElementById('loginScreen').style.display='none';var el=document.getElementById('profileSetupScreen');el.style.display='flex';var pg=document.getElementById('psGreeting');if(pg)pg.textContent=(googleUser.displayName?googleUser.displayName+'님, ':'')+'프로필을 설정해주세요';var pe=document.getElementById('psEmailDisp');if(pe)pe.textContent=googleUser.email||'';var pn=document.getElementById('psName');if(pn)pn.value=googleUser.displayName||'';updatePsTeam();}
 function updatePsTeam(){var d=document.getElementById('psDept');var sel=document.getElementById('psTeam');if(!d||!sel)return;sel.innerHTML='<option value="">-- 팀 선택 --</option>'+(ORG[d.value]||[]).map(function(t){return '<option>'+t+'</option>';}).join('');}
-function saveProfileSetup(){var name=(document.getElementById('psName').value||'').trim();var dept=document.getElementById('psDept').value;var team=document.getElementById('psTeam').value;var role=(document.getElementById('psRole')||{}).value||'';var phone=(document.getElementById('psPhone')||{}).value||'';var adminCode=(document.getElementById('psAdminCode')||{}).value||'';if(!name){showPsErr('이름을 입력해주세요.');return;}if(!dept){showPsErr('소속 과를 선택해주세요.');return;}if(!team){showPsErr('소속 팀을 선택해주세요.');return;}if(!role){showPsErr('회원유형을 선택해주세요.');return;}if(!phone||phone.replace(/[^0-9]/g,'').length<9){showPsErr('휴대폰 번호를 입력해주세요. (숫자만, 9자리 이상)');return;}phone=phone.replace(/[^0-9]/g,'');var isAdmin=adminCode===ADMIN_PW;var user=window._pendingGoogleUser||{uid:'local',displayName:name,email:''};var status=isAdmin?'approved':'pending';var profile={name:name,dept:dept,team:team,role:role,phone:phone,isAdmin:isAdmin,status:status,email:user.email||'',createdAt:new Date().toISOString()};function proceed(){setCurrentUserFromProfile(user,profile);document.getElementById('profileSetupScreen').style.display='none';if(status==='pending'){showPendingScreen('pending');var _db=db||window._origDb;if(_db&&user.uid!=='local')setupStatusListener(user.uid);}else{enterApp();}}var _db=db||window._origDb;if(_db&&user.uid!=='local'){_db.ref('users/'+user.uid).set(profile).then(proceed).catch(function(err){console.error('[ProfileSetup] set failed:',err);showPsErr('⚠️ 가입 신청 전송 실패: '+(err.message||'인터넷 연결을 확인하고 다시 시도해 주세요.'));});}else{localStorage.setItem('bu_profile',JSON.stringify(profile));proceed();}}
+function saveProfileSetup(){var name=(document.getElementById('psName').value||'').trim();var dept=document.getElementById('psDept').value;var team=document.getElementById('psTeam').value;var role=(document.getElementById('psRole')||{}).value||'';var phone=(document.getElementById('psPhone')||{}).value||'';var adminCode=(document.getElementById('psAdminCode')||{}).value||'';if(!name){showPsErr('이름을 입력해주세요.');return;}if(!dept){showPsErr('소속 과를 선택해주세요.');return;}if(!team && role !== '국장'){showPsErr('소속 팀을 선택해주세요.');return;}if(!role){showPsErr('회원유형을 선택해주세요.');return;}if(!phone||phone.replace(/[^0-9]/g,'').length<9){showPsErr('휴대폰 번호를 입력해주세요. (숫자만, 9자리 이상)');return;}phone=phone.replace(/[^0-9]/g,'');var isAdmin=adminCode===ADMIN_PW;var user=window._pendingGoogleUser||{uid:'local',displayName:name,email:''};var status=isAdmin?'approved':'pending';var profile={name:name,dept:dept,team:team,role:role,phone:phone,isAdmin:isAdmin,status:status,email:user.email||'',createdAt:new Date().toISOString()};function proceed(){setCurrentUserFromProfile(user,profile);document.getElementById('profileSetupScreen').style.display='none';if(status==='pending'){showPendingScreen('pending');var _db=db||window._origDb;if(_db&&user.uid!=='local')setupStatusListener(user.uid);}else{enterApp();}}var _db=db||window._origDb;if(_db&&user.uid!=='local'){_db.ref('users/'+user.uid).set(profile).then(proceed).catch(function(err){console.error('[ProfileSetup] set failed:',err);showPsErr('⚠️ 가입 신청 전송 실패: '+(err.message||'인터넷 연결을 확인하고 다시 시도해 주세요.'));});}else{localStorage.setItem('bu_profile',JSON.stringify(profile));proceed();}}
 function showPsErr(m){var e=document.getElementById('psErr');if(e){e.textContent=m;e.style.display='block';}}
 function openProfileEdit(){if(!currentUser){return;}var pe=document.getElementById('peErr');if(pe)pe.style.display='none';document.getElementById('peEmail').value=currentUser.email||'';document.getElementById('peName').value=currentUser.name||'';document.getElementById('peDept').value=currentUser.dept||'';updatePeTeam(currentUser.team||'');document.getElementById('peRole').value=currentUser.role||'';document.getElementById('pePhone').value=currentUser.phone||'';document.getElementById('profileEditModal').style.display='flex';}
 function closeProfileEdit(){document.getElementById('profileEditModal').style.display='none';}
@@ -988,7 +989,7 @@ function showPeErr(m){var e=document.getElementById('peErr');if(e){e.textContent
 function saveProfileEdit(){if(!currentUser)return;var name=(document.getElementById('peName').value||'').trim();var dept=document.getElementById('peDept').value;var team=document.getElementById('peTeam').value;var role=document.getElementById('peRole').value;var phone=(document.getElementById('pePhone').value||'').trim();if(!name){showPeErr('이름을 입력해주세요.');return;}phone=phone.replace(/[^0-9]/g,'');if(!phone||phone.length<9){showPeErr('휴대폰 번호를 입력해주세요. (숫자만, 9자리 이상)');return;}var prevDept=currentUser.dept;var upd={name:name,dept:dept,team:team,role:role,phone:phone};currentUser.name=name;currentUser.dept=dept;currentUser.team=team;currentUser.role=role;currentUser.phone=phone;try{var lp=JSON.parse(localStorage.getItem('bu_profile')||'{}');Object.assign(lp,upd);localStorage.setItem('bu_profile',JSON.stringify(lp));}catch(e){}var _db=db||window._origDb;if(_db&&currentUser.uid&&currentUser.uid!=='local'){_db.ref('users/'+currentUser.uid).update(upd);}var ub=document.getElementById('ubadge');if(ub)ub.textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';if(currentUser.type!=='admin'&&prevDept!==dept){setupProjectsListener();}renderIssues();renderProjectsGrid();closeProfileEdit();}
 function showLErr(m){var e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
 function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('pendingScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';
-if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';var _mt=document.getElementById('memberTab');if(_mt)_mt.style.display='';}document.getElementById('adminCalPnl').style.display='block';initTimeDropdown();var _db=db||window._origDb;setupGlobalListeners();setupUsersListener();var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstrBoard();renderIssues();renderWeeklyReport();if(_db)setupProjectsListener();else{renderProjectsGrid();renderWeeklyAgenda();}renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var _ka0=document.getElementById('gcalApiKey');if(_ka0)_ka0.value=GCAL_API_KEY;var _ki0=document.getElementById('gcalCalId');if(_ki0)_ki0.value=GCAL_CAL_ID;setGCalSt(GCAL_API_KEY?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!_db){loadLS();fetchGCal();}else{if(GCAL_API_KEY)fetchGCal();if(_gcalRef){_gcalRef.off('value');}_gcalRef=_db.ref('settings/gcal');_gcalRef.on('value',function(snap){var s=snap.val();var prevKey=GCAL_API_KEY;if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser&&currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;setGCalSt(s&&s.apiKey?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!prevKey||prevKey!==GCAL_API_KEY)fetchGCal();});}if(window._gcalTimer)clearInterval(window._gcalTimer);window._gcalTimer=setInterval(function(){if(currentUser)fetchGCal();},10*60*1000);if(typeof Notification!=='undefined'&&Notification.permission==='granted')startNotificationListener();history.pushState({inApp:true},'');}
+if(currentUser.type==='admin'){if(currentUser.isAdmin){document.getElementById('adminInstrPnl').style.display='block';}document.getElementById('adminUserMgmt').style.display='block';var _mt=document.getElementById('memberTab');if(_mt)_mt.style.display='';}document.getElementById('adminCalPnl').style.display='block';initTimeDropdown();var _db=db||window._origDb;setupGlobalListeners();setupUsersListener();var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstrBoard();renderIssues();renderWeeklyReport();if(_db)setupProjectsListener();else{renderProjectsGrid();renderWeeklyAgenda();}renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var _ka0=document.getElementById('gcalApiKey');if(_ka0)_ka0.value=GCAL_API_KEY;var _ki0=document.getElementById('gcalCalId');if(_ki0)_ki0.value=GCAL_CAL_ID;setGCalSt(GCAL_API_KEY?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!_db){loadLS();fetchGCal();}else{if(GCAL_API_KEY)fetchGCal();if(_gcalRef){_gcalRef.off('value');}_gcalRef=_db.ref('settings/gcal');_gcalRef.on('value',function(snap){var s=snap.val();var prevKey=GCAL_API_KEY;if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser&&currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;setGCalSt(s&&s.apiKey?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!prevKey||prevKey!==GCAL_API_KEY)fetchGCal();});}if(window._gcalTimer)clearInterval(window._gcalTimer);window._gcalTimer=setInterval(function(){if(currentUser)fetchGCal();},10*60*1000);if(typeof Notification!=='undefined'&&Notification.permission==='granted')startNotificationListener();history.pushState({inApp:true},'');}
 function teardownProjectsListener(){if(_projRef){_projRef.off('value');_projRef=null;}}
 function setupProjectsListener(){teardownProjectsListener();var _db=db||window._origDb;if(!_db||!currentUser)return;if(currentUser.type==='admin'){_projRef=_db.ref('projects');_projRef.on('value',function(s){projects=[];if(s.val()){Object.entries(s.val()).forEach(function(de){var dept=de[0];if(de[1]&&typeof de[1]==='object'){Object.entries(de[1]).forEach(function(pe){projects.push(Object.assign({id:pe[0],dept:dept},pe[1]));});}});}renderProjectsGrid();renderWeeklyAgenda();renderWeeklyReport();});}else{_projRef=_db.ref('projects/'+currentUser.dept);_projRef.on('value',function(s){var dept=currentUser.dept;projects=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0],dept:dept},e[1]);}):[];renderProjectsGrid();renderWeeklyAgenda();renderWeeklyReport();});}setupWeeklyAgendaListener();}
 function projPath(id){var p=projects.find(function(x){return x.id===id;});return p?'projects/'+p.dept+'/'+id:null;}
@@ -1008,7 +1009,8 @@ function rejectUser(uid){var _db=db||window._origDb;if(!_db)return;showConf('이
 /* 관리자 — 회원 영구 삭제 (관리자/일반 회원 모두 가능, 본인 제외) */
 function deleteUser(uid){
   var _db=db||window._origDb;if(!_db)return;
-  if(!currentUser||!currentUser.isAdmin){alert('관리자만 회원을 삭제할 수 있습니다.');return;}
+  var canEditMgmt=currentUser&&(currentUser.isAdmin||currentUser.isSubAdmin||currentUser.name==='정인영'||currentUser.name==='박소희');
+  if(!canEditMgmt){alert('관리자 혹은 부관리자만 회원을 삭제할 수 있습니다.');return;}
   if(currentUser.uid===uid){alert('본인 계정은 회원관리에서 삭제할 수 없습니다. "내 프로필 → 탈퇴하기"를 이용하세요.');return;}
   var all=window._allUsers||{};var target=all[uid]||{};
   var label=(target.name||'(이름없음)')+' · '+(target.dept||'-')+' '+(target.team||'')+(target.isAdmin?' 👑관리자':'');
@@ -3115,6 +3117,56 @@ function loadAndRenderMembers(){
       +'</div>';
   });
 }
+function moveUserOrder(uid, direction) {
+  var _db = db || window._origDb;
+  if (!_db) return;
+  var targetUser = window._allUsers[uid];
+  if (!targetUser) return;
+  var dept = targetUser.dept;
+  var team = targetUser.team;
+  if (!dept || !team) return;
+
+  var teamMembers = Object.entries(window._allUsers)
+    .filter(function(e) {
+      var u = e[1];
+      return u && u.dept === dept && u.team === team && u.status !== 'rejected' && u.role !== '과장' && u.role !== '국장';
+    })
+    .map(function(e) {
+      return Object.assign({uid: e[0]}, e[1]);
+    });
+
+  var roleOrd2 = {'팀장': 0, '주무관': 1};
+  teamMembers.sort(function(a, b) {
+    if (a.sortOrder !== undefined && b.sortOrder !== undefined) {
+      return a.sortOrder - b.sortOrder;
+    }
+    if (a.sortOrder !== undefined) return -1;
+    if (b.sortOrder !== undefined) return 1;
+    
+    var rDiff = (roleOrd2[a.role] || 9) - (roleOrd2[b.role] || 9);
+    if (rDiff !== 0) return rDiff;
+    
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  var idx = teamMembers.findIndex(function(m) { return m.uid === uid; });
+  if (idx === -1) return;
+
+  var swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= teamMembers.length) return;
+
+  var updates = {};
+  teamMembers.forEach(function(m, i) {
+    var newOrder = i;
+    if (i === idx) newOrder = swapIdx;
+    else if (i === swapIdx) newOrder = idx;
+    updates['users/' + m.uid + '/sortOrder'] = newOrder;
+  });
+
+  _db.ref().update(updates).catch(function(e) {
+    alert('순서 변경 실패: ' + (e && e.message || e));
+  });
+}
 function renderMemberList(){
   var el=document.getElementById('memberListBody');
   var cntEl=document.getElementById('memberCnt');
@@ -3127,8 +3179,8 @@ function renderMemberList(){
     return;
   }
   var q=((document.getElementById('memberSearch')||{}).value||'').trim().toLowerCase();
-  var roleOrd={'과장':0,'팀장':1,'주무관':2};
-  var statusOrd={'approved':0,'pending':1,'rejected':2};
+  var canEditMgmt=currentUser&&(currentUser.isAdmin||currentUser.isSubAdmin||currentUser.name==='정인영'||currentUser.name==='박소희');
+
   /* 승인여부 무관하게 전원 표시 (rejected 제외) */
   var members=Object.entries(allU).filter(function(e){
     var u=e[1];
@@ -3136,50 +3188,104 @@ function renderMemberList(){
     if(!q)return true;
     return (u.name||'').toLowerCase().indexOf(q)>=0||(u.dept||'').indexOf(q)>=0||(u.team||'').indexOf(q)>=0||(u.phone||'').indexOf(q)>=0;
   }).map(function(e){return Object.assign({uid:e[0]},e[1]);});
-  members.sort(function(a,b){
-    var di=Object.keys(ORG).indexOf(a.dept)-Object.keys(ORG).indexOf(b.dept);if(di!==0)return di;
-    var ti=(ORG[a.dept]||[]).indexOf(a.team)-(ORG[b.dept]||[]).indexOf(b.team);if(ti!==0)return ti;
-    return (roleOrd[a.role]||9)-(roleOrd[b.role]||9);
-  });
+
   if(cntEl)cntEl.textContent=members.length+'명';
   if(!members.length){
-    var totalKeys=Object.keys(allU).length;
     el.innerHTML='<div style="text-align:center;color:var(--tx3);padding:20px;">'
-      +(q?'검색 결과가 없습니다.':'등록된 회원이 없습니다.')+'</div>'
-      +'<div style="font-size:11px;color:#94a3b8;text-align:center;padding:0 0 12px;">'
-      +'Firebase users 노드: '+totalKeys+'건 · DB연결: '+(db?'✅':'❌')
-      +(totalKeys>0?' (rejected 상태만 있음)':'')
-      +'</div>';
+      +(q?'검색 결과가 없습니다.':'등록된 회원이 없습니다.')+'</div>';
     return;
   }
+
+  // 1. 국장 분리
+  var gukjangs=members.filter(function(m){return m.role==='국장';});
+  var restMembers=members.filter(function(m){return m.role!=='국장';});
+
+  var html='';
+
+  // 도시주택국 라인 (국장 배치)
+  if(gukjangs.length>0||canEditMgmt){
+    html+='<div class="mbrDeptHeaderRow" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--bdr);">';
+    html+='<div class="mbrDeptLabel" style="margin:0;color:var(--primary);font-size:16px;font-weight:700;">🏢 도시주택국</div>';
+    gukjangs.forEach(function(m){
+      var tel=m.phone?m.phone.replace(/[^0-9+]/g,''):'';
+      var isPending=m.status==='pending';
+      html+='<div class="gwajangPill" style="display:inline-flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid #2563eb;padding:5px 12px;border-radius:30px;font-size:13px;box-shadow:0 1px 3px rgba(0,0,0,.05);'+(isPending?'background:#fffbeb;':'')+'">'
+        +'<span style="font-weight:bold;color:#1e40af;">👑 '+esc(m.name||'(이름없음)')+'</span>'
+        +'<span class="orgRoleBadge orgRoleGwajang" style="font-size:10px;padding:2px 6px;background:#2563eb;color:#fff;">국장</span>'
+        +(m.phone?'<a class="orgCallBtn" href="tel:'+tel+'" style="font-size:11px;padding:2px 5px;line-height:1;">📞</a>':'')
+        +(canEditMgmt&&isPending?'<button class="btn btnP sm" onclick="approveUser(\''+m.uid+'\')" style="padding:2px 6px;font-size:10px;line-height:1;">승인</button>':'')
+        +(canEditMgmt&&currentUser.uid!==m.uid?'<button class="btn btnD sm" onclick="deleteUser(\''+m.uid+'\')" style="padding:2px 6px;font-size:10px;line-height:1;margin-left:4px;">🗑</button>':'')
+        +'</div>';
+    });
+    html+='</div>';
+  }
+
   /* 과 → 팀 → 구성원 그룹핑 */
   var deptMap={};
   var deptOrder=Object.keys(ORG);
-  members.forEach(function(m){
+  restMembers.forEach(function(m){
     var d=m.dept||'(소속 미지정)';
     var t=m.team||'(팀 미지정)';
     if(!deptMap[d])deptMap[d]={};
     if(!deptMap[d][t])deptMap[d][t]=[];
     deptMap[d][t].push(m);
   });
+
   /* 과 순서 정렬 */
   var depts=Object.keys(deptMap).sort(function(a,b){var ia=deptOrder.indexOf(a),ib=deptOrder.indexOf(b);return(ia<0?999:ia)-(ib<0?999:ib);});
-  var html='';
+  
   depts.forEach(function(dept){
-    html+='<div class="mbrDeptLabel">📂 '+esc(dept)+'</div>';
+    // 과장 분리
+    var deptMembers=restMembers.filter(function(m){return m.dept===dept;});
+    var gwajangs=deptMembers.filter(function(m){return m.role==='과장';});
+    
+    // 과 헤더 및 과장 옆으로 배치
+    html+='<div class="mbrDeptHeaderRow" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--bdr);">';
+    html+='<div class="mbrDeptLabel" style="margin:0;font-size:15px;font-weight:700;">📂 '+esc(dept)+'</div>';
+    gwajangs.forEach(function(m){
+      var tel=m.phone?m.phone.replace(/[^0-9+]/g,''):'';
+      var isPending=m.status==='pending';
+      html+='<div class="gwajangPill" style="display:inline-flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid #16a34a;padding:4px 10px;border-radius:30px;font-size:13px;box-shadow:0 1px 3px rgba(0,0,0,.05);'+(isPending?'background:#fffbeb;':'')+'">'
+        +'<span style="font-weight:bold;color:#15803d;">👨‍💼 '+esc(m.name||'(이름없음)')+'</span>'
+        +'<span class="orgRoleBadge orgRoleGwajang" style="font-size:10px;padding:2px 6px;">과장</span>'
+        +(m.phone?'<a class="orgCallBtn" href="tel:'+tel+'" style="font-size:11px;padding:2px 5px;line-height:1;">📞</a>':'')
+        +(canEditMgmt&&isPending?'<button class="btn btnP sm" onclick="approveUser(\''+m.uid+'\')" style="padding:2px 6px;font-size:10px;line-height:1;">승인</button>':'')
+        +(canEditMgmt&&currentUser.uid!==m.uid?'<button class="btn btnD sm" onclick="deleteUser(\''+m.uid+'\')" style="padding:2px 6px;font-size:10px;line-height:1;margin-left:4px;">🗑</button>':'')
+        +'</div>';
+    });
+    html+='</div>';
+
     html+='<div class="mbrDeptGrid">';
     var teamMap=deptMap[dept];
     var teamOrder=ORG[dept]||[];
     var teams=Object.keys(teamMap).sort(function(a,b){var ia=teamOrder.indexOf(a),ib=teamOrder.indexOf(b);return(ia<0?999:ia)-(ib<0?999:ib);});
+    
     teams.forEach(function(team){
-      var tMembers=teamMap[team];
-      var roleOrd2={'과장':0,'팀장':1,'주무관':2};
-      tMembers.sort(function(a,b){return(roleOrd2[a.role]||9)-(roleOrd2[b.role]||9);});
+      // 과장 제외한 팀원만 필터링
+      var tMembers=teamMap[team].filter(function(m){return m.role!=='과장';});
+      var roleOrd2={'팀장':0,'주무관':1};
+      tMembers.sort(function(a,b){
+        if(a.sortOrder!==undefined&&b.sortOrder!==undefined){return a.sortOrder-b.sortOrder;}
+        if(a.sortOrder!==undefined)return -1;
+        if(b.sortOrder!==undefined)return 1;
+        var rDiff=(roleOrd2[a.role]||9)-(roleOrd2[b.role]||9);if(rDiff!==0)return rDiff;
+        return (a.name||'').localeCompare(b.name||'');
+      });
+
       html+='<div class="mbrTeamCard"><div class="mbrTeamLabel">'+esc(team)+' <span class="tCnt">'+tMembers.length+'명</span></div>';
       tMembers.forEach(function(m){
         var tel=m.phone?m.phone.replace(/[^0-9+]/g,''):'';
-        var bc=m.role==='과장'?'orgRoleGwajang':m.role==='팀장'?'orgRoleTeamjang':'orgRoleStaff';
+        var bc=m.role==='팀장'?'orgRoleTeamjang':'orgRoleStaff';
         var isPending=m.status==='pending';
+        
+        var orderButtons='';
+        if(canEditMgmt){
+          orderButtons='<div class="mbrOrderActs" style="display:inline-flex;gap:2px;margin-right:6px;flex-shrink:0;">'
+            +'<button class="btn sm" onclick="moveUserOrder(\''+m.uid+'\',\'up\')" style="padding:3px 5px;font-size:10px;line-height:1;background:#f1f5f9;border:1px solid #cbd5e1;cursor:pointer;" title="위로">▲</button>'
+            +'<button class="btn sm" onclick="moveUserOrder(\''+m.uid+'\',\'down\')" style="padding:3px 5px;font-size:10px;line-height:1;background:#f1f5f9;border:1px solid #cbd5e1;cursor:pointer;" title="아래로">▼</button>'
+            +'</div>';
+        }
+
         html+='<div class="mbrRow"'+(isPending?' style="background:#fffbeb;"':'')+'>'
           +'<div class="mbrInfo">'
             +'<div class="mbrName">'+esc(m.name||'(이름없음)')+(m.isAdmin?' 👑':'')
@@ -3188,9 +3294,10 @@ function renderMemberList(){
             +'</div>'
             +(m.phone?'<div class="mbrMeta">📱 '+esc(m.phone)+'</div>':'<div class="mbrMeta" style="color:#f87171;">미등록</div>')
           +'</div>'
+          +orderButtons
           +(tel?'<a class="orgCallBtn" href="tel:'+tel+'" style="font-size:11px;padding:3px 7px;">📞</a>':'')
-          +(currentUser&&currentUser.isAdmin&&isPending?'<button class="btn btnP" style="font-size:10px;padding:3px 7px;flex-shrink:0;" onclick="approveUser(\''+m.uid+'\')">승인</button>':'')
-          +(currentUser&&currentUser.isAdmin&&currentUser.uid!==m.uid?'<button class="btn btnD" style="font-size:10px;padding:3px 7px;flex-shrink:0;" onclick="deleteUser(\''+m.uid+'\')" title="회원 삭제">🗑</button>':'')
+          +(canEditMgmt&&isPending?'<button class="btn btnP" style="font-size:10px;padding:3px 7px;flex-shrink:0;" onclick="approveUser(\''+m.uid+'\')">승인</button>':'')
+          +(canEditMgmt&&currentUser.uid!==m.uid?'<button class="btn btnD" style="font-size:10px;padding:3px 7px;flex-shrink:0;" onclick="deleteUser(\''+m.uid+'\')" title="회원 삭제">🗑</button>':'')
           +'</div>';
       });
       html+='</div>';
