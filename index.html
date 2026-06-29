@@ -373,10 +373,10 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .mbrRow{display:flex;align-items:center;padding:7px 10px;border-bottom:1px solid var(--bg);gap:6px;}
 .mbrRow:last-child{border-bottom:none;}
 .mbrInfo{flex:1;min-width:0;}
-.mbrName{font-size:12px;font-weight:600;}
+.mbrName{font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .mbrMeta{font-size:11px;color:var(--tx3);margin-top:1px;}
 @media(max-width:900px){.mbrDeptGrid{grid-template-columns:repeat(3,1fr);}}
-@media(max-width:600px){.mbrDeptGrid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.mbrDeptGrid{grid-template-columns:1fr;}}
 .orgGwajangBlock{border-bottom:3px solid #1a3a5c;}
 .orgMember.isGwajang{background:linear-gradient(135deg,#1a3a5c,#1e4d7a);color:#fff;}
 .orgMember.isGwajang .orgMemberInfo{color:#f5e17a;}
@@ -384,7 +384,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .orgMember.isGwajang .orgCallBtn{background:#e8d080;color:#1a3a5c;}
 .orgMember.isGwajang .orgCallBtn:hover{background:#fbbf24;color:#1a3a5c;}
 .orgMember.isTeamjang{background:#eff6ff;border-left:3px solid var(--primary);}
-.orgRoleBadge{display:inline-block;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:6px;vertical-align:middle;}
+.orgRoleBadge{display:inline-block;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:6px;vertical-align:middle;white-space:nowrap;flex-shrink:0;}
 .orgRoleGwajang{background:#e8d080;color:#1a3a5c;}
 .orgRoleTeamjang{background:#bfdbfe;color:#1e3a8a;}
 .orgRoleStaff{background:#e2e8f0;color:#475569;}
@@ -3140,7 +3140,7 @@ function moveUserOrder(uid, direction) {
   var teamMembers = Object.entries(window._allUsers)
     .filter(function(e) {
       var u = e[1];
-      return u && u.dept === dept && u.team === team && u.status !== 'rejected' && u.role !== '과장' && u.role !== '국장';
+      return u && u.dept === dept && u.team === team && u.status !== 'rejected' && u.role !== '과장' && u.role !== '국장' && u.role !== '총괄관리자' && u.role !== '도시주택국장' && u.dept !== '도시주택국';
     })
     .map(function(e) {
       return Object.assign({uid: e[0]}, e[1]);
@@ -3208,8 +3208,12 @@ function renderMemberList(){
   }
 
   // 1. 국장 분리
-  var gukjangs=members.filter(function(m){return m.role==='국장';});
-  var restMembers=members.filter(function(m){return m.role!=='국장';});
+  var gukjangs=members.filter(function(m){
+    return m.role==='국장'||m.role==='총괄관리자'||m.role==='도시주택국장'||m.dept==='도시주택국';
+  });
+  var restMembers=members.filter(function(m){
+    return !(m.role==='국장'||m.role==='총괄관리자'||m.role==='도시주택국장'||m.dept==='도시주택국');
+  });
 
   var html='';
 
