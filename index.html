@@ -1934,6 +1934,13 @@ function dateFromISOWeek(weekStr){
   d.setDate(d.getDate()-day+1+(week-1)*7);
   return d;
 }
+function formatWeekDropdownLabel(w){
+  var d=dateFromISOWeek(w);
+  var yy=(''+d.getFullYear()).slice(-2);
+  var mm=(''+(d.getMonth()+1)).padStart(2,'0');
+  var dd=(''+d.getDate()).padStart(2,'0');
+  return yy+'.'+mm+'.'+dd+'.~';
+}
 function setupWeeklyAgendaListener(){
   var _db=db||window._origDb;if(!_db)return;
   if(_weeklyAgendaRef){try{_weeklyAgendaRef.off('value');}catch(_){}_weeklyAgendaRef=null;}
@@ -1947,7 +1954,8 @@ function setupWeeklyAgendaListener(){
       var currentW=thisWeek();
       var weeks=getPastWeeks(12);
       sel.innerHTML=weeks.map(function(w,i){
-        var label=w;
+        var dateRange=formatWeekDropdownLabel(w);
+        var label=dateRange;
         if(w===currentW)label+=' (이번 주)';
         else if(i===1)label+=' (지난 주)';
         else label+=' ('+(i)+'주 전)';
