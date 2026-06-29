@@ -575,7 +575,8 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
           <div class="secT">🗂️ 주간보고</div>
           <div class="weekRangePill" id="weeklyReportRange" style="margin-top:8px;"></div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="btn btnG sm" onclick="openNotificationSetup()" style="padding:6px 10px;font-size:13px;display:flex;align-items:center;gap:4px;" title="알림 설정">🔔 알림 설정</button>
           <select id="weeklyReportWeekSelect" onchange="changeWeeklyReportWeek(this.value)" style="padding:6px 12px;border:1px solid var(--bdr);border-radius:6px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;"></select>
           <button class="btn btnP" id="btnWeeklyReportAdd" onclick="openWeeklyReportModal()">+ 보고 추가</button>
         </div>
@@ -900,6 +901,41 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
     </div>
   </div>
 </div>
+<!-- 알림 설정 모달 -->
+<div class="mOverlay" id="notificationSetupModal" style="display:none" onclick="if(event.target===this)closeNotificationSetup()">
+  <div class="modal" style="max-width:480px;">
+    <div class="mH"><span class="mT">🔔 실시간 알림 설정</span><button class="mClose" onclick="closeNotificationSetup()">✕</button></div>
+    <div class="mB" style="font-size:14px;line-height:1.6;color:var(--tx2);">
+      <p style="margin-bottom:14px;font-weight:700;">주간보고 등록 시 모바일 및 PC로 실시간 푸시 알림을 받을 수 있습니다.</p>
+      
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:16px;">
+        <span style="font-weight:700;color:var(--primary);display:block;margin-bottom:6px;">💻 현재 PC 브라우저 알림 설정</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <span id="browserNotifStatus" style="font-size:13px;color:var(--tx3);">확인 중...</span>
+          <button class="btn btnP sm" id="btnReqNotifPerm" onclick="requestBrowserNotificationPermission()" style="padding:4px 10px;font-size:12px;margin-left:auto;">권한 허용</button>
+        </div>
+      </div>
+
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;">
+        <span style="font-weight:700;color:#166534;display:block;margin-bottom:6px;">📱 스마트폰(Android/iOS) 푸시 알림 받기</span>
+        <ol style="margin:0;padding-left:20px;font-size:13px;color:#1e293b;">
+          <li style="margin-bottom:4px;">구글 플레이스토어 또는 애플 앱스토어에서 <strong>ntfy</strong> 앱(무료, 회원가입 불필요)을 설치합니다.</li>
+          <li style="margin-bottom:4px;">앱 실행 후 우측 상단 <strong>+</strong> 또는 <strong>구독 추가</strong>를 누릅니다.</li>
+          <li style="margin-bottom:4px;">토픽 이름에 아래 값을 정확히 입력하고 구독합니다:
+            <div style="background:#fff;border:1px solid #cbd5e1;padding:6px 10px;border-radius:6px;font-family:monospace;font-weight:700;margin:6px 0;display:flex;align-items:center;justify-content:between;">
+              <span id="ntfyTopicName">bureau_dashboard_weekly_notifications_f6a8</span>
+              <button class="btn sm" onclick="copyNtfyTopic()" style="padding:2px 6px;font-size:11px;margin-left:auto;">복사</button>
+            </div>
+          </li>
+          <li>이제 주간보고가 등록되면 스마트폰으로 즉시 알림이 발송됩니다.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="mF" style="display:flex;justify-content:flex-end;gap:8px;">
+      <button class="btn btnG" onclick="closeNotificationSetup()">닫기</button>
+    </div>
+  </div>
+</div>
 <div class="confOverlay" id="confDlg" style="display:none">
   <div class="confBox"><h3>확인</h3><p id="confMsg"></p><div class="confBtns"><button class="btn btnG" onclick="closeConf()">취소</button><button class="btn btnD" onclick="execConf()">확인</button></div></div>
 </div>
@@ -952,7 +988,7 @@ function showPeErr(m){var e=document.getElementById('peErr');if(e){e.textContent
 function saveProfileEdit(){if(!currentUser)return;var name=(document.getElementById('peName').value||'').trim();var dept=document.getElementById('peDept').value;var team=document.getElementById('peTeam').value;var role=document.getElementById('peRole').value;var phone=(document.getElementById('pePhone').value||'').trim();if(!name){showPeErr('이름을 입력해주세요.');return;}phone=phone.replace(/[^0-9]/g,'');if(!phone||phone.length<9){showPeErr('휴대폰 번호를 입력해주세요. (숫자만, 9자리 이상)');return;}var prevDept=currentUser.dept;var upd={name:name,dept:dept,team:team,role:role,phone:phone};currentUser.name=name;currentUser.dept=dept;currentUser.team=team;currentUser.role=role;currentUser.phone=phone;try{var lp=JSON.parse(localStorage.getItem('bu_profile')||'{}');Object.assign(lp,upd);localStorage.setItem('bu_profile',JSON.stringify(lp));}catch(e){}var _db=db||window._origDb;if(_db&&currentUser.uid&&currentUser.uid!=='local'){_db.ref('users/'+currentUser.uid).update(upd);}var ub=document.getElementById('ubadge');if(ub)ub.textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';if(currentUser.type!=='admin'&&prevDept!==dept){setupProjectsListener();}renderIssues();renderProjectsGrid();closeProfileEdit();}
 function showLErr(m){var e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
 function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('pendingScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';
-if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';var _mt=document.getElementById('memberTab');if(_mt)_mt.style.display='';}document.getElementById('adminCalPnl').style.display='block';initTimeDropdown();var _db=db||window._origDb;setupGlobalListeners();setupUsersListener();var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstrBoard();renderIssues();if(_db)setupProjectsListener();else renderProjectsGrid();renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var _ka0=document.getElementById('gcalApiKey');if(_ka0)_ka0.value=GCAL_API_KEY;var _ki0=document.getElementById('gcalCalId');if(_ki0)_ki0.value=GCAL_CAL_ID;setGCalSt(GCAL_API_KEY?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!_db){loadLS();fetchGCal();}else{if(GCAL_API_KEY)fetchGCal();if(_gcalRef){_gcalRef.off('value');}_gcalRef=_db.ref('settings/gcal');_gcalRef.on('value',function(snap){var s=snap.val();var prevKey=GCAL_API_KEY;if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser&&currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;setGCalSt(s&&s.apiKey?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!prevKey||prevKey!==GCAL_API_KEY)fetchGCal();});}if(window._gcalTimer)clearInterval(window._gcalTimer);window._gcalTimer=setInterval(function(){if(currentUser)fetchGCal();},10*60*1000);history.pushState({inApp:true},'');}
+if(currentUser.type==='admin'){document.getElementById('adminInstrPnl').style.display='block';document.getElementById('adminUserMgmt').style.display='block';var _mt=document.getElementById('memberTab');if(_mt)_mt.style.display='';}document.getElementById('adminCalPnl').style.display='block';initTimeDropdown();var _db=db||window._origDb;setupGlobalListeners();setupUsersListener();var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderInstrBoard();renderIssues();renderWeeklyReport();if(_db)setupProjectsListener();else{renderProjectsGrid();renderWeeklyAgenda();}renderCal();renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var _ka0=document.getElementById('gcalApiKey');if(_ka0)_ka0.value=GCAL_API_KEY;var _ki0=document.getElementById('gcalCalId');if(_ki0)_ki0.value=GCAL_CAL_ID;setGCalSt(GCAL_API_KEY?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!_db){loadLS();fetchGCal();}else{if(GCAL_API_KEY)fetchGCal();if(_gcalRef){_gcalRef.off('value');}_gcalRef=_db.ref('settings/gcal');_gcalRef.on('value',function(snap){var s=snap.val();var prevKey=GCAL_API_KEY;if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser&&currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;setGCalSt(s&&s.apiKey?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!prevKey||prevKey!==GCAL_API_KEY)fetchGCal();});}if(window._gcalTimer)clearInterval(window._gcalTimer);window._gcalTimer=setInterval(function(){if(currentUser)fetchGCal();},10*60*1000);if(typeof Notification!=='undefined'&&Notification.permission==='granted')startNotificationListener();history.pushState({inApp:true},'');}
 function teardownProjectsListener(){if(_projRef){_projRef.off('value');_projRef=null;}}
 function setupProjectsListener(){teardownProjectsListener();var _db=db||window._origDb;if(!_db||!currentUser)return;if(currentUser.type==='admin'){_projRef=_db.ref('projects');_projRef.on('value',function(s){projects=[];if(s.val()){Object.entries(s.val()).forEach(function(de){var dept=de[0];if(de[1]&&typeof de[1]==='object'){Object.entries(de[1]).forEach(function(pe){projects.push(Object.assign({id:pe[0],dept:dept},pe[1]));});}});}renderProjectsGrid();renderWeeklyAgenda();renderWeeklyReport();});}else{_projRef=_db.ref('projects/'+currentUser.dept);_projRef.on('value',function(s){var dept=currentUser.dept;projects=s.val()?Object.entries(s.val()).map(function(e){return Object.assign({id:e[0],dept:dept},e[1]);}):[];renderProjectsGrid();renderWeeklyAgenda();renderWeeklyReport();});}setupWeeklyAgendaListener();}
 function projPath(id){var p=projects.find(function(x){return x.id===id;});return p?'projects/'+p.dept+'/'+id:null;}
@@ -2149,7 +2185,9 @@ function toggleWeeklyProject(id,checked){
   var path=weeklyItemPath(p.dept,id);
   var data={source:'project',type:'info',reason:'',by:currentUser?currentUser.name:'',byUid:currentUser?currentUser.uid:'',at:new Date().toISOString()};
   if(_db){
-    (checked?_db.ref(path).set(data):_db.ref(path).remove()).catch(function(e){
+    (checked?_db.ref(path).set(data):_db.ref(path).remove()).then(function(){
+      if(checked)publishWeeklyReportNotification(p.dept,p.name,false);
+    }).catch(function(e){
       alert('저장 실패: '+(e&&e.message||e));
       renderProjectsGrid();
     });
@@ -2261,7 +2299,7 @@ function saveWeeklyReportManual(){
   var data={manual:true,title:title,content:content,dept:dept,type:'info',by:currentUser?currentUser.name:'',byUid:currentUser?currentUser.uid:'',at:(window._weeklyEditKey&&_weeklyAgendaData[dept]&&_weeklyAgendaData[dept][key]&&_weeklyAgendaData[dept][key].at)||now,updatedAt:now,images:imagesData};
   var _db=db||window._origDb;
   if(_db){
-    _db.ref(weeklyItemPath(dept,key)).set(data).then(function(){closeWeeklyReportModal();}).catch(function(e){alert('저장 실패: '+(e&&e.message||e));});
+    _db.ref(weeklyItemPath(dept,key)).set(data).then(function(){closeWeeklyReportModal();publishWeeklyReportNotification(dept,title,true);}).catch(function(e){alert('저장 실패: '+(e&&e.message||e));});
   }else{
     if(!_weeklyAgendaData[dept])_weeklyAgendaData[dept]={};
     _weeklyAgendaData[dept][key]=data;closeWeeklyReportModal();renderWeeklyAgenda();renderWeeklyReport();
@@ -3351,6 +3389,126 @@ function dismissPWA(e){
   e.stopPropagation();
   localStorage.setItem('pwa_dismiss','1');
   document.getElementById('pwaInstall').style.display='none';
+}
+
+/* ── 실시간 푸시 알림 (ntfy.sh) ── */
+var _ntfyTopic = 'bureau_dashboard_weekly_notifications_f6a8';
+
+function publishWeeklyReportNotification(dept, projName, isManual) {
+  var senderName = currentUser ? currentUser.name : '시스템';
+  var senderUid = currentUser ? currentUser.uid : 'system';
+  var title = '[주간보고 등록] ' + dept;
+  var body = senderName + '님이 ' + (isManual ? '직접입력' : '업무현황 연동') + ' 건을 등록했습니다.\n- 사업명: ' + projName;
+  
+  body += ' [by:' + senderUid + ']';
+
+  fetch('https://ntfy.sh', {
+    method: 'POST',
+    body: JSON.stringify({
+      topic: _ntfyTopic,
+      message: body,
+      title: title,
+      priority: 3,
+      click: 'https://bureau-dashboard.web.app'
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).catch(function(e) {
+    console.error('Failed to send ntfy push notification:', e);
+  });
+}
+
+function startNotificationListener() {
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  if (window._ntfyEventSource) return;
+
+  var es = new EventSource('https://ntfy.sh/' + _ntfyTopic + '/sse');
+  window._ntfyEventSource = es;
+
+  es.onmessage = function(e) {
+    try {
+      var data = JSON.parse(e.data);
+      if (data.event === 'message') {
+        var msg = data.message || '';
+        var title = data.title || '주간보고 알림';
+        
+        var tag = '[by:' + (currentUser ? currentUser.uid : '') + ']';
+        if (msg.indexOf(tag) >= 0) {
+          return;
+        }
+
+        var cleanMsg = msg.replace(/\[by:[^\]]+\]/g, '').trim();
+
+        new Notification(title, {
+          body: cleanMsg,
+          icon: './public/icon-500.png',
+          tag: 'weekly-report-notify'
+        });
+
+        try {
+          var audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav');
+          audio.volume = 0.3;
+          audio.play();
+        } catch(_) {}
+      }
+    } catch(err) {
+      console.error('Notification listener error:', err);
+    }
+  };
+
+  es.onerror = function() {
+    console.warn('Notification listener disconnected. EventSource reconnecting...');
+  };
+}
+
+function openNotificationSetup() {
+  document.getElementById('ntfyTopicName').textContent = _ntfyTopic;
+  updateNotificationStatusUI();
+  document.getElementById('notificationSetupModal').style.display = 'flex';
+}
+
+function closeNotificationSetup() {
+  document.getElementById('notificationSetupModal').style.display = 'none';
+}
+
+function copyNtfyTopic() {
+  var topic = _ntfyTopic;
+  navigator.clipboard.writeText(topic).then(function() {
+    alert('토픽 이름이 복사되었습니다: ' + topic);
+  }).catch(function() {
+    alert('복사에 실패했습니다. 직접 입력해 주세요: ' + topic);
+  });
+}
+
+function updateNotificationStatusUI() {
+  var statusEl = document.getElementById('browserNotifStatus');
+  var btnEl = document.getElementById('btnReqNotifPerm');
+  if (!statusEl || !btnEl) return;
+  if (typeof Notification === 'undefined') {
+    statusEl.textContent = '⚠️ 이 브라우저는 알림을 지원하지 않습니다.';
+    btnEl.style.display = 'none';
+  } else if (Notification.permission === 'granted') {
+    statusEl.textContent = '✅ 알림 허용됨 (실시간 알림 활성화)';
+    btnEl.style.display = 'none';
+    startNotificationListener();
+  } else if (Notification.permission === 'denied') {
+    statusEl.textContent = '❌ 알림 권한 거부됨 (설정에서 알림을 허용해 주세요)';
+    btnEl.style.display = 'none';
+  } else {
+    statusEl.textContent = '❔ 알림 권한이 설정되지 않았습니다.';
+    btnEl.style.display = 'block';
+  }
+}
+
+function requestBrowserNotificationPermission() {
+  if (typeof Notification === 'undefined') return;
+  Notification.requestPermission().then(function(permission) {
+    updateNotificationStatusUI();
+    if (permission === 'granted') {
+      alert('브라우저 실시간 알림이 활성화되었습니다!');
+    }
+  });
 }
 </script>
 <button id="pwaInstall" onclick="installPWA()" title="홈 화면에 앱으로 설치">📱 앱 설치<span class="pwaX" onclick="dismissPWA(event)" title="닫기">✕</span></button>
