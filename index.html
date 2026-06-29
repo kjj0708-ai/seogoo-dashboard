@@ -3521,10 +3521,9 @@ function publishWeeklyReportNotification(dept, projName, isManual) {
   
   body += ' [by:' + senderUid + ']';
 
-  fetch('https://ntfy.sh', {
+  fetch('https://ntfy.sh/' + _ntfyTopic, {
     method: 'POST',
     body: JSON.stringify({
-      topic: _ntfyTopic,
       message: body,
       title: title,
       priority: 4,
@@ -3549,10 +3548,9 @@ function publishInstructionNotification(title, content) {
   body += '\n\n작성자: ' + senderName;
   body += ' [by:' + senderUid + ']';
 
-  fetch('https://ntfy.sh', {
+  fetch('https://ntfy.sh/' + _ntfyTopic, {
     method: 'POST',
     body: JSON.stringify({
-      topic: _ntfyTopic,
       message: body,
       title: notifTitle,
       priority: 4,
