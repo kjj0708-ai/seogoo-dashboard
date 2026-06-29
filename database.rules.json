@@ -8,9 +8,9 @@
       }
     },
     "projects": {
-      ".read": "auth != null && root.child('users').child(auth.uid).child('isAdmin').val() === true",
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('isAdmin').val() === true || root.child('users').child(auth.uid).child('isSubAdmin').val() === true)",
       "$dept": {
-        ".read": "auth != null && (root.child('users').child(auth.uid).child('status').val() === 'approved' && root.child('users').child(auth.uid).child('dept').val() === $dept)",
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('status').val() === 'approved' && (root.child('users').child(auth.uid).child('dept').val() === $dept || root.child('users').child(auth.uid).child('isSubAdmin').val() === true))",
         ".write": "auth != null && (root.child('users').child(auth.uid).child('isAdmin').val() === true || (root.child('users').child(auth.uid).child('status').val() === 'approved' && root.child('users').child(auth.uid).child('dept').val() === $dept))"
       }
     },

@@ -3263,23 +3263,24 @@ function renderMemberList(){
     teams.forEach(function(team){
       // 과장 제외한 팀원만 필터링
       var tMembers=teamMap[team].filter(function(m){return m.role!=='과장';});
-      var roleOrd2={'팀장':0,'주무관':1};
-      tMembers.sort(function(a,b){
+      var leaders=tMembers.filter(function(m){return m.role==='팀장';});
+      var staff=tMembers.filter(function(m){return m.role!=='팀장';});
+      staff.sort(function(a,b){
         if(a.sortOrder!==undefined&&b.sortOrder!==undefined){return a.sortOrder-b.sortOrder;}
         if(a.sortOrder!==undefined)return -1;
         if(b.sortOrder!==undefined)return 1;
-        var rDiff=(roleOrd2[a.role]||9)-(roleOrd2[b.role]||9);if(rDiff!==0)return rDiff;
         return (a.name||'').localeCompare(b.name||'');
       });
+      var finalMembers=leaders.concat(staff);
 
-      html+='<div class="mbrTeamCard"><div class="mbrTeamLabel">'+esc(team)+' <span class="tCnt">'+tMembers.length+'명</span></div>';
-      tMembers.forEach(function(m){
+      html+='<div class="mbrTeamCard"><div class="mbrTeamLabel">'+esc(team)+' <span class="tCnt">'+finalMembers.length+'명</span></div>';
+      finalMembers.forEach(function(m){
         var tel=m.phone?m.phone.replace(/[^0-9+]/g,''):'';
         var bc=m.role==='팀장'?'orgRoleTeamjang':'orgRoleStaff';
         var isPending=m.status==='pending';
         
         var orderButtons='';
-        if(canEditMgmt){
+        if(canEditMgmt && m.role!=='팀장'){
           orderButtons='<div class="mbrOrderActs" style="display:inline-flex;gap:2px;margin-right:6px;flex-shrink:0;">'
             +'<button class="btn sm" onclick="moveUserOrder(\''+m.uid+'\',\'up\')" style="padding:3px 5px;font-size:10px;line-height:1;background:#f1f5f9;border:1px solid #cbd5e1;cursor:pointer;" title="위로">▲</button>'
             +'<button class="btn sm" onclick="moveUserOrder(\''+m.uid+'\',\'down\')" style="padding:3px 5px;font-size:10px;line-height:1;background:#f1f5f9;border:1px solid #cbd5e1;cursor:pointer;" title="아래로">▼</button>'
