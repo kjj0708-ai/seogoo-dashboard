@@ -1,10 +1,10 @@
 {
   "rules": {
     "users": {
-      ".read": "auth != null && (root.child('users').child(auth.uid).child('status').val() === 'approved' || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('status').val() === 'approved' || root.child('users').child(auth.uid).child('isAdmin').val() === true || root.child('users').child(auth.uid).child('isSubAdmin').val() === true)",
       "$uid": {
-        ".read": "$uid === auth.uid || root.child('users').child(auth.uid).child('isAdmin').val() === true",
-        ".write": "$uid === auth.uid || root.child('users').child(auth.uid).child('isAdmin').val() === true"
+        ".read": "$uid === auth.uid || root.child('users').child(auth.uid).child('isAdmin').val() === true || root.child('users').child(auth.uid).child('isSubAdmin').val() === true",
+        ".write": "$uid === auth.uid || root.child('users').child(auth.uid).child('isAdmin').val() === true || root.child('users').child(auth.uid).child('isSubAdmin').val() === true"
       }
     },
     "projects": {
