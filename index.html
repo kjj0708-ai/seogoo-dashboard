@@ -3527,7 +3527,7 @@ function publishWeeklyReportNotification(dept, projName, isManual) {
       message: body,
       title: title,
       priority: 4,
-      click: 'https://bureau-dashboard.web.app'
+      click: window.location.origin
     }),
     headers: {
       'Content-Type': 'application/json'
@@ -3554,7 +3554,7 @@ function publishInstructionNotification(title, content) {
       message: body,
       title: notifTitle,
       priority: 4,
-      click: 'https://bureau-dashboard.web.app'
+      click: window.location.origin
     }),
     headers: {
       'Content-Type': 'application/json'
