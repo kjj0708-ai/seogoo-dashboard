@@ -575,8 +575,9 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
           <div class="secT">🗂️ 주간보고</div>
           <div class="weekRangePill" id="weeklyReportRange" style="margin-top:8px;"></div>
         </div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btnP" onclick="openWeeklyReportModal()">+ 보고 추가</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="weeklyReportWeekSelect" onchange="changeWeeklyReportWeek(this.value)" style="padding:6px 12px;border:1px solid var(--bdr);border-radius:6px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;"></select>
+          <button class="btn btnP" id="btnWeeklyReportAdd" onclick="openWeeklyReportModal()">+ 보고 추가</button>
         </div>
       </div>
       <div id="weeklyReportGrid" class="weeklyGrid"></div>
@@ -1904,16 +1905,61 @@ function generateWeeklyCandidates(dept){
   scored.sort(function(a,b){return b.score-a.score||b.lastUpdatedAt-a.lastUpdatedAt;});
   return scored.slice(0,3);
 }
+var _selectedWeeklyReportWeek = null;
+function getActiveWeeklyReportWeek(){
+  return window._selectedWeeklyReportWeek || thisWeek();
+}
+function changeWeeklyReportWeek(wk){
+  window._selectedWeeklyReportWeek = wk;
+  setupWeeklyAgendaListener();
+  if(!db){
+    renderWeeklyAgenda();renderWeeklyReport();
+  }
+}
+function getPastWeeks(count){
+  var list=[];
+  var now=new Date();
+  for(var i=0; i<count; i++){
+    var d=new Date(now.getTime() - i*7*24*60*60*1000);
+    list.push(getISOWeek(d));
+  }
+  return list.filter(function(v,idx,self){return self.indexOf(v)===idx;});
+}
+function dateFromISOWeek(weekStr){
+  var parts=weekStr.split('-W');
+  var year=parseInt(parts[0],10);
+  var week=parseInt(parts[1],10);
+  var d=new Date(year,0,4);
+  var day=d.getDay()||7;
+  d.setDate(d.getDate()-day+1+(week-1)*7);
+  return d;
+}
 function setupWeeklyAgendaListener(){
   var _db=db||window._origDb;if(!_db)return;
   if(_weeklyAgendaRef){try{_weeklyAgendaRef.off('value');}catch(_){}_weeklyAgendaRef=null;}
-  var wk=thisWeek();
+  var wk=getActiveWeeklyReportWeek();
   _weeklyAgendaRef=_db.ref('weeklyAgenda/'+wk);
   _weeklyAgendaRef.on('value',function(s){_weeklyAgendaData=s.val()||{};renderWeeklyAgenda();renderWeeklyReport();renderProjectsGrid();},function(){});
+
+  var sel=document.getElementById('weeklyReportWeekSelect');
+  if(sel){
+    if(!sel.options.length){
+      var currentW=thisWeek();
+      var weeks=getPastWeeks(12);
+      sel.innerHTML=weeks.map(function(w,i){
+        var label=w;
+        if(w===currentW)label+=' (이번 주)';
+        else if(i===1)label+=' (지난 주)';
+        else label+=' ('+(i)+'주 전)';
+        return '<option value="'+w+'">'+label+'</option>';
+      }).join('');
+    }
+    sel.value=wk;
+  }
 }
 function teardownWeeklyAgendaListener(){if(_weeklyAgendaRef){try{_weeklyAgendaRef.off('value');}catch(_){}_weeklyAgendaRef=null;}_weeklyAgendaData={};}
-function fmtWeekRange(){
-  var mon=weeklyMondayOf();var fri=new Date(mon);fri.setDate(mon.getDate()+4);
+function fmtWeekRange(w){
+  var mon=w?dateFromISOWeek(w):weeklyMondayOf();var fri=new Date(mon);fri.setDate(mon.getDate()+4);
   function s(d){return (d.getMonth()+1)+'.'+d.getDate();}
   return s(mon)+'~'+s(fri);
 }
@@ -2118,13 +2164,18 @@ function weeklyTextFromProject(p){
 }
 function renderWeeklyReport(){
   var grid=document.getElementById('weeklyReportGrid');if(!grid)return;
-  var range=document.getElementById('weeklyReportRange');if(range)range.textContent='보고 기간 '+fmtWeekRange();
+  var wk=getActiveWeeklyReportWeek();
+  var currentW=thisWeek();
+  var isCurrentWeek=(wk===currentW);
+  var range=document.getElementById('weeklyReportRange');if(range)range.textContent='보고 기간 '+fmtWeekRange(wk);
+  var addBtn=document.getElementById('btnWeeklyReportAdd');
+  if(addBtn)addBtn.style.display=isCurrentWeek?'block':'none';
   var depts=weeklyReportDepts();
   grid.innerHTML=depts.map(function(dept){
     var items=_weeklyAgendaData[dept]||{};
     var keys=Object.keys(items);
     keys.sort(function(a,b){return new Date(items[b].updatedAt||items[b].at||0)-new Date(items[a].updatedAt||items[a].at||0);});
-    var canEdit=weeklyCanEditDept(dept);
+    var canEdit=weeklyCanEditDept(dept) && isCurrentWeek;
     var html='<div class="weeklyDept"><div class="weeklyDeptH"><div><span class="weeklyDeptT">'+esc(dept)+'</span> <span class="weeklyCnt">'+keys.length+'건</span></div>'
       +(canEdit?'<button class="btn btnP sm" onclick="openWeeklyReportModal(\''+jsq(dept)+'\')" style="padding:6px 10px;">+ 추가</button>':'')+'</div><div class="weeklyBody">';
     if(!keys.length){
