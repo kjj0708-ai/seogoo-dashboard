@@ -3521,17 +3521,14 @@ function publishWeeklyReportNotification(dept, projName, isManual) {
   
   body += ' [by:' + senderUid + ']';
 
-  fetch('https://ntfy.sh/' + _ntfyTopic, {
+  var url = 'https://ntfy.sh/' + _ntfyTopic 
+    + '?title=' + encodeURIComponent(title) 
+    + '&priority=4' 
+    + '&click=' + encodeURIComponent(window.location.origin);
+
+  fetch(url, {
     method: 'POST',
-    body: JSON.stringify({
-      message: body,
-      title: title,
-      priority: 4,
-      click: window.location.origin
-    }),
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    body: body
   }).catch(function(e) {
     console.error('Failed to send ntfy push notification:', e);
   });
@@ -3548,17 +3545,14 @@ function publishInstructionNotification(title, content) {
   body += '\n\n작성자: ' + senderName;
   body += ' [by:' + senderUid + ']';
 
-  fetch('https://ntfy.sh/' + _ntfyTopic, {
+  var url = 'https://ntfy.sh/' + _ntfyTopic 
+    + '?title=' + encodeURIComponent(notifTitle) 
+    + '&priority=4' 
+    + '&click=' + encodeURIComponent(window.location.origin);
+
+  fetch(url, {
     method: 'POST',
-    body: JSON.stringify({
-      message: body,
-      title: notifTitle,
-      priority: 4,
-      click: window.location.origin
-    }),
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    body: body
   }).catch(function(e) {
     console.error('Failed to send ntfy instruction notification:', e);
   });
