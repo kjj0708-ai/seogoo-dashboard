@@ -3518,13 +3518,11 @@ function publishWeeklyReportNotification(dept, projName, isManual) {
   var senderUid = currentUser ? currentUser.uid : 'system';
   var title = '[주간보고 등록] ' + dept;
   var body = senderName + '님이 ' + (isManual ? '직접입력' : '업무현황 연동') + ' 건을 등록했습니다.\n- 사업명: ' + projName;
-  
-  body += ' [by:' + senderUid + ']';
 
   var url = 'https://ntfy.sh/' + _ntfyTopic 
     + '?title=' + encodeURIComponent(title) 
     + '&priority=4' 
-    + '&click=' + encodeURIComponent(window.location.origin);
+    + '&click=' + encodeURIComponent(window.location.origin + '/?sender=' + senderUid);
 
   fetch(url, {
     method: 'POST',
@@ -3543,12 +3541,11 @@ function publishInstructionNotification(title, content) {
     body = body.substring(0, 100) + '...';
   }
   body += '\n\n작성자: ' + senderName;
-  body += ' [by:' + senderUid + ']';
 
   var url = 'https://ntfy.sh/' + _ntfyTopic 
     + '?title=' + encodeURIComponent(notifTitle) 
     + '&priority=4' 
-    + '&click=' + encodeURIComponent(window.location.origin);
+    + '&click=' + encodeURIComponent(window.location.origin + '/?sender=' + senderUid);
 
   fetch(url, {
     method: 'POST',
@@ -3572,15 +3569,14 @@ function startNotificationListener() {
         var msg = data.message || '';
         var title = data.title || '주간보고 알림';
         
-        var tag = '[by:' + (currentUser ? currentUser.uid : '') + ']';
-        if (msg.indexOf(tag) >= 0) {
+        var clickVal = data.click || '';
+        var senderTag = 'sender=' + (currentUser ? currentUser.uid : '');
+        if (clickVal.indexOf(senderTag) >= 0) {
           return;
         }
 
-        var cleanMsg = msg.replace(/\[by:[^\]]+\]/g, '').trim();
-
         new Notification(title, {
-          body: cleanMsg,
+          body: msg,
           icon: './public/icon-500.png',
           tag: 'weekly-report-notify'
         });
