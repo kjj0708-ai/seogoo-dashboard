@@ -2030,6 +2030,13 @@ function _photoSetIndex(idx){
   var wasAnnot=_photoAnnotate;
   if(wasAnnot){_photoAnnotate=false;}
   _pmResetState();
+  img.onload = function(){
+    if(_photoAnnotate){
+      _photoSaveAnnot();
+      _photoSyncAnnotCanvas(false);
+      _photoRestoreAnnot();
+    }
+  };
   img.src=imageThumbSrc(entry)||'';
   img.style.transition='none';
   _pmApply();_pmSetCursor();_photoUpdateControls();
