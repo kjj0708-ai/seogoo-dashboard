@@ -45,7 +45,7 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-const CACHE_NAME = 'bureau-dashboard-v82';
+const CACHE_NAME = 'bureau-dashboard-v83';
 const ASSETS = [
   './',
   './index.html',
