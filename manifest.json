@@ -1,11 +1,11 @@
-﻿{
+{
   "name": "도시주택국 대시보드",
   "short_name": "도시주택국",
   "description": "서구 도시주택국 업무 대시보드 - 현안/이슈, 업무현황, 일정, 조직도 통합 관리",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "background_color": "#ffffff",
   "theme_color": "#1a3a5c",
   "lang": "ko",

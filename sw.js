@@ -1,5 +1,51 @@
 // 서구 도시주택국 대시보드 - Service Worker
-const CACHE_NAME = 'bureau-dashboard-v67';
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
+
+firebase.initializeApp({
+  apiKey: "AIzaSyDDsAzrYojzbVXyaPilfF3Mj57pmat8JVU",
+  authDomain: "bureau-dashboard.firebaseapp.com",
+  databaseURL: "https://bureau-dashboard-default-rtdb.firebaseio.com",
+  projectId: "bureau-dashboard",
+  storageBucket: "bureau-dashboard.firebasestorage.app",
+  messagingSenderId: "865956736976",
+  appId: "1:865956736976:web:423c2add3bc57737c213d5"
+});
+
+try {
+  const messaging = firebase.messaging();
+  messaging.onBackgroundMessage((payload) => {
+    const notification = payload.notification || {};
+    const data = payload.data || {};
+    const title = data.title || notification.title || '도시주택국 알림';
+    const body = data.body || notification.body || '';
+    const tag = data.tag || (data.instructionId ? `instruction-${data.instructionId}` : 'bureau-dashboard');
+    self.registration.showNotification(title, {
+      body,
+      icon: data.icon || '/public/icon-500.png',
+      tag,
+      requireInteraction: true,
+      data: { url: data.url || 'https://bureau-dashboard.web.app/' }
+    });
+  });
+} catch (err) {
+  console.warn('[SW] Firebase Messaging init failed', err);
+}
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || 'https://bureau-dashboard.web.app/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.indexOf('bureau-dashboard.web.app') >= 0 && 'focus' in client) return client.focus();
+      }
+      return clients.openWindow(targetUrl);
+    })
+  );
+});
+
+const CACHE_NAME = 'bureau-dashboard-v82';
 const ASSETS = [
   './',
   './index.html',
