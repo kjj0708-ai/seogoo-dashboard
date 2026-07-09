@@ -1011,7 +1011,7 @@ var GCD=[];var GCAL_API_KEY=localStorage.getItem('gcal_key')||'AIzaSyDU0y_Jg9YW-
 var currentUser=null,db=null,auth=null,messaging=null,issues=[],projects=[],events=[],instruction=null,directorMaterials=[],_instrList=[],_instrReadsCache={},_myInstrReads={},_myReadsRef=null,_instrCmtRef=null,_currentInstrId=null,_projRef=null,_statusRef=null,_usersRef=null,_gcalRef=null,_issuesRef=null,_eventsRef=null,_instrRef=null,_directorMaterialsRef=null;
 var FCM_VAPID_KEY='BHQszz0dxyVU3i1KYnLgQMxuybQW0_Ld3R826EehvrsraKZLGi1hDsYTYpjvAX4_pKZI_EiWvnEzMrXFNthUg8I';
 var calY,calM,editIssId=null,editProjId=null,pendingPhoto=null,confCb=null,statusFilter='';
-(function(){try{firebase.initializeApp(FB);db=firebase.database();window._origDb=db;auth=firebase.auth();auth.onAuthStateChanged(function(user){if(user&&!currentUser){var _db=db||window._origDb;(_db?_db.ref('users/'+user.uid).once('value'):Promise.resolve(null)).then(function(s){try{var p=s?s.val():null;if(!p){try{p=JSON.parse(localStorage.getItem('bu_profile')||'null');}catch(e){}}if(user&&user.email&&user.email.toLowerCase()===SUPER_ADMIN_EMAIL){var sp={name:(p&&p.name)||user.displayName||'총괄관리자',dept:(p&&p.dept)||'도시주택국',team:(p&&p.team)||'',phone:(p&&p.phone)||'',role:'총괄관리자',isAdmin:true,status:'approved',email:user.email};setCurrentUserFromProfile(user,sp);if(_db&&user.uid)_db.ref('users/'+user.uid).update({name:sp.name,isAdmin:true,status:'approved',role:'총괄관리자',email:user.email});enterApp();return;}if(p){if((p.name==='정인영'||p.name==='박소희')&&!p.isSubAdmin){p.isSubAdmin=true;if(_db&&user.uid)_db.ref('users/'+user.uid).update({isSubAdmin:true});}var status=p.status||'approved';if(status==='pending'){setCurrentUserFromProfile(user,p);showPendingScreen('pending');setupStatusListener(user.uid);}else if(status==='rejected'||status==='reapplying'){if(status==='rejected'){setCurrentUserFromProfile(user,p);window._pendingGoogleUser=user;showPendingScreen('rejected');}else{window._pendingGoogleUser=user;showProfileSetup(user);}}else{setCurrentUserFromProfile(user,p);enterApp();}}else{showProfileSetup(user);}}catch(err){console.error('Auth processing error:',err);showLErr('인증 처리 중 오류가 발생했습니다.');var ld=document.getElementById('loginLoading');if(ld)ld.style.display='none';var btn=document.getElementById('btnGoogleLogin');if(btn)btn.style.display='flex';}}).catch(function(err){console.warn('Profile fetch failed:',err);var p;try{p=JSON.parse(localStorage.getItem('bu_profile')||'null');}catch(e){}if(p){setCurrentUserFromProfile(user,p);enterApp();}else{showProfileSetup(user);}});}else if(!user){currentUser=null;if(_statusRef){_statusRef.off('value');_statusRef=null;}var ld=document.getElementById('loginLoading');var btn=document.getElementById('btnGoogleLogin');if(ld)ld.style.display='none';if(btn)btn.style.display='flex';}});}catch(e){console.warn('FB init 실패',e);var ld0=document.getElementById('loginLoading');if(ld0)ld0.innerHTML='⚠️ 인증 서비스 연결에 실패했습니다.<br><button onclick="location.reload()" style="margin-top:10px;background:#fff;color:#1a3a5c;border:none;border-radius:8px;padding:8px 18px;font-weight:600;cursor:pointer;">🔄 새로고침</button>';}})();
+(function(){try{firebase.initializeApp(FB);db=firebase.database();window._origDb=db;auth=firebase.auth();auth.onAuthStateChanged(function(user){if(user&&!currentUser){var _db=db||window._origDb;(_db?_db.ref('users/'+user.uid).once('value'):Promise.resolve(null)).then(function(s){try{var p=s?s.val():null;if(!p){try{p=JSON.parse(localStorage.getItem('bu_profile')||'null');}catch(e){}}if(user&&user.email&&user.email.toLowerCase()===SUPER_ADMIN_EMAIL){var sp={name:(p&&p.name)||user.displayName||'총괄관리자',dept:(p&&p.dept)||'도시주택국',team:(p&&p.team)||'',phone:(p&&p.phone)||'',role:'총괄관리자',isAdmin:true,status:'approved',email:user.email};setCurrentUserFromProfile(user,sp);if(_db&&user.uid)_db.ref('users/'+user.uid).update({name:sp.name,isAdmin:true,status:'approved',role:'총괄관리자',email:user.email});enterApp();return;}if(p){if((p.name==='정인영'||p.name==='박소희')&&!p.isSubAdmin){p.isSubAdmin=true;if(_db&&user.uid)_db.ref('users/'+user.uid).update({isSubAdmin:true});}var status=p.status||'approved';if(status==='pending'){setCurrentUserFromProfile(user,p);showPendingScreen('pending');setupStatusListener(user.uid);}else if(status==='rejected'||status==='reapplying'){if(status==='rejected'){setCurrentUserFromProfile(user,p);window._pendingGoogleUser=user;showPendingScreen('rejected');}else{window._pendingGoogleUser=user;showProfileSetup(user);}}else{setCurrentUserFromProfile(user,p);enterApp();}}else{showProfileSetup(user);}}catch(err){console.error('Auth err:',err);var p;try{p=JSON.parse(localStorage.getItem('bu_profile')||'null');}catch(e){}if(p){setCurrentUserFromProfile(user,p);enterApp();}else{showProfileSetup(user);}}}).catch(function(err){console.warn('Profile fetch failed:',err);var p;try{p=JSON.parse(localStorage.getItem('bu_profile')||'null');}catch(e){}if(p){setCurrentUserFromProfile(user,p);enterApp();}else{showProfileSetup(user);}});}else if(!user){currentUser=null;if(_statusRef){_statusRef.off('value');_statusRef=null;}var ld=document.getElementById('loginLoading');var btn=document.getElementById('btnGoogleLogin');if(ld)ld.style.display='none';if(btn)btn.style.display='flex';}});}catch(e){console.warn('FB init 실패',e);var ld0=document.getElementById('loginLoading');if(ld0)ld0.innerHTML='⚠️ 인증 서비스 연결에 실패했습니다.<br><button onclick="location.reload()" style="margin-top:10px;background:#fff;color:#1a3a5c;border:none;border-radius:8px;padding:8px 18px;font-weight:600;cursor:pointer;">🔄 새로고침</button>';}})();
 /* failsafe: 8초 내 인증이 안 끝나면 로그인 버튼/새로고침 노출 (무한 로딩 방지) */
 setTimeout(function(){
   var app=document.getElementById('app'),ls=document.getElementById('loginScreen'),ld=document.getElementById('loginLoading'),btn=document.getElementById('btnGoogleLogin');
@@ -1832,6 +1832,61 @@ function renderIssues(){
       +'<div class="archHd"><span>완료일</span><span>부서명</span><span>제목</span><span>작성자</span>'+(isAdminA?'<span style="text-align:center">관리</span>':'')+'</div>';
     htmlA+=archRows.map(function(i){
       var dt=new Date(i.doneAt||i.date||0);
+      var dstr=isNaN(dt.getTime())?'-':fmtD(dt);
+      var safeId=String(i.id).replace(/'/g,"\\'");
+      return '<div class="archRow" onclick="openIssDetail(\''+safeId+'\')">'
+        +'<span class="archCol archDate">'+esc(dstr)+'</span>'
+        +'<span class="archCol archDept">'+esc(i.dept||'-')+'</span>'
+        +'<span class="archCol archTitle" title="'+esc(i.title||'')+'">'+esc(i.title||'(제목없음)')+'</span>'
+        +'<span class="archCol archAuthor">'+esc(i.author||'-')+'</span>'
+        +(isAdminA?'<span class="archCol" style="text-align:center"><button class="archRestoreBtn" onclick="event.stopPropagation();restoreArchive(\''+safeId+'\')" title="현안목록으로 복원">↩ 복원</button></span>':'')
+        +'</div>';
+    }).join('');
+    htmlA+='</div>';
+    listA.innerHTML=htmlA;
+    return;
+  }
+  baseIssues=baseIssues.filter(function(i){return !i.archived;});
+  var procList=baseIssues.filter(function(i){return i.status==='proc';});
+  var doneList=baseIssues.filter(function(i){return i.status==='done';});
+  if(sa){sa.textContent=baseIssues.length;sp.textContent=procList.length;sd.textContent=doneList.length;
+    var allProg=baseIssues.map(function(i){return parseInt(i.progress)||0;});
+    var avg=baseIssues.length?Math.round(allProg.reduce(function(a,b){return a+b;},0)/baseIssues.length):0;
+    if(sap)sap.textContent=avg+'%';}
+  var dF=document.getElementById('filterDept')?document.getElementById('filterDept').value:'';
+  var f=baseIssues.slice();
+  if(statusFilter)f=f.filter(function(i){return i.status===statusFilter;});
+  if(dF)f=f.filter(function(i){return i.dept===dF;});
+  var ORD={proc:0,done:1};
+  f.sort(function(a,b){var o=(ORD[a.status]||0)-(ORD[b.status]||0);return o!==0?o:new Date(b.date)-new Date(a.date);});
+  var list=document.getElementById('issueList');if(!list)return;
+  if(!f.length){list.innerHTML='<div style="text-align:center;color:var(--tx3);padding:40px">등록된 이슈가 없습니다.</div>';return;}
+  var BL={proc:'bProc',done:'bDone'},BT={proc:'진행중',done:'완료'};
+  list.innerHTML=f.map(function(iss){
+    var ce=canEditIss(iss);
+    var prog=parseInt(iss.progress)||0;
+    var barColor=prog===100?'#22c55e':prog>=70?'#3b82f6':prog>=30?'#f59e0b':'#94a3b8';
+    var progHTML='<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx3);margin-bottom:4px"><span>진행률</span><span style="font-weight:700;color:'+barColor+'">'+prog+'%</span></div><div style="background:#e5e7eb;border-radius:20px;height:8px;overflow:hidden"><div style="height:100%;width:'+prog+'%;background:'+barColor+';border-radius:20px;transition:width .3s"></div></div></div>';
+    var editId=iss.id.replace(/'/g,"\\'");
+    return '<div class="issItem '+(iss.status||'proc')+'" id="iss-'+iss.id+'">'
+      +'<div class="issTop"><div>'
+      +'<div class="issTitle issTitleLink" onclick="openIssDetail(\''+editId+'\')" title="클릭하여 상세 보기">'+esc(iss.title)+'</div>'
+      +'<div class="issMeta"><span class="badge '+(BL[iss.status]||'bProc')+'">'+(BT[iss.status]||'진행중')+'</span>'
+      +'<span class="badge bDept">'+esc(iss.dept||'')+'</span>'
+      +'<span style="font-size:12px;color:var(--tx3)">'+esc(iss.author||'')+' · '+fmtD(new Date(iss.date))+'</span>'
+      +'</div></div>'
+      +(ce?'<div class="issActions">'
+        +'<button class="btn btnG sm iss-edit" data-id="'+iss.id+'">수정</button>'
+        +'<button class="btn btnD sm iss-del" data-id="'+iss.id+'">삭제</button>'
+        +'</div>':'')
+      +'</div>'
+      +(iss.content?'<div class="issContent">'+esc(iss.content)+'</div>':'')
+      +progHTML
+      +(ce&&iss.status!=='done'?'<div class="statusBtns" style="margin-top:8px">'
+        +'<button class="sBtn sBtnP'+(iss.status==='proc'?' cur':'')+'" onclick="chgStatus(\''+editId+'\',\'proc\')">진행중</button>'
+        +'<button class="sBtn sBtnD" onclick="chgStatus(\''+editId+'\',\'done\')">완료처리</button>'
+        +'</div>':'')
+      +(iss.photo?'<img class="issPhoto" onclick="showPhotoById(this)" data-id="'+iss.id+'" src="'+imageThumbSrc(iss.photo)+'" alt="사진">':'')
       +'</div>';
   }).join('');
   f.forEach(function(i){if(i.photo)window['_ph_'+i.id]=i.photo;});
