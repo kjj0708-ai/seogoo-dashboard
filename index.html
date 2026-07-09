@@ -248,7 +248,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .photoModal img{max-width:96vw;max-height:calc(100vh - 120px);border-radius:8px;transform-origin:center;transition:transform .15s;touch-action:none;user-select:none;cursor:zoom-in;box-shadow:0 12px 40px rgba(0,0,0,.35);}
 .photoAnnotCanvas{position:fixed;display:none;z-index:402;touch-action:none;cursor:crosshair;border-radius:8px;}
 .photoAnnotBar{position:fixed;top:18px;right:72px;z-index:403;display:none;gap:8px;align-items:center;}
-.photoAnnotBtn{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.42);color:#fff;border-radius:18px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
+.photoAnnotBtn{background:rgba(0,0,0,.7);border:1.5px solid rgba(255,255,255,.7);color:#fff;border-radius:18px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;backdrop-filter:blur(4px);box-shadow:0 2px 8px rgba(0,0,0,.4);}
 .photoAnnotBtn.active{background:#dc2626;border-color:#fecaca;}
 .photoAnnotSwatch{width:12px;height:12px;border-radius:50%;background:#dc2626;border:2px solid rgba(255,255,255,.8);display:inline-block;vertical-align:-2px;margin-right:5px;}
 .photoClose{position:fixed;top:16px;right:16px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);color:#fff;font-size:22px;width:44px;height:44px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:401;line-height:1;}
@@ -258,7 +258,7 @@ main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
 .pzBtn:hover{background:rgba(255,255,255,.4);}
 .pzReset{font-size:13px;width:54px;border-radius:20px;}
 .pzHint{font-size:11px;color:rgba(255,255,255,.55);background:rgba(0,0,0,.3);border-radius:10px;padding:3px 10px;white-space:nowrap;}
-.photoNav{position:fixed;top:50%;transform:translateY(-50%);z-index:401;width:52px;height:72px;border-radius:12px;border:1px solid rgba(255,255,255,.32);background:rgba(0,0,0,.34);color:#fff;font-size:42px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,opacity .15s;}
+.photoNav{position:fixed;top:50%;transform:translateY(-50%);z-index:410;width:52px;height:72px;border-radius:12px;border:1px solid rgba(255,255,255,.32);background:rgba(0,0,0,.34);color:#fff;font-size:42px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,opacity .15s;}
 .photoNav:hover{background:rgba(255,255,255,.2);}
 .photoNav:disabled{opacity:.2;cursor:default;}
 .photoPrev{left:16px;}
@@ -1832,61 +1832,6 @@ function renderIssues(){
       +'<div class="archHd"><span>완료일</span><span>부서명</span><span>제목</span><span>작성자</span>'+(isAdminA?'<span style="text-align:center">관리</span>':'')+'</div>';
     htmlA+=archRows.map(function(i){
       var dt=new Date(i.doneAt||i.date||0);
-      var dstr=isNaN(dt.getTime())?'-':fmtD(dt);
-      var safeId=String(i.id).replace(/'/g,"\\'");
-      return '<div class="archRow" onclick="openIssDetail(\''+safeId+'\')">'
-        +'<span class="archCol archDate">'+esc(dstr)+'</span>'
-        +'<span class="archCol archDept">'+esc(i.dept||'-')+'</span>'
-        +'<span class="archCol archTitle" title="'+esc(i.title||'')+'">'+esc(i.title||'(제목없음)')+'</span>'
-        +'<span class="archCol archAuthor">'+esc(i.author||'-')+'</span>'
-        +(isAdminA?'<span class="archCol" style="text-align:center"><button class="archRestoreBtn" onclick="event.stopPropagation();restoreArchive(\''+safeId+'\')" title="현안목록으로 복원">↩ 복원</button></span>':'')
-        +'</div>';
-    }).join('');
-    htmlA+='</div>';
-    listA.innerHTML=htmlA;
-    return;
-  }
-  baseIssues=baseIssues.filter(function(i){return !i.archived;});
-  var procList=baseIssues.filter(function(i){return i.status==='proc';});
-  var doneList=baseIssues.filter(function(i){return i.status==='done';});
-  if(sa){sa.textContent=baseIssues.length;sp.textContent=procList.length;sd.textContent=doneList.length;
-    var allProg=baseIssues.map(function(i){return parseInt(i.progress)||0;});
-    var avg=baseIssues.length?Math.round(allProg.reduce(function(a,b){return a+b;},0)/baseIssues.length):0;
-    if(sap)sap.textContent=avg+'%';}
-  var dF=document.getElementById('filterDept')?document.getElementById('filterDept').value:'';
-  var f=baseIssues.slice();
-  if(statusFilter)f=f.filter(function(i){return i.status===statusFilter;});
-  if(dF)f=f.filter(function(i){return i.dept===dF;});
-  var ORD={proc:0,done:1};
-  f.sort(function(a,b){var o=(ORD[a.status]||0)-(ORD[b.status]||0);return o!==0?o:new Date(b.date)-new Date(a.date);});
-  var list=document.getElementById('issueList');if(!list)return;
-  if(!f.length){list.innerHTML='<div style="text-align:center;color:var(--tx3);padding:40px">등록된 이슈가 없습니다.</div>';return;}
-  var BL={proc:'bProc',done:'bDone'},BT={proc:'진행중',done:'완료'};
-  list.innerHTML=f.map(function(iss){
-    var ce=canEditIss(iss);
-    var prog=parseInt(iss.progress)||0;
-    var barColor=prog===100?'#22c55e':prog>=70?'#3b82f6':prog>=30?'#f59e0b':'#94a3b8';
-    var progHTML='<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx3);margin-bottom:4px"><span>진행률</span><span style="font-weight:700;color:'+barColor+'">'+prog+'%</span></div><div style="background:#e5e7eb;border-radius:20px;height:8px;overflow:hidden"><div style="height:100%;width:'+prog+'%;background:'+barColor+';border-radius:20px;transition:width .3s"></div></div></div>';
-    var editId=iss.id.replace(/'/g,"\\'");
-    return '<div class="issItem '+(iss.status||'proc')+'" id="iss-'+iss.id+'">'
-      +'<div class="issTop"><div>'
-      +'<div class="issTitle issTitleLink" onclick="openIssDetail(\''+editId+'\')" title="클릭하여 상세 보기">'+esc(iss.title)+'</div>'
-      +'<div class="issMeta"><span class="badge '+(BL[iss.status]||'bProc')+'">'+(BT[iss.status]||'진행중')+'</span>'
-      +'<span class="badge bDept">'+esc(iss.dept||'')+'</span>'
-      +'<span style="font-size:12px;color:var(--tx3)">'+esc(iss.author||'')+' · '+fmtD(new Date(iss.date))+'</span>'
-      +'</div></div>'
-      +(ce?'<div class="issActions">'
-        +'<button class="btn btnG sm iss-edit" data-id="'+iss.id+'">수정</button>'
-        +'<button class="btn btnD sm iss-del" data-id="'+iss.id+'">삭제</button>'
-        +'</div>':'')
-      +'</div>'
-      +(iss.content?'<div class="issContent">'+esc(iss.content)+'</div>':'')
-      +progHTML
-      +(ce&&iss.status!=='done'?'<div class="statusBtns" style="margin-top:8px">'
-        +'<button class="sBtn sBtnP'+(iss.status==='proc'?' cur':'')+'" onclick="chgStatus(\''+editId+'\',\'proc\')">진행중</button>'
-        +'<button class="sBtn sBtnD" onclick="chgStatus(\''+editId+'\',\'done\')">완료처리</button>'
-        +'</div>':'')
-      +(iss.photo?'<img class="issPhoto" onclick="showPhotoById(this)" data-id="'+iss.id+'" src="'+imageThumbSrc(iss.photo)+'" alt="사진">':'')
       +'</div>';
   }).join('');
   f.forEach(function(i){if(i.photo)window['_ph_'+i.id]=i.photo;});
@@ -1935,6 +1880,34 @@ var _pmDist=0,_pmT1X=0,_pmT1Y=0;
 var _pmDrag=false,_pmLX=0,_pmLY=0;
 var _photoGallery=[],_photoIndex=0,_photoBtnClose=false,_photoLoadToken=0,_photoContext=null;
 var _photoAnnotate=false,_paDrawing=false,_paLast=null;
+var _photoAnnotData={};
+function _photoAnnotKey(){
+  if(!_photoGallery.length)return null;
+  var e=_photoGallery[_photoIndex];
+  return typeof e==='string'?e:(e&&(e.mediaId||e.data||e.thumb||''))||null;
+}
+function _photoSaveAnnot(){
+  var c=document.getElementById('photoAnnotCanvas');if(!c||!c.width||!c.height)return;
+  var key=_photoAnnotKey();if(!key)return;
+  try{_photoAnnotData[key]=c.toDataURL();}catch(e){}
+}
+function _photoRestoreAnnot(){
+  var c=document.getElementById('photoAnnotCanvas');if(!c)return;
+  var key=_photoAnnotKey();
+  var saved=key?_photoAnnotData[key]:null;
+  if(!saved){_photoSyncAnnotCanvas(true);return;}
+  var ctx=c.getContext('2d');
+  var img2=new Image();
+  img2.onload=function(){
+    var dpr=window.devicePixelRatio||1;
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.drawImage(img2,0,0,c.width,c.height);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#dc2626';ctx.lineWidth=4;
+  };
+  img2.src=saved;
+}
 function _pmApply(){
   var img=document.getElementById('photoModalImg');
   if(img)img.style.transform='translate('+_pmTx+'px,'+_pmTy+'px) scale('+_pmScale+')';
@@ -1959,11 +1932,12 @@ function _photoSyncAnnotCanvas(clear){
   if(clear)ctx.clearRect(0,0,r.width,r.height);
 }
 function _photoSetAnnotate(on){
+  if(_photoAnnotate&&!on){_photoSaveAnnot();}
   _photoAnnotate=!!(on&&_photoCanAnnotate());
   var c=document.getElementById('photoAnnotCanvas'),btn=document.getElementById('photoAnnotToggle');
   if(c){c.style.display=_photoAnnotate?'block':'none';c.style.pointerEvents=_photoAnnotate?'auto':'none';}
   if(btn)btn.classList.toggle('active',_photoAnnotate);
-  if(_photoAnnotate){_pmResetState();_pmApply();_photoSyncAnnotCanvas(false);}
+  if(_photoAnnotate){_pmResetState();_pmApply();_photoSyncAnnotCanvas(false);_photoRestoreAnnot();}
 }
 function _photoUpdateAnnotateControls(){
   var bar=document.getElementById('photoAnnotBar');
@@ -1975,6 +1949,7 @@ function photoToggleAnnotate(){_photoSetAnnotate(!_photoAnnotate);}
 function photoClearAnnotation(){
   var c=document.getElementById('photoAnnotCanvas');if(!c)return;
   _photoSyncAnnotCanvas(true);
+  var key=_photoAnnotKey();if(key)delete _photoAnnotData[key];
 }
 function _paPoint(e){
   var c=document.getElementById('photoAnnotCanvas'),r=c.getBoundingClientRect();
@@ -1993,15 +1968,24 @@ function _photoUpdateControls(){
 }
 function _photoSetIndex(idx){
   if(!_photoGallery.length)return;
+  if(_photoAnnotate){_photoSaveAnnot();}
   _photoIndex=(idx+_photoGallery.length)%_photoGallery.length;
   var img=document.getElementById('photoModalImg');
   var entry=_photoGallery[_photoIndex],token=++_photoLoadToken;
-  _photoSetAnnotate(false);
+  var wasAnnot=_photoAnnotate;
+  if(wasAnnot){_photoAnnotate=false;}
   _pmResetState();
   img.src=imageThumbSrc(entry)||'';
   img.style.transition='none';
   _pmApply();_pmSetCursor();_photoUpdateControls();
-  photoClearAnnotation();
+  _photoSyncAnnotCanvas(true);
+  if(wasAnnot){
+    _photoAnnotate=true;
+    var c=document.getElementById('photoAnnotCanvas');
+    if(c){c.style.display='block';c.style.pointerEvents='auto';}
+    var btn=document.getElementById('photoAnnotToggle');if(btn)btn.classList.add('active');
+    _photoRestoreAnnot();
+  }
   imageFullSrc(entry).then(function(src){
     if(token!==_photoLoadToken||!src)return;
     img.src=src;
