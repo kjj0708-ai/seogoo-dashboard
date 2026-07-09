@@ -1934,7 +1934,7 @@ var _pmScale=1,_pmTx=0,_pmTy=0;
 var _pmDist=0,_pmT1X=0,_pmT1Y=0;
 var _pmDrag=false,_pmLX=0,_pmLY=0;
 var _photoGallery=[],_photoIndex=0,_photoBtnClose=false,_photoLoadToken=0,_photoContext=null;
-var _photoAnnotate=false,_paDrawing=false,_paLast=null;
+var _photoAnnotate=false,_paDrawing=false,_paLast=null,_paDirty=false;
 var _photoAnnotData={};
 function _photoAnnotKey(){
   if(!_photoGallery.length)return null;
@@ -1944,7 +1944,8 @@ function _photoAnnotKey(){
 function _photoSaveAnnot(){
   var c=document.getElementById('photoAnnotCanvas');if(!c||!c.width||!c.height)return;
   var key=_photoAnnotKey();if(!key)return;
-  try{_photoAnnotData[key]=c.toDataURL();}catch(e){}
+  if(!_paDirty)return;
+  try{_photoAnnotData[key]=c.toDataURL();_paDirty=false;}catch(e){}
 }
 function _photoRestoreAnnot(){
   var c=document.getElementById('photoAnnotCanvas');if(!c)return;
@@ -2005,6 +2006,7 @@ function photoClearAnnotation(){
   var c=document.getElementById('photoAnnotCanvas');if(!c)return;
   _photoSyncAnnotCanvas(true);
   var key=_photoAnnotKey();if(key)delete _photoAnnotData[key];
+  _paDirty=false;
 }
 function _paPoint(e){
   var c=document.getElementById('photoAnnotCanvas'),r=c.getBoundingClientRect();
@@ -2030,13 +2032,6 @@ function _photoSetIndex(idx){
   var wasAnnot=_photoAnnotate;
   if(wasAnnot){_photoAnnotate=false;}
   _pmResetState();
-  img.onload = function(){
-    if(_photoAnnotate){
-      _photoSaveAnnot();
-      _photoSyncAnnotCanvas(false);
-      _photoRestoreAnnot();
-    }
-  };
   img.src=imageThumbSrc(entry)||'';
   img.style.transition='none';
   _pmApply();_pmSetCursor();_photoUpdateControls();
@@ -2090,14 +2085,18 @@ function closePhotoModal(){
     var img=document.getElementById('photoModalImg');
     var canvas=document.getElementById('photoAnnotCanvas');
 
-    img.addEventListener('load',function(){_photoSyncAnnotCanvas(true);});
-    window.addEventListener('resize',function(){if(_photoAnnotate)_photoSyncAnnotCanvas(false);});
+    img.addEventListener('load',function(){
+      _photoSyncAnnotCanvas(false);
+      if(_photoAnnotate) _photoRestoreAnnot();
+    });
+    window.addEventListener('resize',function(){if(_photoAnnotate){_photoSyncAnnotCanvas(false);_photoRestoreAnnot();}});
     if(canvas){
       canvas.addEventListener('pointerdown',function(e){
         if(!_photoAnnotate)return;
         e.preventDefault();
         _photoSyncAnnotCanvas(false);
         _paDrawing=true;_paLast=_paPoint(e);
+        _paDirty=true;
         try{canvas.setPointerCapture(e.pointerId);}catch(_){}
       });
       canvas.addEventListener('pointermove',function(e){
