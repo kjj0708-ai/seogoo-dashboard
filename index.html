@@ -1112,52 +1112,17 @@ function updatePeTeam(sel){var d=document.getElementById('peDept');var t=documen
 function showPeErr(m){var e=document.getElementById('peErr');if(e){e.textContent=m;e.style.display='block';}}
 function saveProfileEdit(){if(!currentUser)return;var name=(document.getElementById('peName').value||'').trim();var dept=document.getElementById('peDept').value;var team=document.getElementById('peTeam').value;var role=document.getElementById('peRole').value;var phone=(document.getElementById('pePhone').value||'').trim();if(!name){showPeErr('이름을 입력해주세요.');return;}phone=phone.replace(/[^0-9]/g,'');if(!phone||phone.length<9){showPeErr('휴대폰 번호를 입력해주세요. (숫자만, 9자리 이상)');return;}var prevDept=currentUser.dept;var upd={name:name,dept:dept,team:team,role:role,phone:phone};currentUser.name=name;currentUser.dept=dept;currentUser.team=team;currentUser.role=role;currentUser.phone=phone;try{var lp=JSON.parse(localStorage.getItem('bu_profile')||'{}');Object.assign(lp,upd);localStorage.setItem('bu_profile',JSON.stringify(lp));}catch(e){}var _db=db||window._origDb;if(_db&&currentUser.uid&&currentUser.uid!=='local'){_db.ref('users/'+currentUser.uid).update(upd);}var ub=document.getElementById('ubadge');if(ub)ub.textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';if(currentUser.type!=='admin'&&prevDept!==dept){setupProjectsListener();}renderIssues();renderProjectsGrid();closeProfileEdit();}
 function showLErr(m){var e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
-window._allowAppExit=false;window._exitConfirmOpen=false;window._appGuardReady=false;window._appExitAttempting=false;
+window._allowAppExit=false;window._appGuardReady=false;
 function isAppActive(){var app=document.getElementById('app');return !!(app&&app.style.display!=='none');}
 function setupAppHistoryGuard(){
   try{
     if(!window._appGuardReady){
-      history.replaceState({inApp:true,appBase:true},'');
-      history.pushState({inApp:true,appTrap:true,level:1},'');
-      history.pushState({inApp:true,appTrap:true,level:2},'');
       window._appGuardReady=true;
-      return;
-    }
-    if(!history.state||!history.state.appTrap){
-      history.pushState({inApp:true,appTrap:true,level:2},'');
+      var st=history.state||{};
+      history.replaceState(Object.assign({},st,{appExitRoot:true}),'');
+      history.pushState({appExitGuard:true},'');
     }
   }catch(e){}
-}
-function requestAppExitConfirm(){
-  if(window._exitConfirmOpen)return;
-  window._exitConfirmOpen=true;
-  setupAppHistoryGuard();
-  try{history.pushState({inApp:true,appTrap:true,level:2,exitPrompt:true},'');}catch(e){}
-  showConf('앱을 닫으시겠습니까?',function(){
-    window._exitConfirmOpen=false;
-    window._allowAppExit=true;
-    window._appExitAttempting=true;
-    try{window.close();}catch(e){}
-    try{history.go(-3);}catch(e){try{history.back();}catch(_){}}
-    setTimeout(function(){
-      if(!document.hidden&&isAppActive()){
-        try{window.close();}catch(e){}
-        try{history.back();}catch(e){}
-      }
-    },250);
-    setTimeout(function(){
-      if(!document.hidden&&isAppActive()){
-        try{history.back();}catch(e){}
-      }
-    },650);
-    setTimeout(function(){
-      if(!document.hidden&&isAppActive()){
-        window._allowAppExit=false;
-        window._appExitAttempting=false;
-        setupAppHistoryGuard();
-      }
-    },1600);
-  });
 }
 function enterApp(){document.getElementById('loginScreen').style.display='none';document.getElementById('pendingScreen').style.display='none';document.getElementById('app').style.display='flex';document.getElementById('ubadge').textContent=currentUser.type==='admin'?'👑 '+currentUser.name+' (관리자)':currentUser.name+' ('+currentUser.dept+(currentUser.team?' '+currentUser.team:'')+')';
 if(currentUser.type==='admin'){if(currentUser.isAdmin){document.getElementById('adminInstrPnl').style.display='block';}document.getElementById('adminUserMgmt').style.display='block';var _mt=document.getElementById('memberTab');if(_mt)_mt.style.display='';}document.getElementById('adminCalPnl').style.display='block';initTimeDropdown();var _db=db||window._origDb;setupGlobalListeners();setupUsersListener();setupDirectorMaterialsListener();var n=new Date();calY=n.getFullYear();calM=n.getMonth();window._selDayDs=window._selDayDs||todayDs();renderInstrBoard();renderIssues();renderWeeklyReport();if(_db)setupProjectsListener();else{renderProjectsGrid();renderWeeklyAgenda();}renderCal();selDay(window._selDayDs);renderGcalSide();if(currentUser.type==='admin'){document.getElementById('adminGcalPnl').style.display='block';var _ka0=document.getElementById('gcalApiKey');if(_ka0)_ka0.value=GCAL_API_KEY;var _ki0=document.getElementById('gcalCalId');if(_ki0)_ki0.value=GCAL_CAL_ID;setGCalSt(GCAL_API_KEY?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!_db){loadLS();fetchGCal();}else{if(GCAL_API_KEY)fetchGCal();if(_gcalRef){_gcalRef.off('value');}_gcalRef=_db.ref('settings/gcal');_gcalRef.on('value',function(snap){var s=snap.val();var prevKey=GCAL_API_KEY;if(s&&s.apiKey){GCAL_API_KEY=s.apiKey;GCAL_CAL_ID=s.calId||GCAL_CAL_ID;localStorage.setItem('gcal_key',s.apiKey);if(s.calId)localStorage.setItem('gcal_calid',s.calId);}if(currentUser&&currentUser.type==='admin'){var ka=document.getElementById('gcalApiKey');if(ka)ka.value=GCAL_API_KEY;var ki=document.getElementById('gcalCalId');if(ki)ki.value=GCAL_CAL_ID;setGCalSt(s&&s.apiKey?'✅ 저장된 API 키 적용 중':'⚠️ API 키 미설정');}if(!prevKey||prevKey!==GCAL_API_KEY)fetchGCal();});}if(window._gcalTimer)clearInterval(window._gcalTimer);window._gcalTimer=setInterval(function(){if(currentUser)fetchGCal();},10*60*1000);initFcmNotifications(false);setupAppHistoryGuard();}
