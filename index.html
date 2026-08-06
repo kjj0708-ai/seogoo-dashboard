@@ -3432,7 +3432,6 @@ window.addEventListener('popstate',function(e){
   if(photoModal&&photoModal.style.display!=='none'){
     photoModal.style.display='none';
     _pmDrag=false;
-    setupAppHistoryGuard();
     return;
   }
   /* ✕·ESC로 닫힌 경우 — 이미 DOM 닫혔으므로 건너뜀 */
@@ -3440,12 +3439,25 @@ window.addEventListener('popstate',function(e){
   /* 뒤로가기로 팝업 닫기 */
   if(document.getElementById('projDetail').style.display!=='none'){
     _closeProjDetailDOM();
-    setupAppHistoryGuard();
     return;
   }
-  /* 앱 이탈 확인 */
-  if(isAppActive()){
-    requestAppExitConfirm();
+  /* 앱 이탈 확인 (안내 화면 후 2번째 뒤로가기 시 정상 종료) */
+  if(isAppActive()&&st.appExitRoot){
+    try{history.pushState({appExitGuard:true},'');}catch(err){}
+    window._allowAppExit=true;
+    var t=document.getElementById('appToast');
+    if(!t){
+      t=document.createElement('div');
+      t.id='appToast';
+      t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.2);pointer-events:none;transition:opacity 0.3s;text-align:center;white-space:nowrap;';
+      document.body.appendChild(t);
+    }
+    t.textContent='뒤로 가기를 한 번 더 누르면 앱이 종료됩니다';
+    t.style.opacity='1';
+    setTimeout(function(){
+      window._allowAppExit=false;
+      if(t) t.style.opacity='0';
+    }, 2000);
     return;
   }
 });
